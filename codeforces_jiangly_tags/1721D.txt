@@ -1,1 +1,0 @@
-bitmasks, dfs and similar, divide and conquer, greedy, sortings

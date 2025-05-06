@@ -1,1 +1,0 @@
-geometry, interactive, probabilities

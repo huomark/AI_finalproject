@@ -1,1 +1,0 @@
-2-sat, data structures, dsu, greedy, matrices

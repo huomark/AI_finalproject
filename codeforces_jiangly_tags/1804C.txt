@@ -1,1 +1,0 @@
-brute force, greedy, math, number theory

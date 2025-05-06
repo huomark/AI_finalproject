@@ -1,1 +1,0 @@
-brute force, divide and conquer, dp, greedy, math

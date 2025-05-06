@@ -1,1 +1,0 @@
-brute force, dfs and similar, dp, implementation, math, number theory

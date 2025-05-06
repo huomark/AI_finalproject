@@ -1,1 +1,0 @@
-binary search, divide and conquer, graphs, shortest paths

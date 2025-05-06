@@ -1,1 +1,0 @@
-bitmasks, brute force, constructive algorithms, dp, flows, graph matchings, shortest paths

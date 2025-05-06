@@ -1,1 +1,0 @@
-greedy, hashing, string suffix structures

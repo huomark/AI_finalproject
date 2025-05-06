@@ -1,1 +1,0 @@
-*special, constructive algorithms, dfs and similar, dsu, graphs

@@ -1,1 +1,0 @@
-binary search, constructive algorithms, graphs, greedy, math, sortings

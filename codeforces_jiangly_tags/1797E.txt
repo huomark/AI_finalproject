@@ -1,1 +1,0 @@
-brute force, data structures, dsu, math, number theory, two pointers

@@ -1,1 +1,0 @@
-binary search, constructive algorithms, divide and conquer, interactive, math, number theory

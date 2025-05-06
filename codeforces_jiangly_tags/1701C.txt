@@ -1,1 +1,0 @@
-binary search, greedy, implementation, two pointers

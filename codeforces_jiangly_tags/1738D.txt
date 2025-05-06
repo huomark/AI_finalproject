@@ -1,1 +1,0 @@
-constructive algorithms, data structures, dfs and similar, dsu, graphs, trees

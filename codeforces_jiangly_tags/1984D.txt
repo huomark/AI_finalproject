@@ -1,1 +1,0 @@
-brute force, hashing, implementation, math, string suffix structures, strings

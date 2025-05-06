@@ -1,1 +1,0 @@
-constructive algorithms, data structures, greedy, implementation, math, two pointers

@@ -1,1 +1,0 @@
-combinatorics, greedy, hashing, math, number theory, sortings

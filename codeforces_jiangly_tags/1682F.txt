@@ -1,1 +1,0 @@
-data structures, flows, graphs, greedy, sortings, two pointers

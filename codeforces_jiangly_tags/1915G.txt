@@ -1,1 +1,0 @@
-graphs, greedy, implementation, shortest paths, sortings

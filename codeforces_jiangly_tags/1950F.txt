@@ -1,1 +1,0 @@
-bitmasks, brute force, greedy, implementation, trees

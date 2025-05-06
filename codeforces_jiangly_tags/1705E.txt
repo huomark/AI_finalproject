@@ -1,1 +1,0 @@
-binary search, bitmasks, brute force, combinatorics, data structures, greedy

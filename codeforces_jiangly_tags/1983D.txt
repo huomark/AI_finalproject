@@ -1,1 +1,0 @@
-constructive algorithms, data structures, divide and conquer, greedy, math, sortings

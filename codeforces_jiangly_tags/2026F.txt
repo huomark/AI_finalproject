@@ -1,1 +1,0 @@
-data structures, dfs and similar, divide and conquer, dp, implementation, trees

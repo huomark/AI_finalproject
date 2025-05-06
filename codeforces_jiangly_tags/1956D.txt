@@ -1,1 +1,0 @@
-bitmasks, brute force, constructive algorithms, divide and conquer, dp, greedy, implementation, math

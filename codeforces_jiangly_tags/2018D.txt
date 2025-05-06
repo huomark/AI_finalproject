@@ -1,1 +1,0 @@
-data structures, dp, dsu, greedy, implementation, matrices, sortings

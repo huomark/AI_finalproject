@@ -1,1 +1,0 @@
-brute force, data structures, dfs and similar, dp, graphs, greedy

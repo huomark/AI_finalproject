@@ -1,1 +1,0 @@
-binary search, math, sortings, two pointers

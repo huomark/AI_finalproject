@@ -1,1 +1,0 @@
-combinatorics, divide and conquer, dp, dsu, hashing, sortings, trees

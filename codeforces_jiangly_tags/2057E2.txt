@@ -1,1 +1,0 @@
-binary search, dfs and similar, dp, dsu, graphs, shortest paths, sortings

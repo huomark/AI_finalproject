@@ -1,1 +1,0 @@
-bitmasks, data structures, divide and conquer, greedy, hashing, sortings, strings

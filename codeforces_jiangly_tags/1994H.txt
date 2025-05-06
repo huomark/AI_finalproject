@@ -1,1 +1,0 @@
-combinatorics, constructive algorithms, games, greedy, hashing, interactive, math, number theory, strings

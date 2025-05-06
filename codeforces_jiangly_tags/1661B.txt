@@ -1,1 +1,0 @@
-bitmasks, brute force, dfs and similar, dp, graphs, greedy, shortest paths

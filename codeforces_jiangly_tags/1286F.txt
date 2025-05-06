@@ -1,1 +1,0 @@
-brute force, constructive algorithms, dp, fft, implementation, math

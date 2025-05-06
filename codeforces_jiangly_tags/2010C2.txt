@@ -1,1 +1,0 @@
-hashing, string suffix structures, strings, two pointers

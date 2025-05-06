@@ -1,1 +1,0 @@
-binary search, bitmasks, constructive algorithms, data structures

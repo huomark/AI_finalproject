@@ -1,1 +1,0 @@
-brute force, sortings, two pointers
