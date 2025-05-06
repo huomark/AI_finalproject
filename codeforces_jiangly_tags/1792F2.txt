@@ -1,0 +1,1 @@
+brute force, combinatorics, divide and conquer, dp, fft, graphs

@@ -1,0 +1,1 @@
+bitmasks, constructive algorithms, dfs and similar, games, greedy, implementation, trees

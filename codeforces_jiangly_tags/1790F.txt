@@ -1,0 +1,1 @@
+brute force, dfs and similar, divide and conquer, graphs, greedy, math, shortest paths, trees

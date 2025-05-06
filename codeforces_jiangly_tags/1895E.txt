@@ -1,0 +1,1 @@
+binary search, brute force, data structures, dfs and similar, dp, dsu, games, graphs, greedy, sortings, two pointers

@@ -1,0 +1,1 @@
+brute force, data structures, dfs and similar, dsu, math, trees

@@ -1,0 +1,1 @@
+brute force, combinatorics, greedy, sortings, trees, two pointers

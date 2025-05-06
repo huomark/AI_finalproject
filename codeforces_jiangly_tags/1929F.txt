@@ -1,0 +1,1 @@
+brute force, combinatorics, data structures, dfs and similar, math, trees

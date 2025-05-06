@@ -1,0 +1,1 @@
+brute force, data structures, dp, greedy, implementation, strings

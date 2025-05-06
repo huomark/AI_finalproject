@@ -1,0 +1,1 @@
+brute force, constructive algorithms, dfs and similar, dsu, graphs, trees

@@ -1,0 +1,1 @@
+brute force, data structures, geometry, implementation, two pointers

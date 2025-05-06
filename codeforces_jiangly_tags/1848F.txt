@@ -1,0 +1,1 @@
+binary search, bitmasks, combinatorics, divide and conquer, dp, math

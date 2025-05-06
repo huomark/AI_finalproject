@@ -1,0 +1,1 @@
+binary search, geometry, greedy, implementation, math, ternary search

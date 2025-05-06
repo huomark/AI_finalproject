@@ -1,0 +1,1 @@
+brute force, strings, two pointers

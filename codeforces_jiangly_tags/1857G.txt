@@ -1,0 +1,1 @@
+combinatorics, divide and conquer, dsu, graphs, greedy, sortings, trees

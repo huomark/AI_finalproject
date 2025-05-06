@@ -1,0 +1,1 @@
+binary search, combinatorics, data structures, divide and conquer, implementation, two pointers
