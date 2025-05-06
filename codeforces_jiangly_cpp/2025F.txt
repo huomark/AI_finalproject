@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, q;
+    std::cin >> n >> q;
+        std::vector<int> x(q), y(q);
+    std::vector<std::vector<std::array<int, 2>>> adj(n);
+    for (int i = 0; i < q; i++) {
+        std::cin >> x[i] >> y[i];
+        x[i]--;
+        y[i]--;
+        adj[x[i]].push_back({y[i], 2 * i});
+        adj[y[i]].push_back({x[i], 2 * i + 1});
+    }
+        std::vector<bool> vis(n);
+    std::vector<int> dep(n);
+        std::vector<std::string> ans(q, "x+");
+         auto match = [&](int i, int j, int x) {
+        ans[i / 2][1] = (i < j ? '+' : '-');
+        ans[j / 2][1] = (i < j ? '-' : '+');
+        ans[i / 2][0] = "xy"[i % 2];
+        ans[j / 2][0] = "xy"[j % 2];
+    };
+        for (int s = 0; s < n; s++) {
+        if (vis[s]) {
+            continue;
+        }
+        auto dfs = [&](auto &self, int x, int p) -> int {
+            vis[x] = true;
+            int c = -1;
+            for (auto [y, i] : adj[x]) {
+                if (vis[y]) {
+                    if (dep[y] > dep[x]) {
+                        if (c != -1) {
+                            match(c, i, x);
+                            c = -1;
+                        } else {
+                            c = i;
+                        }
+                    }
+                } else {
+                    dep[y] = dep[x] + 1;
+                    int d = self(self, y, i);
+                    if (d != -1) {
+                        match(i ^ 1, d, y);
+                    } else {
+                        if (c != -1) {
+                            match(c, i, x);
+                            c = -1;
+                        } else {
+                            c = i;
+                        }
+                    }
+                }
+            }
+            return c;
+        };
+        dfs(dfs, s, -1);
+    }
+        for (int i = 0; i < q; i++) {
+        std::cout << ans[i] << "\n";
+    }
+        return 0;
+}

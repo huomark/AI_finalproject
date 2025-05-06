@@ -1,0 +1,139 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+template <typename T>
+struct Fenwick {
+    int n;
+    std::vector<T> a;
+        Fenwick(int n_ = 0) {
+        init(n_);
+    }
+        void init(int n_) {
+        n = n_;
+        a.assign(n, T{});
+    }
+        void add(int x, const T &v) {
+        for (int i = x + 1; i <= n; i += i & -i) {
+            a[i - 1] = a[i - 1] + v;
+        }
+    }
+        T sum(int x) {
+        T ans{};
+        for (int i = x; i > 0; i -= i & -i) {
+            ans = ans + a[i - 1];
+        }
+        return ans;
+    }
+        T rangeSum(int l, int r) {
+        return sum(r) - sum(l);
+    }
+        int select(const T &k) {
+        int x = 0;
+        T cur{};
+        for (int i = 1 << std::__lg(n); i; i /= 2) {
+            if (x + i <= n && cur + a[x + i - 1] <= k) {
+                x += i;
+                cur = cur + a[x - 1];
+            }
+        }
+        return x;
+    }
+};
+ void solve() {
+    int n, k, q;
+    std::cin >> n >> k >> q;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        a[i] += n - i - 1;
+    }
+        std::vector<int> f(n - k + 1);
+        std::vector<int> cnt(2 * n), freq(n + 1);
+    freq[0] = 2 * n;
+    int res = 0;
+    for (int i = 0; i < k - 1; i++) {
+        freq[cnt[a[i]]]--;
+        res = std::max(res, ++cnt[a[i]]);
+        freq[cnt[a[i]]]++;
+    }
+    for (int i = 0; i <= n - k; i++) {
+        freq[cnt[a[i + k - 1]]]--;
+        res = std::max(res, ++cnt[a[i + k - 1]]);
+        freq[cnt[a[i + k - 1]]]++;
+                while (freq[res] == 0) {
+            res--;
+        }
+        f[i] = k - res;
+                freq[cnt[a[i]]]--;
+        cnt[a[i]]--;
+        freq[cnt[a[i]]]++;
+    }
+        const int N = f.size();
+        std::vector<int> l(N), r(N, N);
+    std::vector<int> stk;
+    for (int i = 0; i < N; i++) {
+        while (!stk.empty() && f[i] <= f[stk.back()]) {
+            r[stk.back()] = i;
+            stk.pop_back();
+        }
+        if (!stk.empty()) {
+            l[i] = stk.back() + 1;
+        }
+        stk.push_back(i);
+    }
+        std::vector<i64> ans(q);
+    std::vector<std::array<int, 3>> ask(q);
+    for (int i = 0; i < q; i++) {
+        int l, r;
+        std::cin >> l >> r;
+        l--;
+        r = r - k + 1;
+        ask.push_back({l, r, i});
+    }
+    std::sort(ask.begin(), ask.end(), std::greater());
+        std::vector<std::array<int, 3>> e;
+    for (int i = 0; i < N; i++) {
+        e.push_back({i + 1, i, 1});
+        e.push_back({l[i], i, -1});
+    }
+    std::sort(e.begin(), e.end(), std::greater());
+        Fenwick<i64> fen0(N + 1), fen1(N + 1);
+    Fenwick<i64> fen2(N + 1), fen3(N + 1);
+    for (auto [l, k, coef] : e) {
+        fen2.add(r[k], coef * f[k]);
+        fen3.add(r[k], 1LL * coef * r[k] * f[k]);
+        fen2.add(k, -coef * f[k]);
+        fen3.add(k, -1LL * coef * k * f[k]);
+    }
+    for (int j = 0; auto [L, R, i] : ask) {
+        while (j < e.size() && e[j][0] >= L) {
+            auto [l, k, coef] = e[j++];
+            fen2.add(r[k], -coef * f[k]);
+            fen3.add(r[k], -1LL * coef * r[k] * f[k]);
+            fen2.add(k, coef * f[k]);
+            fen3.add(k, 1LL * coef * k * f[k]);
+                    fen0.add(r[k], 1LL * coef * f[k] * l);
+            fen1.add(r[k], 1LL * coef * r[k] * f[k] * l);
+            fen0.add(k, -1LL * coef * f[k] * l);
+            fen1.add(k, -1LL * coef * k * f[k] * l);
+        }
+        ans[i] += fen0.rangeSum(R, N + 1) * R;
+        ans[i] += fen1.sum(R);
+        ans[i] += fen2.rangeSum(R, N + 1) * R * L;
+        ans[i] += fen3.sum(R) * L;
+    }
+        for (int i = 0; i < q; i++) {
+        std::cout << ans[i] << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

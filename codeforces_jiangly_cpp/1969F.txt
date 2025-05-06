@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        // 1 <= a[i] <= k
+        // 1 <= a[i] <= k
+        // 1 <= a[i] <= k
+        // 1 <= a[i] <= k
+        // 1 <= a[i] <= k
+        // 1 <= a[i] <= k
+        a[i]--;
+    }
+        std::vector<int> dp(n + 1, n);
+        std::set<int> s;
+    int p = -1;
+    for (int i = 0; i < n; i++) {
+        if (s.count(a[i])) {
+            s.erase(a[i]);
+        } else {
+            s.insert(a[i]);
+        }
+        if (s.size() == k) {
+            p = i + 1;
+            break;
+        }
+    }
+    int ans = n;
+    if (p == -1) {
+        ans = s.size();
+    } else {
+        dp[p] = 0;
+    }
+    std::vector vis(k, std::vector(k, -1));
+    std::vector<std::pair<int, int>> cand;
+    for (int i = 0; i <= n; i += 2) {
+        s.clear();
+        cand.clear();
+        for (int j = i; j < n; j += 2) {
+            for (auto x : {a[j], a[j + 1]}) {
+                if (s.count(x)) {
+                    s.erase(x);
+                } else {
+                    s.insert(x);
+                }
+            }
+            if (s.size() == 2) {
+                int x = *s.begin();
+                int y = *s.rbegin();
+                if (vis[x][y] != i) {
+                    dp[j + 2] = std::min(dp[j + 2], dp[i] + 2);
+                    vis[x][y] = i;
+                    cand.emplace_back(x, y);
+                }
+            }
+        }
+        int siz = s.size();
+        int cnt[3];
+        cnt[2] = (k - siz) * (k - siz - 1) / 2;
+        cnt[1] = siz * (k - siz);
+        cnt[0] = siz * (siz - 1) / 2;
+        for (auto [x, y] : cand) {
+            int v = !s.count(x) + !s.count(y);
+            cnt[v]--;
+        }
+        for (int x = 0; x <= 2; x++) {
+            if (cnt[x]) {
+                ans = std::min(ans, dp[i] + 2 + k - (siz + 2 * x - 2));
+            }
+        }
+    }
+        ans = (n - ans) / 2;
+    std::cout << ans << "\n";
+        return 0;
+}

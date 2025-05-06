@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    std::vector<int> cnt(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        a[i]--;
+        cnt[a[i]]++;
+    }
+        int len = n - std::count(cnt.begin(), cnt.end(), 0);
+    std::vector<int> ans;
+        std::multiset<int> s;
+    int l = 0, r = 0;
+    int d = len;
+    int t = -1;
+    while (len > 0) {
+        while (d >= len) {
+            if (cnt[a[r]] > 0) {
+                s.insert(a[r]);
+            }
+            d -= (cnt[a[r]] == 1);
+            cnt[a[r]]--;
+            r++;
+        }
+        int x = t == -1 ? *s.rbegin() : *s.begin();
+        ans.push_back(x);
+        while (a[l] != x) {
+            s.extract(a[l]);
+            l++;
+        }
+        s.erase(x);
+        d -= (cnt[x] > 0);
+        cnt[x] = 0;
+        len--;
+        t *= -1;
+    }
+        std::cout << ans.size() << "\n";
+    for (auto x : ans) {
+        std::cout << x + 1 << " \n"[x == ans.back()];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

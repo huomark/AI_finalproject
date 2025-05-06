@@ -1,0 +1,117 @@
+#include <bits/stdc++.h>
+ using u32 = unsigned;
+using i64 = long long;
+using u64 = unsigned long long;
+ void solve() {
+    int n, m, k, q;
+    std::cin >> n >> m >> k >> q;
+        std::string s;
+    std::cin >> s;
+        std::vector a(n, std::vector<int>(m));
+    auto checkRow = [&](int x, int l, int r, int v) {
+        for (int i = l; i < r; i++) {
+            if (a[x][i] != v) {
+                return false;
+            }
+        }
+        return true;
+    };
+    auto checkCol = [&](int x, int l, int r, int v) {
+        for (int i = l; i < r; i++) {
+            if (a[i][x] != v) {
+                return false;
+            }
+        }
+        return true;
+    };
+    auto fillRow = [&](int x, int l, int r, int v) {
+        for (int i = l; i < r; i++) {
+            a[x][i] = v;
+        }
+    };
+    auto fillCol = [&](int x, int l, int r, int v) {
+        for (int i = l; i < r; i++) {
+            a[i][x] = v;
+        }
+    };
+    auto clear = [&]() {
+        std::vector<bool> R(n), C(m);
+        for (int i = 0; i < n; i++) {
+            R[i] = checkRow(i, 0, m, 1);
+        }
+        for (int i = 0; i < m; i++) {
+            C[i] = checkCol(i, 0, n, 1);
+        }
+        for (int i = 0; i < n; i++) {
+            if (R[i]) {
+                fillRow(i, 0, m, 0);
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            if (C[i]) {
+                fillCol(i, 0, n, 0);
+            }
+        }
+    };
+    auto putRow = [&]() -> std::pair<int, int> {
+        for (int i = k; i < n; i++) {
+            if (checkRow(i, 0, k, 0)) {
+                return {i, 0};
+            }
+        }
+        for (int i = 0; i < k; i++) {
+            if (checkRow(i, 0, k, 0) && checkRow(i, k, m, 1)) {
+                return {i, 0};
+            }
+        }
+        for (int i = 0; i < k; i++) {
+            if (checkRow(i, 0, k, 0)) {
+                return {i, 0};
+            }
+        }
+        assert(false);
+    };
+    auto putCol = [&]() -> std::pair<int, int> {
+        for (int i = k; i < m; i++) {
+            if (checkCol(i, 0, k, 0)) {
+                return {0, i};
+            }
+        }
+        for (int i = 0; i < k; i++) {
+            if (checkCol(i, 0, k, 0) && checkCol(i, k, n, 1)) {
+                return {0, i};
+            }
+        }
+        for (int i = 0; i < k; i++) {
+            if (checkCol(i, 0, k, 0)) {
+                return {0, i};
+            }
+        }
+        assert(false);
+    };
+    for (int i = 0; i < q; i++) {
+        if (s[i] == 'H') {
+            auto [x, y] = putRow();
+            assert(checkRow(x, y, y + k, 0));
+            fillRow(x, y, y + k, 1);
+            clear();
+            std::cout << x + 1 << " " << y + 1 << "\n";
+        } else {
+            auto [x, y] = putCol();
+            assert(checkCol(y, x, x + k, 0));
+            fillCol(y, x, x + k, 1);
+            clear();
+            std::cout << x + 1 << " " << y + 1 << "\n";
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

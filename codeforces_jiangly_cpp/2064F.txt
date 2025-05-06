@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+using i128 = __int128;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> le(n, -1);
+    std::vector<int> stk;
+    for (int i = 0; i < n; i++) {
+        while (!stk.empty() && a[i] < a[stk.back()]) {
+            stk.pop_back();
+        }
+        if (!stk.empty()) {
+            le[i] = stk.back();
+        }
+        stk.push_back(i);
+    }
+        i64 ans = 0;
+        stk.clear();
+    for (int i = n - 1; i >= 0; i--) {
+        int x = std::partition_point(stk.begin(), stk.end(),
+            [&](int x) {
+                return a[x] + a[i] > k;
+            }) - stk.begin();
+        if (x < stk.size() && a[stk[x]] + a[i] == k && a[i] <= a[stk[x]]) {
+            if (x) {
+                ans += 1LL * (stk[x - 1] - stk[x]) * (i - le[i]);
+            } else {
+                ans += 1LL * (n - stk[x]) * (i - le[i]);
+            }
+        }
+        while (!stk.empty() && a[i] >= a[stk.back()]) {
+            stk.pop_back();
+        }
+        stk.push_back(i);
+    }
+        std::vector<int> lgt(n, -1), rge(n, n);
+    stk.clear();
+    for (int i = 0; i < n; i++) {
+        while (!stk.empty() && a[i] >= a[stk.back()]) {
+            rge[stk.back()] = i;
+            stk.pop_back();
+        }
+        if (!stk.empty()) {
+            lgt[i] = stk.back();
+        }
+        stk.push_back(i);
+    }
+    std::vector<std::vector<std::array<int, 2>>> ask(n);
+    for (int i = 0; i < n; i++) {
+        if (lgt[i] != -1) {
+            ask[lgt[i]].push_back({k - a[i], rge[i] - i});
+        }
+    }
+    stk.clear();
+    for (int i = 0; i < n; i++) {
+        while (!stk.empty() && a[i] <= a[stk.back()]) {
+            stk.pop_back();
+        }
+        stk.push_back(i);
+        for (auto [v, t] : ask[i]) {
+            int x = std::partition_point(stk.begin(), stk.end(),
+                [&](int x) {
+                    return a[x] < v;
+                }) - stk.begin();
+            if (x < stk.size() && a[stk[x]] == v) {
+                if (x) {
+                    ans += 1LL * (stk[x] - stk[x - 1]) * t;
+                } else {
+                    ans += 1LL * (stk[x] + 1) * t;
+                }
+            }
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

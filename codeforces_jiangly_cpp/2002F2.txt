@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+ using u32 = unsigned;
+using i64 = long long;
+using u64 = unsigned long long;
+ constexpr int N = 2E7;
+std::vector<int> minp, primes;
+ void sieve(int n) {
+    minp.assign(n + 1, 0);
+    primes.clear();
+        for (int i = 2; i <= n; i++) {
+        if (minp[i] == 0) {
+            minp[i] = i;
+            primes.push_back(i);
+        }
+                for (auto p : primes) {
+            if (i * p > n) {
+                break;
+            }
+            minp[i * p] = p;
+            if (p == minp[i]) {
+                break;
+            }
+        }
+    }
+}
+ void solve() {
+    int n, m, l, f;
+    std::cin >> n >> m >> l >> f;
+        int q = m;
+    while (q > 1 && minp[q] != q) {
+        q--;
+    }
+    int p = std::min(q - 1, n);
+    while (p > 1 && (minp[p] != p || m / p != q / p)) {
+        p--;
+    }
+        // std::cerr << "p : " << p << ", q : " << q << "\n";
+    std::vector vis(n - p + 1, std::vector<bool>(m - q + 1));
+    i64 ans = 0;
+    for (int i = 0; i <= n - p; i++) {
+        for (int j = 0; j <= m - q; j++) {
+            int g = std::gcd(p + i, q + j);
+            if (i == 0 || j == 0) {
+                vis[i][j] = (g == 1 && p + i <= q + j);
+            } else if (g == 1) {
+                vis[i][j] = vis[i - 1][j] || vis[i][j - 1];
+            }
+            if (vis[i][j]) {
+                // std::cerr << "(" << p + i << ", " << q + j << ")\n";
+                ans = std::max(ans, 1LL * l * (p + i) + 1LL * f * (q + j));
+                if (q + j <= n) {
+                    ans = std::max(ans, 1LL * f * (p + i) + 1LL * l * (q + j));
+                }
+            }
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        // for (int i = 0; i <= 30; i++) {
+    //     for (int j = 0; j <= 30; j++) {
+    //         std::cerr << (std::gcd(i, j) <= 1 ? "O" : " ");
+    //     }
+    //     std::cerr << "\n";
+    // }
+        sieve(N);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

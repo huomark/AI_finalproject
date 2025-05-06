@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ void solve() {
+    int n, a, b, c;
+    std::cin >> n >> a >> b >> c;
+        int s = a + b + c;
+    int t = n / s;
+    n %= s;
+    t *= 3;
+        for (auto x : {a, b, c}) {
+        if (n > 0) {
+            n -= x;
+            t++;
+        }
+    }
+        std::cout << t << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

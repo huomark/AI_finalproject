@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ int query(int i, int j) {
+    std::cout << "? " << i + 1 << " " << j + 1 << std::endl;
+    int res;
+    std::cin >> res;
+        return res ^ 1;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        int ans = -1;
+    if (n == 3) {
+        if (query(0, 1) == query(1, 0)) {
+            ans = 2;
+        } else if (query(0, 2) == query(2, 0)) {
+            ans = 1;
+        } else {
+            ans = 0;
+        }
+    } else {
+        int i = 0;
+        if (n % 2 == 1) {
+            int u = query(0, 1);
+            int v = query(1, 2);
+            if (u ^ v ^ query(2, 0)) {
+                if (query(1, 0) == u) {
+                    ans = 2;
+                } else if (query(2, 1) == v) {
+                    ans = 0;
+                } else {
+                    ans = 1;
+                }
+            }
+            i += 3;
+        }
+        for (; ans == -1 && i < n; i += 2) {
+            if (i == n - 2) {
+                if (query(i, i - 1) == query(i - 1, i)) {
+                    ans = i + 1;
+                } else {
+                    ans = i;
+                }
+            } else if (query(i, i + 1) != query(i + 1, i)) {
+                if (query(i, i + 2) == query(i + 2, i)) {
+                    ans = i + 1;
+                } else {
+                    ans = i;
+                }
+            }
+        }
+    }
+    std::cout << "! " << ans + 1 << std::endl;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

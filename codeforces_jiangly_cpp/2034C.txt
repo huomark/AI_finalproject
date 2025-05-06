@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ std::array<int, 2> go(int x, int y, char c) {
+    if (c == 'L') {
+        y--;
+    } else if (c == 'R') {
+        y++;
+    } else if (c == 'U') {
+        x--;
+    } else {
+        x++;
+    }
+    return {x, y};
+}
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<std::string> s(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+    }
+        auto valid = [&](int x, int y) {
+        return 0 <= x && x < n && 0 <= y && y < m;
+    };
+        std::vector vis(n, std::vector<bool>(m));
+    std::vector f(n, std::vector<bool>(m));
+        for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (s[i][j] == '?') {
+                vis[i][j] = true;
+            }
+        }
+    }
+        for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (vis[i][j]) {
+                continue;
+            }
+            int x = i, y = j;
+            std::vector<std::array<int, 2>> a;
+            while (valid(x, y) && !vis[x][y]) {
+                vis[x][y] = true;
+                a.push_back({x, y});
+                std::tie(x, y) = go(x, y, s[x][y]);
+            }
+            if (!valid(x, y) || f[x][y]) {
+                for (auto [x, y] : a) {
+                    f[x][y] = true;
+                }
+            }
+        }
+    }
+        for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (s[i][j] == '?') {
+                bool ok = false;
+                for (auto c : {'L', 'R', 'U', 'D'}) {
+                    auto [x, y] = go(i, j, c);
+                    if (valid(x, y) && !f[x][y]) {
+                        ok = true;
+                        break;
+                    }
+                }
+                if (!ok) {
+                    f[i][j] = true;
+                }
+            }
+        }
+    }
+        int ans = n * m;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (f[i][j]) {
+                ans--;
+            }
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

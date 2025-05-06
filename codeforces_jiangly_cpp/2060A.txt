@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ void solve() {
+    int a1, a2, a4, a5;
+    std::cin >> a1 >> a2 >> a4 >> a5;
+        std::map<int, int> mp;
+    mp[a1 + a2]++;
+    mp[a4 - a2]++;
+    mp[a5 - a4]++;
+        int ans = 0;
+    for (auto [_, x] : mp) {
+        ans = std::max(ans, x);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

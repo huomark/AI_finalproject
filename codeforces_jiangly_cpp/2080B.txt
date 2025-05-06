@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m, T;
+    std::cin >> n >> m >> T;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<bool> start(n);
+    for (int i = 0; i < m; i++) {
+        int b;
+        std::cin >> b;
+        b--;
+        start[b] = true;
+    }
+        int ans = 0;
+        auto work = [&]() {
+        std::vector<i64> pre(n + 1);
+        for (int i = 0; i < n; i++) {
+            pre[i + 1] = pre[i] + a[i];
+        }
+                int lst = -1;
+        for (int i = 0; i < n; i++) {
+            if (start[i]) {
+                lst = i;
+            }
+            if (lst != -1 && pre[i] - pre[lst] <= T) {
+                ans = std::max(ans, int(T - (pre[i] - pre[lst])) / a[i] + (i - lst));
+            }
+        }
+    };
+        work();
+    std::reverse(start.begin(), start.end());
+    std::reverse(a.begin(), a.end());
+    work();
+        std::cout << ans << "\n";
+        return 0;
+}

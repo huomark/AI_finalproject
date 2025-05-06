@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+using i128 = __int128;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<bool> vis(n);
+    std::vector<std::array<int, 2>> ver;
+    std::vector<int> dep(n), par(n);
+        for (int x = 0; x < n; x++) {
+        if (vis[x]) {
+            continue;
+        }
+        int s = -1;
+        auto dfs = [&](this auto &&self, int x) -> void {
+            if (s == -1 || dep[x] > dep[s]) {
+                s = x;
+            }
+            vis[x] = true;
+            for (auto y : adj[x]) {
+                if (y == par[x]) {
+                    continue;
+                }
+                par[y] = x;
+                dep[y] = dep[x] + 1;
+                self(y);
+            }
+        };
+        dfs(x);
+        int rt = s;
+        dep[rt] = 0;
+        par[rt] = -1;
+        dfs(rt);
+        int dia = dep[s];
+        for (int i = 0; i < dia / 2; i++) {
+            s = par[s];
+        }
+        ver.push_back({dia, s});
+    }
+    std::sort(ver.begin(), ver.end(), std::greater());
+        int ans = ver[0][0];
+    if (ver.size() >= 2) {
+        ans = std::max(ans, (ver[0][0] + 1) / 2 + (ver[1][0] + 1) / 2 + 1);
+    }
+    if (ver.size() >= 3) {
+        ans = std::max(ans, (ver[1][0] + 1) / 2 + (ver[2][0] + 1) / 2 + 2);
+    }
+    std::cout << ans << "\n";
+    for (int i = 1; i < ver.size(); i++) {
+        std::cout << ver[i][1] + 1 << " " << ver[0][1] + 1 << "\n";
+    }
+        return 0;
+}

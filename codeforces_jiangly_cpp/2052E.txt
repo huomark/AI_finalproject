@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ bool checkEq(const std::string &s) {
+    int eq = s.find('=');
+    i64 lhs = 0, rhs = 0;
+    int i = 0;
+    while (true) {
+        int j = i;
+        while (j < eq && std::isdigit(s[j])) {
+            j++;
+        }
+        if (j - i > 10 || i == j) {
+            return false;
+        }
+        if (s[i] == '0' && j - i > 1) {
+            return false;
+        }
+        i64 v = std::stoll(s.substr(i, j - i));
+        if (i == 0 || s[i - 1] == '+') {
+            lhs += v;
+        } else {
+            lhs -= v;
+        }
+        if (j == eq) {
+            break;
+        }
+        i = j + 1;
+    }
+    i = eq + 1;
+    while (true) {
+        int j = i;
+        while (j < s.size() && std::isdigit(s[j])) {
+            j++;
+        }
+        if (j - i > 10 || i == j) {
+            return false;
+        }
+        if (s[i] == '0' && j - i > 1) {
+            return false;
+        }
+        i64 v = std::stoll(s.substr(i, j - i));
+        if (i == eq + 1 || s[i - 1] == '+') {
+            rhs += v;
+        } else {
+            rhs -= v;
+        }
+        if (j == s.size()) {
+            break;
+        }
+        i = j + 1;
+    }
+        return lhs == rhs;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string s;
+    std::cin >> s;
+        if (checkEq(s)) {
+        std::cout << "Correct\n";
+        return 0;
+    }
+        for (int i = 0; i < s.size(); i++) {
+        if (!std::isdigit(s[i])) {
+            continue;
+        }
+        for (int j = 0; j < s.size(); j++) {
+            auto t = s;
+            char ch = t[i];
+            t.erase(i, 1);
+            t.insert(t.begin() + j, ch);
+                        if (checkEq(t)) {
+                std::cout << t << "\n";
+                return 0;
+            }
+        }
+    }
+        std::cout << "Impossible\n";
+        return 0;
+}

@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ using F = long double;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::cout << std::fixed << std::setprecision(10);
+        int n;
+    std::cin >> n;
+        std::vector<int> v(n), h(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> v[i];
+    }
+    for (int i = 1; i < n; i++) {
+        std::cin >> h[i];
+        if (v[i - 1] > h[i] || v[i] > h[i]) {
+            assert(v[i - 1] == v[i]);
+        }
+    }
+    h[0] = 1E9;
+        std::deque<std::pair<F, int>> q;
+    q.emplace_back(v[n - 1], 1);
+    int l = n - 1;
+        for (int i = n - 1; i > 0; i--) {
+        q[0].first += h[i];
+        while (true) {
+            F hl = h[l];
+            F hr = q.size() == 1 ? 1E9 : q[1].first / q[1].second;
+            if (hl < hr) {
+                if (q[0].first / q[0].second >= hl) {
+                    F ex = std::max<F>(0, q[0].first - F(q[0].second) * h[l]);
+                    q[0].first = F(h[l]) * q[0].second;
+                    l--;
+                    q.emplace_front(v[l] + ex, 1);
+                } else {
+                    break;
+                }
+            } else {
+                if (q.size() > 1 && q[0].first / q[0].second >= hr) {
+                    q[1].first += q[0].first;
+                    q[1].second += q[0].second;
+                    q.pop_front();
+                } else {
+                    break;
+                }
+            }
+        }
+        assert(!q.empty());
+        q.back().first -= q.back().first / q.back().second;
+        if (--q.back().second == 0) {
+            q.pop_back();
+        }
+    }
+        assert(l == 0);
+    std::cout << q[0].first << "\n";
+        return 0;
+}

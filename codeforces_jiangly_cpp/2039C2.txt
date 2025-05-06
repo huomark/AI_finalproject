@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ i64 exgcd(i64 a, i64 b, i64 &x, i64 &y) {
+    if (b == 0) {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    i64 g = exgcd(b, a % b, y, x);
+    y -= a / b * x;
+    return g;
+}
+ void solve() {
+    int x;
+    i64 m;
+    std::cin >> x >> m;
+    m++;
+        int n = 1;
+    while (n <= x) {
+        n *= 2;
+    }
+        i64 ans = 0;
+    for (i64 y = 1; y < std::min<i64>(n, m); y++) {
+        i64 z = x ^ y;
+        if (z % x == 0 || z % y == 0) {
+            ans++;
+        }
+    }
+    i64 u, v;
+    i64 g = exgcd(n, x, u, v);
+    for (int y = 0; y < n; y++) {
+        i64 z = x ^ y;
+        i64 r = m / n + (y < m % n) - 1;
+        if (r <= 0) {
+            continue;
+        }
+                if (z % g != 0) {
+            continue;
+        }
+        i64 m = x / g;
+        i64 u0 = u * (-z / g) % m;
+        if (u0 < 0) {
+            u0 += m;
+        }
+        r++;
+        ans += r / m;
+        ans += u0 < r % m;
+        if (u0 == 0) {
+            ans--;
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

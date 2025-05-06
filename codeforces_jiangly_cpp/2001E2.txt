@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u32 = unsigned;
+ u32 P;
+void inc(u32 &a, u32 b) {
+    a += b;
+    if (a >= P) {
+        a -= P;
+    }
+}
+ void solve() {
+    int n, k;
+    std::cin >> n >> k >> P;
+        std::vector f(n + 1, std::vector<u32>(k + 1));
+    std::vector g(n + 1, std::vector<u32>(k + 1));
+    std::vector dp(n + 1, std::vector(k + 1, std::vector<u32>(k + 1)));
+    std::vector h(n + 1, std::vector(k + 1, std::vector<u32>(k + 1)));
+    for (int i = 0; i <= k; i++) {
+        f[1][i] = 1;
+        g[1][i] = 1;
+    }
+        for (int i = 2; i <= n; i++) {
+        for (int a = 0; a <= k; a++) {
+            for (int b = 0; a + b <= k; b++) {
+                inc(g[i][a + b], 1ULL * g[i - 1][a] * g[i - 1][b] % P);
+            }
+        }
+        for (int a = 0; a <= k; a++) {
+            u32 sdp = 0;
+            u32 sh = 0;
+            for (int c = 0; c <= a; c++) {
+                inc(sdp, dp[i - 1][a][c]);
+            }
+            for (int b = 0; b < a && a + b <= k; b++) {
+                inc(f[i][a + b], 2ULL * f[i - 1][a] * g[i - 1][b] % P);
+                inc(h[i][a + b][a], 2ULL * f[i - 1][a] * g[i - 1][b] % P);
+                if (i == 2) {
+                    inc(dp[i][a + b][a], 2ULL * f[i - 1][a] * g[i - 1][b] % P);
+                }
+                inc(sdp, P - dp[i - 1][a][b]);
+                inc(dp[i][a + b][a], 2ULL * sdp * g[i - 1][b] % P);
+                inc(dp[i][a + b][a], 2ULL * sh * f[i - 1][b] % P);
+                inc(sh, h[i - 1][a][b]);
+            }
+        }
+        for (int a = 1; a <= k; a++) {
+            inc(g[i][a], g[i][a - 1]);
+            inc(f[i][a], f[i][a - 1]);
+            for (int b = 0; b <= a; b++) {
+                inc(dp[i][a][b], dp[i][a - 1][b]);
+                inc(h[i][a][b], h[i][a - 1][b]);
+            }
+        }
+    }
+        u32 ans = 0;
+    for (int i = 0; i <= k; i++) {
+        inc(ans, dp[n][k][i]);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

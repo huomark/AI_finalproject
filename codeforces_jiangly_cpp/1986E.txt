@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        i64 ans = 0;
+    int odd = 0;
+    std::map<int, std::vector<int>> f;
+    for (int i = 0; i < n; i++) {
+        int a;
+        std::cin >> a;
+        f[a % k].push_back(a);
+    }
+    for (auto [_, a] : f) {
+        std::sort(a.begin(), a.end());
+        if (a.size() % 2 == 0) {
+            for (int i = 0; i < a.size(); i += 2) {
+                ans += (a[i + 1] - a[i]) / k;
+            }
+        } else {
+            odd++;
+            i64 sum = 0;
+            for (int i = 1; i < a.size(); i += 2) {
+                sum += (a[i + 1] - a[i]) / k;
+            }
+            i64 res = sum;
+            for (int i = 0; i + 1 < a.size(); i += 2) {
+                sum += (a[i + 1] - a[i]) / k;
+                sum -= (a[i + 2] - a[i + 1]) / k;
+                res = std::min(res, sum);
+            }
+            ans += res;
+        }
+    }
+    if (odd > 1) {
+        ans = -1;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

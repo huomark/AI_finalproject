@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+ using u32 = unsigned;
+using i64 = long long;
+using u64 = unsigned long long;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> dp(n);
+    auto check = [&](int x) {
+        for (int i = 0; i < n; i++) {
+            int v = a[i] >= x ? 1 : -1;
+            if (i % k == 0) {
+                dp[i] = v;
+            } else {
+                dp[i] = dp[i - 1] + v;
+            }
+            if (i >= k) {
+                dp[i] = std::max(dp[i], dp[i - k]);
+            }
+        }
+        return dp[n - 1] > 0;
+    };
+        int lo = 1, hi = 1E9;
+    while (lo < hi) {
+        int x = (lo + hi + 1) / 2;
+        if (check(x)) {
+            lo = x;
+        } else {
+            hi = x - 1;
+        }
+    }
+        std::cout << lo << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

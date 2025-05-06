@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int query(const std::string &s) {
+    std::cout << "? " << s << std::endl;
+    int r;
+    std::cin >> r;
+    return r;
+}
+ constexpr i64 M = 2E9;
+ void solve() {
+    int p = query("aa") - 1;
+    std::string s(20, 'z');
+    int A = query(s);
+    int a = A;
+        int i = 0;
+    i64 pw = 1;
+    while (A >= p) {
+        A /= p;
+        i++;
+        pw *= p;
+    }
+    if (A <= 24) {
+        s[i] -= A + 1;
+        pw *= A + 1;
+    } else {
+        s[i + 1] -= 1;
+        pw *= p;
+    }
+    int m = query(s) + pw - a;
+        std::cout << "! " << p << " " << m << std::endl;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

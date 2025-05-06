@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ void solve() {
+    int n;
+    i64 k;
+    std::cin >> n >> k;
+        std::vector<i64> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    std::sort(a.begin(), a.end());
+        i64 sum = std::accumulate(a.begin(), a.end(), 0LL);
+    i64 mx = a[n - 1];
+        for (int i = n; i >= 1; i--) {
+        i64 need = mx * i;
+        need = std::max(need, sum + (i - sum % i) % i);
+        if (need - sum <= k) {
+            std::cout << i << "\n";
+            return;
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

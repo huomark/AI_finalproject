@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ constexpr int V = 1E5;
+constexpr int inf = 1E9;
+ int pos[V + 1];
+std::vector<int> factors[V + 1];
+ void solve() {
+    int n, q;
+    std::cin >> n >> q;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> k(q), r(q);
+    std::vector<std::vector<int>> qry(n);
+    for (int i = 0; i < q; i++) {
+        int l;
+        std::cin >> k[i] >> l >> r[i];
+        l--;
+        qry[l].push_back(i);
+    }
+        std::vector<i64> ans(q);
+        std::vector<int> nxt(n, inf);
+    for (int i = n - 1; i >= 0; i--) {
+        nxt[i] = pos[a[i]];
+        pos[a[i]] = i;
+    }
+        for (int l = 0; l < n; l++) {
+        for (auto i : qry[l]) {
+            while (k[i] % a[l] == 0) {
+                k[i] /= a[l];
+            }
+            int t = inf;
+            for (auto d : factors[k[i]]) {
+                t = std::min(t, pos[d]);
+            }
+            if (t >= r[i]) {
+                ans[i] += 1LL * (r[i] - l) * k[i];
+            } else {
+                ans[i] += 1LL * (t - l) * k[i];
+                assert(t > l);
+                qry[t].push_back(i);
+            }
+        }
+        pos[a[l]] = nxt[l];
+    }
+        for (int i = 0; i < q; i++) {
+        std::cout << ans[i] << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::fill(pos, pos + V + 1, inf);
+    for (int i = 2; i <= V; i++) {
+        for (int j = i; j <= V; j += i) {
+            factors[j].push_back(i);
+        }
+    }
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

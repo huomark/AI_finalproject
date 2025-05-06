@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ auto get(std::vector<int> a) {
+    int n = a.size();
+    std::vector<std::array<int, 2>> ans;
+        std::set<int> s[3];
+    for (int i = 0; i < n; i++) {
+        s[a[i]].insert(i);
+    }
+        auto swap = [&](int i, int j) {
+        ans.push_back({i + 1, j + 1});
+        assert(std::abs(a[i] - a[j]) == 1);
+        s[a[i]].erase(i);
+        s[a[j]].erase(j);
+        std::swap(a[i], a[j]);
+        s[a[i]].insert(i);
+        s[a[j]].insert(j);
+    };
+        for (int i = 0; i < n; i++) {
+        if (s[1].empty()) {
+            // do nothing
+        } else if (s[0].empty()) {
+            if (a[i] == 2) {
+                swap(i, *s[1].begin());
+            }
+        } else {
+            if (a[i] == 2) {
+                swap(i, *s[1].begin());
+            }
+            if (a[i] == 1) {
+                swap(i, *s[0].begin());
+            }
+        }
+        s[a[i]].erase(i);
+    }
+    assert(std::is_sorted(a.begin(), a.end()));
+        return ans;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        auto ans = get(a);
+        if (ans.size() > n) {
+        std::reverse(a.begin(), a.end());
+        for (auto &x : a) {
+            x = 2 - x;
+        }
+        ans = get(a);
+        for (auto &[u, v] : ans) {
+            u = n + 1 - u;
+            v = n + 1 - v;
+        }        
+    }
+        std::cout << ans.size() << "\n";
+    for (auto [u, v] : ans) {
+        std::cout << u << " " << v << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}
