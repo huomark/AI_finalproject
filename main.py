@@ -24,10 +24,23 @@ from loguru import logger
 import sys
 
 from pygments.lexers import CppLexer
-from pygments.token import Token, Comment, Text, Keyword, Name, Literal, Punctuation, Operator
+from pygments.token import (
+    Token,
+    Comment,
+    Text,
+    Keyword,
+    Name,
+    Literal,
+    Punctuation,
+    Operator,
+)
 import ast
 
-logger.add(sys.stderr, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
+logger.add(
+    sys.stderr,
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
+    level="INFO",
+)
 
 # %% [markdown]
 # ## Data Preprocessing
@@ -107,7 +120,9 @@ if not df.empty:
     logger.info("Sample of loaded data:")
     print(df.head())
 else:
-    logger.warning("No data records were loaded. Please check your `SUBMISSIONS_DIR` and `TAGS_DIR` paths and content.")
+    logger.warning(
+        "No data records were loaded. Please check your `SUBMISSIONS_DIR` and `TAGS_DIR` paths and content."
+    )
 
 
 # %% [markdown]
@@ -125,7 +140,7 @@ def clean_cpp_code(code) -> str:
         raise ValueError("Input code must be a string")
 
     # Remove single-line comments
-    code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL | re.MULTILINE)
+    code = re.sub(r"/\*.*?\*/", "", code, flags=re.DOTALL)
 
     # Remove multi-line comments
     code = re.sub(r"//.*", "", code)
@@ -149,7 +164,9 @@ if not df.empty and "raw_code" in df.columns:
         logger.info("Cleaned Code (first 500 chars):")
         print(df["cleaned_code"].iloc[idx_to_check][:500])
 else:
-    logger.warning("DataFrame is empty or 'raw_code_content' column is missing. Skipping cleaning demonstration.")
+    logger.warning(
+        "DataFrame is empty or 'raw_code_content' column is missing. Skipping cleaning demonstration."
+    )
 
 # %% [markdown]
 # ### Save Metadata file
@@ -161,13 +178,17 @@ if not df.empty:
     existing_columns = [col for col in entries if col in df.columns]
 
     if "cleaned_code" not in df.columns and "raw_code" in df.columns:
-        logger.warning("'cleaned_code' not found, metadata might not be fully processed for next steps.")
+        logger.warning(
+            "'cleaned_code' not found, metadata might not be fully processed for next steps."
+        )
 
     df_metadata = df[existing_columns]
 
     try:
         df_metadata.to_csv(METADATA_FILE, index=False)
-        logger.success(f"Successfully saved metadata for {len(df_metadata)} records to {METADATA_FILE}")
+        logger.success(
+            f"Successfully saved metadata for {len(df_metadata)} records to {METADATA_FILE}"
+        )
         logger.info("Sample of metadata.csv content:")
         print(df_metadata.head())
     except Exception as e:
@@ -175,3 +196,81 @@ if not df.empty:
 
 else:
     logger.warning("DataFrame is empty. No metadata file created.")
+
+# %% [markdown]
+# ## Lexer Tokenization
+
+# %% [markdown]
+# ### Configuration
+
+# %%
+PROCESSED_DATA_DIR = os.path.join(DATA_DIR, "processed")
+os.makedirs(PROCESSED_DATA_DIR, exist_ok=True)
+LEXER_TOKENIZED_FILE = os.path.join(
+    PROCESSED_DATA_DIR, "lexer_tokenized_data.pkl"
+)
+
+
+# %% [markdown]
+# ### Lexer Tokenization
+
+
+# %%
+def tokenize_cpp(cleaned_code):
+    """
+    Tokenizes cleaned C++ code using Pygments CppLexer.
+    Filters out comments, whitespace tokens.
+    Returns a list of tuples (token type: str, token value).
+    """
+    if not isinstance(cleaned_code, str) or not cleaned_code.strip():
+        raise ValueError("Input code must be a non-empty string")
+
+    lexer = CppLexer()
+    tokens = []
+
+    try:
+        for ttype, value in lexer.get_tokens(cleaned_code):
+            if ttype in Comment or ttype in Text.Whitespace:
+                continue
+            tokens.append((str(ttype), value))
+    except Exception as e:
+        logger.error(
+            f"Error during tokenization of code snippet: '{cleaned_code[:100]}...'. Error: {e}"
+        )
+        return []
+
+    return tokens
+
+
+# %%
+if not df.empty and "cleaned_code" in df.columns:
+    logger.info("Applying Lexer Tokenization to 'cleaned_code'...")
+
+    df["cleaned_code"] = df["cleaned_code"].fillna("")
+    df["lexer_tokens"] = df["cleaned_code"].apply(tokenize_cpp)
+
+    logger.info("Lexer Tokenization completed.")
+    logger.info(
+        "Sample of data with lexer tokens (first 3 records, first 10 tokens):"
+    )
+
+    for idx, row in df.head(3).iterrows():
+        logger.info(
+            f"Problem ID: {row.get('problem_id', 'N/A')} - Tokens (first 10): {row.get('lexer_tokens', [])[:10]}"
+        )
+
+    try:
+        df.to_pickle(LEXER_TOKENIZED_FILE)
+        logger.success(f"Lexer tokenized data saved to {LEXER_TOKENIZED_FILE}")
+    except Exception as e:
+        logger.error(
+            f"Error saving dataFrame to pickle '{LEXER_TOKENIZED_FILE}': {e}"
+        )
+
+elif df.empty:
+    logger.warning("DataFrame is empty. No tokenization performed.")
+
+elif "cleaned_code" not in df.columns:
+    logger.warning(
+        "'cleaned_code' column is missing. Cannot perform tokenization."
+    )
