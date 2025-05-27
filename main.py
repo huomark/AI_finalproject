@@ -20,6 +20,15 @@ import os
 import pandas as pd
 import re
 
+from loguru import logger
+import sys
+
+from pygments.lexers import CppLexer
+from pygments.token import Token, Comment, Text, Keyword, Name, Literal, Punctuation, Operator
+import ast
+
+logger.add(sys.stderr, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
+
 # %% [markdown]
 # ## Data Preprocessing
 
@@ -34,9 +43,9 @@ TAG_DIR = os.path.join(DATA_DIR, "tags")
 METADATA_FILE = os.path.join(DATA_DIR, "metadata.csv")
 
 if not os.path.exists(SUBMISSIONS_DIR):
-    print(f"ERROR: Submissions directory not found at {SUBMISSIONS_DIR}")
+    logger.error(f"Submissions directory not found at {SUBMISSIONS_DIR}")
 if not os.path.exists(TAG_DIR):
-    print(f"ERROR: Tags directory not found at {TAG_DIR}")
+    logger.error(f"Tags directory not found at {TAG_DIR}")
 
 
 # %% [markdown]
@@ -62,10 +71,10 @@ for submission_filename in os.listdir(SUBMISSIONS_DIR):
         with open(code_filepath, "r", encoding="utf-8") as code_file:
             code_content = code_file.read()
     except FileNotFoundError:
-        print(f"ERROR: Code file {code_filepath} not found, but was listed")
+        logger.error(f"Code file {code_filepath} not found, but was listed")
         continue
     except Exception as e:
-        print(f"ERROR: Could not read code file {code_filepath}: {e}")
+        logger.error(f"Could not read code file {code_filepath}: {e}")
         continue
 
     # Read tags
@@ -76,10 +85,10 @@ for submission_filename in os.listdir(SUBMISSIONS_DIR):
                 r"\s*,\s*", tag_content.strip()
             )  # Split by commas and strip whitespace
     except FileNotFoundError:
-        print(f"ERROR: Tag file {tag_filepath} not found, but was listed")
+        logger.error(f"Tag file {tag_filepath} not found, but was listed")
         continue
     except Exception as e:
-        print(f"ERROR: Could not read tag file {tag_filepath}: {e}")
+        logger.error(f"Could not read tag file {tag_filepath}: {e}")
         continue
 
     if code_content is not None:
@@ -94,13 +103,11 @@ for submission_filename in os.listdir(SUBMISSIONS_DIR):
 df = pd.DataFrame(data_records)
 
 if not df.empty:
-    print(f"\nSuccessfully loaded {len(df)} records.")
-    print("\nSample of loaded data:")
+    logger.info(f"Successfully loaded {len(df)} records.")
+    logger.info("Sample of loaded data:")
     print(df.head())
 else:
-    print(
-        "\nNo data records were loaded. Please check your `SUBMISSIONS_DIR` and `TAGS_DIR` paths and content."
-    )
+    logger.warning("No data records were loaded. Please check your `SUBMISSIONS_DIR` and `TAGS_DIR` paths and content.")
 
 
 # %% [markdown]
@@ -134,17 +141,15 @@ if not df.empty and "raw_code" in df.columns:
     df["cleaned_code"] = df["raw_code"].apply(clean_cpp_code)
 
     if len(df) > 0:
-        print("\n--- Cleaning Example ---")
+        logger.info("--- Cleaning Example ---")
         idx_to_check = 0  # or a random index
-        print(f"Problem ID: {df['problem_id'].iloc[idx_to_check]}")
-        print("\nOriginal Code (first 500 chars):")
+        logger.info(f"Problem ID: {df['problem_id'].iloc[idx_to_check]}")
+        logger.info("Original Code (first 500 chars):")
         print(df["raw_code"].iloc[idx_to_check][:500])
-        print("\nCleaned Code (first 500 chars):")
+        logger.info("Cleaned Code (first 500 chars):")
         print(df["cleaned_code"].iloc[idx_to_check][:500])
 else:
-    print(
-        "\nDataFrame is empty or 'raw_code_content' column is missing. Skipping cleaning demonstration."
-    )
+    logger.warning("DataFrame is empty or 'raw_code_content' column is missing. Skipping cleaning demonstration.")
 
 # %% [markdown]
 # ### Save Metadata file
@@ -156,21 +161,17 @@ if not df.empty:
     existing_columns = [col for col in entries if col in df.columns]
 
     if "cleaned_code" not in df.columns and "raw_code" in df.columns:
-        print(
-            "Warning: 'cleaned_code' not found, metadata might not be fully processed for next steps."
-        )
+        logger.warning("'cleaned_code' not found, metadata might not be fully processed for next steps.")
 
     df_metadata = df[existing_columns]
 
     try:
         df_metadata.to_csv(METADATA_FILE, index=False)
-        print(
-            f"\nSuccessfully saved metadata for {len(df_metadata)} records to {METADATA_FILE}"
-        )
-        print("\nSample of metadata.csv content:")
+        logger.success(f"Successfully saved metadata for {len(df_metadata)} records to {METADATA_FILE}")
+        logger.info("Sample of metadata.csv content:")
         print(df_metadata.head())
     except Exception as e:
-        print(f"Error saving metadata file: {e}")
+        logger.error(f"Error saving metadata file: {e}")
 
 else:
-    print("\nDataFrame is empty. No metadata file created.")
+    logger.warning("DataFrame is empty. No metadata file created.")
