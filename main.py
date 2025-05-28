@@ -274,3 +274,101 @@ elif "cleaned_code" not in df.columns:
     logger.warning(
         "'cleaned_code' column is missing. Cannot perform tokenization."
     )
+
+# %% [markdown]
+# ## Variable/Function Name Anonymization
+
+# %% [markdown]
+# ### Configuration
+
+# %%
+ANONYMIZED_TOKENIZED_FILE = os.path.join(PROCESSED_DATA_DIR, "anonymized_tokenized_data.pkl")
+
+CPP_KEYWORDS = set([
+    "alignas", "alignof", "and", "and_eq", "asm", "atomic_cancel", "atomic_commit",
+    "atomic_noexcept", "auto", "bitand", "bitor", "bool", "break", "case",
+    "catch", "char", "char8_t", "char16_t", "char32_t", "class", "compl",
+    "concept", "const", "consteval", "constexpr", "constinit", "const_cast",
+    "continue", "co_await", "co_return", "co_yield", "decltype", "default",
+    "delete", "do", "double", "dynamic_cast", "else", "enum", "explicit",
+    "export", "extern", "false", "float", "for", "friend", "goto", "if",
+    "inline", "int", "long", "mutable", "namespace", "new", "noexcept",
+    "not", "not_eq", "nullptr", "operator", "or", "or_eq", "private",
+    "protected", "public", "reflexpr", "register", "reinterpret_cast",
+    "requires", "return", "short", "signed", "sizeof", "static",
+    "static_assert", "static_cast", "struct", "switch", "synchronized",
+    "template", "this", "thread_local", "throw", "true", "try", "typedef",
+    "typeid", "typename", "union", "unsigned", "using", "virtual", "void",
+    "volatile", "wchar_t", "while", "xor", "xor_eq",
+    "std", "cin", "cout", "endl", "vector", "string", "map", "set", "pair", "iostream", "bits/stdc++.h"  # Heuristic
+])
+
+
+# %%
+def anonymize_tokens(tokens):
+    """
+    Anonymizes identifiers and replaces literals in a list of (token_type, token_value) tuples.
+    - Identifiers (Token.Name.*, not keywords) are replaced with <VAR_i> or <FUNC_i>.
+    - Numbers (Token.Literal.Number.*) are replaced with <NUM>.
+    - Strings/Chars (Token.Literal.String.*) are replaced with <STR>.
+    Returns a list of processed tokens values.
+    """
+    if not isinstance(tokens, list):
+        logger.warning("anonymize_and_replace_literals received non-list input.")
+        return []
+
+    processed_tokens = []
+    identifier_map = {}
+    var_cnt, func_cnt = 0, 0
+
+    for i, (ttype, value) in enumerate(tokens):
+        nxt_value = tokens[i + 1][1] if i + 1 < len(tokens) else None
+
+        if 'Token.Literal.Number' in ttype:
+            processed_tokens.append("<NUM>")
+        elif 'Token.Literal.String' in ttype:
+            processed_tokens.append("<STR>")
+        elif 'Token.Name' in ttype:
+            if value in CPP_KEYWORDS:
+                processed_tokens.append(value)
+            else:
+                if value not in identifier_map:
+                    is_heuristic = (nxt_value == '(') or ('Function' in ttype) or ('Class' in ttype)
+                    if is_heuristic:
+                        identifier_map[value] = f"<FUNC_{func_cnt}>"
+                        func_cnt += 1
+                    else:
+                        identifier_map[value] = f"<VAR_{var_cnt}>"
+                        var_cnt += 1
+                processed_tokens.append(identifier_map[value])
+        else:
+            processed_tokens.append(value)
+    
+    return processed_tokens
+
+
+# %% [markdown]
+# ### Apply Anonymization
+
+# %%
+assert not df.empty, "DataFrame should not be empty before anonymization."
+assert "lexer_tokens" in df.columns, "'lexer_tokens' column should exist before anonymization."
+
+logger.info("Applying anonymization and literal replacement...")
+
+df['anonymized_tokens'] = df['lexer_tokens'].apply(anonymize_tokens)
+
+logger.info("Anonymization and literal replacement completed.")
+logger.info("Sample of data with anonymized token values (first 3 records, first 15 tokens):")
+
+for index, row in df.head(3).iterrows():
+    logger.info(f"Problem ID: {row.get('problem_id', 'N/A')}")
+    logger.info(f"Original Tokens (first 15): {row.get('lexer_tokens', [])[:15]}")
+    logger.info(f"Anonymized Tokens (first 15): {row.get('anonymized_tokens', [])[:15]}")
+    logger.info("-" * 30)
+
+try:
+    df.to_pickle(ANONYMIZED_TOKENIZED_FILE)
+    logger.success(f"Anonymized tokenized data saved to {ANONYMIZED_TOKENIZED_FILE}")
+except Exception as e:
+    logger.error(f"Error saving anonymized tokenized data to pickle '{ANONYMIZED_TOKENIZED_FILE}': {e}")
