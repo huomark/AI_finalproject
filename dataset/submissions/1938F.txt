@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+using namespace std;
+ typedef long long ll;
+ struct frac{
+    int x,y;
+    frac(int x_=0,int y_=1):x(x_),y(y_){
+    }
+    bool operator < (const frac&a)const{
+        return (ll)x*a.y<(ll)y*a.x;
+    }
+ };
+ const int INF=1e9;
+  ostream& operator << (ostream&out,const frac&a){
+    int g=gcd(a.x,a.y);
+    return out<<a.x/g<<' '<<a.y/g<<'\n';
+}
+const int N=1001000;
+ int n,a[N],b[N];
+int sum[N],f[N],g[N];
+int lmn[N],rmn[N],lmx[N],rmx[N];
+int main(){
+    ios::sync_with_stdio(0);cin.tie(0);
+    int T;
+    for(cin>>T; T --> 0;){
+        cin>>n>>a[0];
+        for(int i=1;i<n;++i)
+            cin>>a[i],b[i+1]=a[i];
+        frac ans(1,0);
+        for(int d=2;d<=n;++d)
+            if(n%d==0){
+                for(int j=0;j<d;++j)
+                    sum[j]=f[j+1]=g[n-j]=0;
+                for(int j=1;j<=n-d;j+=d)
+                    for(int k=0;k<d;++k)
+                        sum[k]+=a[j+k],
+                        f[j+k+d]=sum[k];
+                for(int j=0;j<d;++j)
+                    sum[j]=0;
+                for(int j=n;j>d;j-=d)
+                    for(int k=0;k<d;++k)
+                        sum[d-k-1]+=b[j-k],
+                        g[j-k-d]=sum[d-k-1];
+                for(int j=1;j<n;j+=d){
+                    for(int k=0;k<d;++k)
+                        sum[k]=f[j+k]+g[j+k];
+                                        lmn[0]=INF;
+                    lmx[0]=0;
+                    rmn[d]=INF;
+                    rmx[d]=0;
+                    for(int k=0;k<d;++k){
+                        int t=a[j+k]+sum[k];
+                        lmn[k+1]=min(lmn[k],t);
+                        lmx[k+1]=max(lmx[k],t);
+                    }
+                    for(int k=d-1;k>=0;--k){
+                        int t=b[j+k]+sum[k];
+                        rmn[k]=min(rmn[k+1],t);
+                        rmx[k]=max(rmx[k+1],t);
+                    }
+                    for(int k=0;k<d;++k){
+                        int t=a[0]+sum[k];
+                        int tmn=min(lmn[k],rmn[k+1]);
+                        int tmx=max(lmx[k],rmx[k+1]);
+                        tmn=min(tmn,t);
+                        tmx=max(tmx,t);
+                        ans=min(ans,frac(tmx,tmn));
+                    }
+                }
+            }
+        cout<<ans;
+    }
+}

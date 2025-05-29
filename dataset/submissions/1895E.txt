@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> ax(n), ay(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> ax[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> ay[i];
+    }
+        int m;
+    std::cin >> m;
+        std::vector<int> bx(m), by(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> bx[i];
+    }
+    for (int i = 0; i < m; i++) {
+        std::cin >> by[i];
+    }
+        std::vector<int> pa(n), pb(m);
+    std::iota(pa.begin(), pa.end(), 0);
+    std::iota(pb.begin(), pb.end(), 0);
+    std::sort(pa.begin(), pa.end(),
+        [&](int i, int j) {
+            return ax[i] < ax[j];
+        });
+    std::sort(pb.begin(), pb.end(),
+        [&](int i, int j) {
+            return bx[i] < bx[j];
+        });
+    auto fa = pa, fb = pb;
+    for (int i = n - 2; i >= 0; i--) {
+        fa[i] = ay[pa[i]] > ay[fa[i + 1]] ? pa[i] : fa[i + 1];
+    }
+    for (int i = m - 2; i >= 0; i--) {
+        fb[i] = by[pb[i]] > by[fb[i + 1]] ? pb[i] : fb[i + 1];
+    }
+        std::vector<std::vector<int>> adj(n + m);
+    std::vector<int> deg(n + m);
+    std::vector<int> dp(n + m, -1);
+    auto addEdge = [&](int u, int v) {
+        deg[u] += 1;
+        adj[v].push_back(u);
+    };
+    for (int i = 0; i < n; i++) {
+        auto it = std::partition_point(pb.begin(), pb.end(),
+            [&](int j) {
+                return bx[j] <= ay[i];
+            });
+        if (it != pb.end()) {
+            addEdge(i, n + fb[it - pb.begin()]);
+        }
+    }
+    for (int i = 0; i < m; i++) {
+        auto it = std::partition_point(pa.begin(), pa.end(),
+            [&](int j) {
+                return ax[j] <= by[i];
+            });
+        if (it != pa.end()) {
+            addEdge(n + i, fa[it - pa.begin()]);
+        }
+    }
+    std::queue<int> q;
+    for (int i = 0; i < n + m; i++) {
+        if (deg[i] == 0) {
+            dp[i] = 1;
+            q.push(i);
+        }
+    }
+    while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+                for (auto y : adj[x]) {
+            dp[y] = !dp[x];
+            q.push(y);
+        }
+    }
+    int ans1 = std::count(dp.begin(), dp.begin() + n, 1);
+    int ans2 = std::count(dp.begin(), dp.begin() + n, -1);
+    int ans3 = std::count(dp.begin(), dp.begin() + n, 0);
+    std::cout << ans1 << " " << ans2 << " " << ans3 << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

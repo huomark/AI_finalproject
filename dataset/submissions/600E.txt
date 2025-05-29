@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> c(n);
+    for (auto &x : c) {
+        std::cin >> x;
+        x--;
+    }
+        std::vector<int> siz(n);
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int x, y;
+        std::cin >> x >> y;
+        x--, y--;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+    }
+        std::function<void(int, int)> dfs = [&](int x, int p) {
+        if (p != -1) {
+            adj[x].erase(std::find(adj[x].begin(), adj[x].end(), p));
+        }
+        siz[x] = 1;
+        for (auto &y : adj[x]) {
+            dfs(y, x);
+            siz[x] += siz[y];
+            if (siz[y] > siz[adj[x][0]]) {
+                std::swap(y, adj[x][0]);
+            }
+        }
+    };
+    dfs(0, -1);
+        std::vector<int> cnt(n);
+    std::vector<i64> sum(n+1);
+    std::vector<i64> ans(n);
+    int mx = 0;
+    sum[0] = 1LL * n * (n+1) / 2;
+        auto addv = [&](int x, int t) {
+        sum[cnt[x]] -= x+1;
+        cnt[x] += t;
+        mx = std::max(mx, cnt[x]);
+        sum[cnt[x]] += x+1;
+        while (!sum[mx]) {
+            mx--;
+        }
+    };
+        std::function<void(int, int)> add = [&](int x, int t) {
+        addv(c[x], t);
+        for (auto y : adj[x]) {
+            add(y, t);
+        }
+    };
+    std::function<void(int)> calc = [&](int x) {
+        for (auto y : adj[x]) {
+            if (y != adj[x][0]) {
+                calc(y);
+                add(y, -1);
+            }
+        }
+        if (!adj[x].empty()) {
+            calc(adj[x][0]);
+            for (auto y : adj[x]) {
+                if (y != adj[x][0]) {
+                    add(y, 1);
+                }
+            }
+        }
+        addv(c[x], 1);
+        ans[x] = sum[mx];
+    };
+    calc(0);
+    add(0, -1);
+        for (int i = 0; i < n; i++) {
+        std::cout << ans[i] << " \n"[i == n-1];
+    }
+        return 0;
+}

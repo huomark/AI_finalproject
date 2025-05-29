@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+using i128 = __int128;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> x(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> x[i];
+    }
+        i64 ans = 0;
+    std::multiset<int> s;
+    int l = 0, r = 0;
+    for (int i = m - 1; i >= 0; i--) {
+        ans -= x[i];
+        s.insert(2 * x[i]);
+        int len = m - i;
+        r++;
+        while (l * 2 < len) {
+            ans += *s.rbegin();
+            s.extract(*s.rbegin());
+            l++;
+        }
+        while (r * 2 > n + len) {
+            s.erase(s.begin());
+            r--;
+        }
+    }
+        for (auto x : s) {
+        ans += std::max(0, x);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> x(n), y(n), r(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i] >> r[i];
+    }
+        std::vector g(n, std::vector<int>(n));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (1LL * (x[i] - x[j]) * (x[i] - x[j]) + 1LL * (y[i] - y[j]) * (y[i] - y[j]) == 1LL * (r[i] + r[j]) * (r[i] + r[j])) {
+                g[i][j] = 1;
+            }
+        }
+    }
+        std::vector<int> col(n, -1);
+    for (int x = 0; x < n; x++) {
+        if (col[x] == -1) {
+            int ok = 1;
+            col[x] = 0;
+            std::queue<int> q;
+            q.push(x);
+                        int sum = 0;
+            while (!q.empty()) {
+                int x = q.front();
+                q.pop();
+                                sum += (col[x] == 0 ? 1 : -1);
+                                for (int y = 0; y < n; y++) {
+                    if (g[x][y]) {
+                        if (col[y] == col[x]) {
+                            ok = 0;
+                        } else if (col[y] == -1) {
+                            col[y] = col[x] ^ 1;
+                            q.push(y);
+                        }
+                    }
+                }
+            }
+                        if (ok && sum != 0) {
+                std::cout << "YES\n";
+                return 0;
+            }
+        }
+    }
+    std::cout << "NO\n";
+        return 0;
+}

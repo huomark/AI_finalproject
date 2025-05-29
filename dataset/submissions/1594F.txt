@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 s, n, k;
+    std::cin >> s >> n >> k;
+        if (s == k) {
+        std::cout << "YES\n";
+        return;
+    }
+    i64 ans = 0;
+    s += 1;
+    ans += (s / k + 2) / 2 * (s % k);
+    ans += (s / k + 1) / 2 * (k - s % k);
+    if (n + 1 <= ans) {
+        std::cout << "NO\n";
+    } else {
+        std::cout << "YES\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

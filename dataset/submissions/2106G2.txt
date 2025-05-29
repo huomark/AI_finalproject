@@ -1,0 +1,127 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ using i128 = __int128;
+using u128 = unsigned __int128;
+ int query(std::vector<int> u) {
+    std::cout << "? 1 " << u.size();
+    for (auto x : u) {
+        std::cout << " " << x + 1;
+    }
+    std::cout << std::endl;
+    int ans;
+    std::cin >> ans;
+    return ans;
+}
+ void change(int u) {
+    std::cout << "? 2 " << u + 1 << std::endl;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> siz(n);
+    std::vector<bool> vis(n);
+    auto dfs = [&](this auto &&self, int x, int p = -1) -> void {
+        siz[x] = 1;
+        for (auto y : adj[x]) {
+            if (vis[y] || y == p) {
+                continue;
+            }
+            self(y, x);
+            siz[x] += siz[y];
+        }
+    };
+        auto find = [&](this auto &&self, int x, int s, int p = -1) -> int {
+        for (auto y : adj[x]) {
+            if (vis[y] || y == p || 2 * siz[y] <= s) {
+                continue;
+            }
+            return self(y, s, x);
+        }
+        return x;
+    };
+        auto work = [&](this auto &&self, int x) -> int {
+        dfs(x);
+        x = find(x, siz[x]);
+        dfs(x);
+        vis[x] = true;
+                std::vector<int> a;
+        for (auto y : adj[x]) {
+            if (vis[y]) {
+                continue;
+            }
+            a.push_back(y);
+        }
+                if (a.empty()) {
+            return x;
+        }
+                int tmp = query(a);
+        change(x);
+        if (std::abs(tmp - query(a)) == 2 * a.size()) {
+            return x;
+        }
+                while (a.size() > 1) {
+            int sum = 0;
+            for (auto x : a) {
+                sum += siz[x];
+            }
+            int m = 0;
+            int res = 0;
+            while (2 * (res + siz[a[m]]) <= sum) {
+                res += siz[a[m++]];
+            }
+            if (2 * res + siz[a[m]] <= sum) {
+                m++;
+            }
+                        std::vector b(a.begin(), a.begin() + m);
+                        int tmp = query(b);
+            change(x);
+            if (std::abs(tmp - query(b)) == 2 * b.size()) {
+                a = std::vector(a.begin() + m, a.end());
+            } else {
+                a = b;
+            }
+        }
+                return self(a[0]);
+    };
+    int rt = work(0);
+        std::vector<int> f(n);
+    for (int i = 0; i < n; i++) {
+        f[i] = query({i});
+    }
+        auto dfs1 = [&](this auto &&self, int x, int p = -1) -> void {
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            self(y, x);
+            f[y] -= f[x];
+        }
+    };
+        dfs1(rt);
+        std::cout << "!";
+    for (auto x : f) {
+        std::cout << " " << x;
+    }
+    std::cout << std::endl;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

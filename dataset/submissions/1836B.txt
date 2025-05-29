@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, k, g;
+    std::cin >> n >> k >> g;
+        int x = (g - 1) / 2;
+    i64 ans;
+    if (1LL * k * g <= 1LL * n * x) {
+        ans = 0;
+    } else {
+        ans = 1LL * k * g - 1LL * (n - 1) * x;
+        if (ans % g * 2 >= g) {
+            ans += g - ans % g;
+        } else {
+            ans -= ans % g;
+        }
+    }
+    ans = 1LL * k * g - ans;
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

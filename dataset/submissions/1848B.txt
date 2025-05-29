@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> c(n);
+    std::vector<int> lst(k, -1);
+    std::vector<std::vector<int>> f(k);
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i];
+        c[i]--;
+        f[c[i]].push_back(i - 1 - lst[c[i]]);
+        lst[c[i]] = i;
+    }
+        int ans = n;
+    for (int i = 0; i < k; i++) {
+        f[i].push_back(n - 1 - lst[i]);
+        std::sort(f[i].begin(), f[i].end(), std::greater());
+                int res = f[i][0] / 2;
+        if (f[i].size() > 1) {
+            res = std::max(res, f[i][1]);
+        }
+        ans = std::min(ans, res);
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

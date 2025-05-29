@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int xA, yA, xB, yB, xC, yC;
+    std::cin >> xA >> yA >> xB >> yB >> xC >> yC;
+        int ans = 1;
+    if (xA < xB && xA < xC) {
+        ans += std::min(xB, xC) - xA;
+    }
+    if (xA > xB && xA > xC) {
+        ans += xA - std::max(xB, xC);
+    }
+    if (yA < yB && yA < yC) {
+        ans += std::min(yB, yC) - yA;
+    }
+    if (yA > yB && yA > yC) {
+        ans += yA - std::max(yB, yC);
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

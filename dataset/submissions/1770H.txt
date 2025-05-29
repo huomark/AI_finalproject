@@ -1,0 +1,180 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::vector<std::vector<std::pair<int, int>>> solve(std::vector<int> p, std::vector<int> q) {
+    int n = p.size();
+        if (n == 0) {
+        return {};
+    }
+        if (n == 1) {
+        return {{{0, 0}}, {{0, 0}}};
+    }
+        std::vector<std::vector<std::pair<int, int>>> ans(2 * n);
+        std::vector<bool> visu(n), visl(n), visr(n), visd(n);
+        visu[0] = true;
+    visd[p[0]] = true;
+    for (int i = 0; i < n; i++) {
+        ans[0].emplace_back(i, 0);
+    }
+    for (int j = 1; j <= p[0]; j++) {
+        ans[0].emplace_back(n - 1, j);
+    }
+        visu[n - 1] = true;
+    visd[p[n - 1]] = true;
+    for (int i = 0; i < n; i++) {
+        ans[n - 1].emplace_back(i, n - 1);
+    }
+    for (int j = n - 2; j >= p[n - 1]; j--) {
+        ans[n - 1].emplace_back(n - 1, j);
+    }
+        visl[0] = true;
+    visr[q[0]] = true;
+    for (int i = 0; i < n; i++) {
+        ans[n].emplace_back(0, i);
+    }
+    for (int i = 1; i <= q[0]; i++) {
+        ans[n].emplace_back(i, n - 1);
+    }
+        if (q[0] != 0) {
+        int x = std::find(q.begin(), q.end(), 0) - q.begin();
+        visl[x] = true;
+        visr[0] = true;
+        for (int i = x; i >= 1; i--) {
+            ans[n + x].emplace_back(i, 0);
+        }
+        for (int i = 0; i < n; i++) {
+            ans[n + x].emplace_back(0, i);
+        }
+    } else {
+        visl[1] = true;
+        visr[q[1]] = true;
+        ans[n + 1].emplace_back(1, 0);
+        for (int i = 0; i < n; i++) {
+            ans[n + 1].emplace_back(0, i);
+        }
+        for (int i = 1; i <= q[1]; i++) {
+            ans[n + 1].emplace_back(i, n - 1);
+        }
+    }
+        std::vector<int> fu(n), fd(n), fl(n), fr(n);
+    for (int i = 0, j = 0; i < n; i++) {
+        if (!visu[i]) {
+            fu[i] = j++;
+        }
+    }
+    for (int i = 0, j = 0; i < n; i++) {
+        if (!visd[i]) {
+            fd[i] = j++;
+        }
+    }
+    for (int i = 0, j = 0; i < n; i++) {
+        if (!visl[i]) {
+            fl[i] = j++;
+        }
+    }
+    for (int i = 0, j = 0; i < n; i++) {
+        if (!visr[i]) {
+            fr[i] = j++;
+        }
+    }
+        std::vector<int> np(n - 2), nq(n - 2);
+    for (int i = 0; i < n; i++) {
+        if (!visu[i]) {
+            np[fu[i]] = fd[p[i]];
+        }
+        if (!visl[i]) {
+            nq[fl[i]] = fr[q[i]];
+        }
+    }
+        auto res = solve(np, nq);
+    for (int i = 0; i < n; i++) {
+        if (!visu[i]) {
+            for (int x = i; x < fu[i] + 1; x++) {
+                ans[i].emplace_back(0, x);
+            }
+            for (int x = i; x > fu[i] + 1; x--) {
+                ans[i].emplace_back(0, x);
+            }
+            ans[i].emplace_back(0, fu[i] + 1);
+            for (auto [x, y] : res[fu[i]]) {
+                ans[i].emplace_back(x + 1, y + 1);
+            }
+            ans[i].emplace_back(n - 1, fd[p[i]] + 1);
+            for (int x = fd[p[i]] + 2; x <= p[i]; x++) {
+                ans[i].emplace_back(n - 1, x);
+            }
+            for (int x = fd[p[i]]; x >= p[i]; x--) {
+                ans[i].emplace_back(n - 1, x);
+            }
+        }
+        if (!visl[i]) {
+            for (int x = i; x < fl[i] + 1; x++) {
+                ans[n + i].emplace_back(x, 0);
+            }
+            for (int x = i; x > fl[i] + 1; x--) {
+                ans[n + i].emplace_back(x, 0);
+            }
+            ans[n + i].emplace_back(fl[i] + 1, 0);
+            for (auto [x, y] : res[n - 2 + fl[i]]) {
+                ans[n + i].emplace_back(x + 1, y + 1);
+            }
+            ans[n + i].emplace_back(fr[q[i]] + 1, n - 1);
+            for (int x = fr[q[i]] + 2; x <= q[i]; x++) {
+                ans[n + i].emplace_back(x, n - 1);
+            }
+            for (int x = fr[q[i]]; x >= q[i]; x--) {
+                ans[n + i].emplace_back(x, n - 1);
+            }
+        }
+    }
+        return ans;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> p(n), q(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> q[i];
+        q[i]--;
+    }
+        bool one = true;
+    for (int i = 0; i < n; i++) {
+        if (p[i] != i) {
+            one = false;
+        }
+        if (q[i] != i) {
+            one = false;
+        }
+    }
+        if (one) {
+        for (int i = 1; i <= n; i++) {
+            std::cout << n;
+            for (int j = 1; j <= n; j++) {
+                std::cout << " " << j << " " << i;
+            }
+            std::cout << "\n";
+        }
+        for (int i = 1; i <= n; i++) {
+            std::cout << n;
+            for (int j = 1; j <= n; j++) {
+                std::cout << " " << i << " " << j;
+            }
+            std::cout << "\n";
+        }
+        return 0;
+    }
+        auto ans = solve(p, q);
+        for (auto v : ans) {
+        std::cout << v.size();
+        for (auto [x, y] : v) {
+            std::cout << " " << x + 1 << " " << y + 1;
+        }
+        std::cout << "\n";
+    }
+        return 0;
+}

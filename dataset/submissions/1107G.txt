@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, a;
+    std::cin >> n >> a;
+        std::vector<int> d(n), c(n);
+    std::vector<int> b(n - 1);
+    for (int i = 0; i < n; i++) {
+        std::cin >> d[i] >> c[i];
+        c[i] = a - c[i];
+    }
+    for (int i = 0; i < n - 1; i++) {
+        b[i] = d[i + 1] - d[i];
+    }
+        std::vector<std::array<int, 2>> ch(n - 1, {-1, -1});
+    std::vector<int> stk;
+    for (int i = 0; i < n - 1; i++) {
+        while (!stk.empty() && b[i] > b[stk.back()]) {
+            ch[stk.back()][1] = ch[i][0];
+            ch[i][0] = stk.back();
+            stk.pop_back();
+        }
+        stk.push_back(i);
+    }
+        while (stk.size() > 1) {
+        int x = stk.back();
+        stk.pop_back();
+        ch[stk.back()][1] = x;
+    }
+        i64 ans = 0;
+    for (int i = 0; i < n; i++) {
+        ans = std::max(ans, 1LL * c[i]);
+    }
+        auto dfs = [&](auto self, int x, int l, int r) -> std::array<i64, 3> {
+        if (x == -1) {
+            return {c[l], c[l], c[l]};
+        }
+        auto [a1, b1, c1] = self(self, ch[x][0], l, x);
+        auto [a2, b2, c2] = self(self, ch[x][1], x + 1, r);
+        ans = std::max(ans, c1 + b2 - 1LL * b[x] * b[x]);
+        return {a1 + a2, std::max(b1, a1 + b2), std::max(c2, c1 + a2)};
+    };
+        if (n > 1) {
+        dfs(dfs, stk[0], 0, n - 1);
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

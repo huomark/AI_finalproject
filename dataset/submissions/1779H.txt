@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<i64> s(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+    }
+        i64 sum = std::accumulate(s.begin(), s.end(), 0LL);
+        std::vector<i64> vals = s;
+    std::sort(vals.begin(), vals.end());
+        int cnt = 0;
+    auto check = [&](auto check, int k, i64 asum, std::vector<i64> a) -> int {
+        int n = a.size();
+        if (k == n) {
+            return asum * 2 >= sum;
+        }
+                if (k == 2) {
+            for (int i = 0; i < n; i++) {
+                for (int j = i + 1; j < n; j++) {
+                    i64 bsum = a[i] + a[j];
+                    if (bsum > asum) break;
+                    if (i + 1 < j && a[i + 1] + a[j] <= asum) continue;
+                    if (j + 1 < n && a[i] + a[j + 1] <= asum) continue;
+                    auto na = a;
+                    na.erase(na.begin() + j);
+                    na.erase(na.begin() + i);
+                    if (check(check, 4, asum + bsum, na)) return 1;
+                }
+            }
+            return 0;
+        }
+                if (k == 4) {
+            cnt++;
+            for (int i = 0; i < n; i++) {
+                for (int j = i + 1; j < n; j++) {
+                    for (int x = j + 1; x < n; x++) {
+                        for (int y = x + 1; y < n; y++) {
+                            i64 bsum = a[i] + a[j] + a[x] + a[y];
+                            if (bsum > asum) break;
+                            if (i + 1 < j && a[i + 1] + a[j] + a[x] + a[y] <= asum) continue;
+                            if (j + 1 < x && a[i] + a[j + 1] + a[x] + a[y] <= asum) continue;
+                            if (x + 1 < y && a[i] + a[j] + a[x + 1] + a[y] <= asum) continue;
+                            if (y + 1 < n && a[i] + a[j] + a[x] + a[y + 1] <= asum) continue;
+                            auto na = a;
+                            na.erase(na.begin() + y);
+                            na.erase(na.begin() + x);
+                            na.erase(na.begin() + j);
+                            na.erase(na.begin() + i);
+                            if (check(check, 8, asum + bsum, na)) return 1;
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+                if (k == 8) {
+            std::vector<i64> sums[9];
+                        if (4 * asum < sum) return 0;
+            assert(n == 24);
+            std::vector<i64> val(1 << 12);
+            for (int s = 0; s < (1 << 12); s++) {
+                if (s) {
+                    int u = __builtin_ctz(s);
+                    val[s] = val[s ^ (1 << u)] + a[u];
+                }
+                if (int c = __builtin_popcount(s); c <= 8) {
+                    sums[c].push_back(val[s]);
+                }
+            }
+                        for (int i = 0; i <= 8; i++) {
+                std::sort(sums[i].begin(), sums[i].end());
+            }
+                        for (int s = 0; s < (1 << 12); s++) {
+                if (s) {
+                    int u = __builtin_ctz(s);
+                    val[s] = val[s ^ (1 << u)] + a[12 + u];
+                }
+                if (int c = __builtin_popcount(s); c <= 8) {
+                    auto &v = sums[8 - c];
+                    auto it = std::upper_bound(v.begin(), v.end(), asum - val[s]);
+                    if (it != v.begin() && (asum + val[s] + *(it - 1)) * 2 >= sum) return 1;
+                }
+            }
+            return 0;
+        }
+                return 0;
+    };
+        int lo = 1, hi = n - 1;
+        while (lo < hi) {
+        int x = (lo + hi) / 2;
+        std::vector<i64> res = vals;
+        res.erase(res.begin() + x);
+        res.erase(res.begin() + x - 1);
+        cnt = 0;
+        if (check(check, 2, vals[x - 1] + vals[x], res)) hi = x;
+        else lo = x + 1;
+    }
+        for (int i = 0; i < n; i++) {
+        std::cout << (s[i] >= vals[lo]);
+    }
+    std::cout << "\n";
+        return 0;
+}

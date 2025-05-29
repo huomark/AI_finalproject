@@ -1,0 +1,1 @@
+binary search, brute force, dfs and similar, geometry, implementation, math

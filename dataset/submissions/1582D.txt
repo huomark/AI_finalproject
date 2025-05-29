@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n), b(n);
+    std::map<int, int> p;
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        if (p.count(a[i])) {
+            b[p[a[i]]] = 1;
+            b[i] = -1;
+            p.erase(a[i]);
+        } else {
+            p[a[i]] = i;
+        }
+    }
+    while (p.size() >= 2) {
+        auto [i, j] = *p.begin();
+        p.erase(p.begin());
+        auto [x, y] = *p.begin();
+        p.erase(p.begin());
+        b[j] = x;
+        b[y] = -i;
+    }
+    if (!p.empty()) {
+        auto [i, j] = *p.begin();
+        int k = !j;
+        do {
+            b[j] += a[k];
+            b[k] -= i;
+        } while (b[k] == 0);
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << b[i] << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

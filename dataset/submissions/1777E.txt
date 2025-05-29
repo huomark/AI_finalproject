@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> u(m), v(m), w(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> u[i] >> v[i] >> w[i];
+        u[i]--, v[i]--;
+    }
+        auto check = [&](int x) {
+        std::vector<std::vector<int>> adj(n);
+        for (int i = 0; i < m; i++) {
+            adj[u[i]].push_back(v[i]);
+            if (w[i] <= x) adj[v[i]].push_back(u[i]);
+        }
+                int cnt = 0, comp = 0;
+        std::vector<int> dfn(n, -1), low(n), bel(n, -1), stk;
+        auto dfs = [&](auto self, int x) -> void {
+            stk.push_back(x);
+            dfn[x] = low[x] = cnt++;
+            for (auto y : adj[x]) {
+                if (dfn[y] == -1) {
+                    self(self, y);
+                    low[x] = std::min(low[x], low[y]);
+                } else if (bel[y] == -1) {
+                    low[x] = std::min(low[x], dfn[y]);
+                }
+            }
+            if (dfn[x] == low[x]) {
+                int y;
+                do {
+                    y = stk.back();
+                    bel[y] = comp;
+                    stk.pop_back();
+                } while (y != x);
+                comp++;
+            }
+        };
+        for (int i = 0; i < n; i++) {
+            if (dfn[i] == -1) {
+                dfs(dfs, i);
+            }
+        }
+                std::vector<int> deg(comp);
+        for (int i = 0; i < n; i++) {
+            for (auto j : adj[i]) {
+                if (bel[i] != bel[j]) {
+                    deg[bel[j]]++;
+                }
+            }
+        }
+                return std::count(deg.begin(), deg.end(), 0) == 1;
+    };
+        int lo = 0, hi = 1E9 + 1;
+    while (lo < hi) {
+        int x = (lo + hi) / 2;
+        if (check(x)) hi = x;
+        else lo = x + 1;
+    }
+        int ans = lo;
+    if (ans > 1E9) ans = -1;
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

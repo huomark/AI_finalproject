@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(n), b(m);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < m; i++) {
+        std::cin >> b[i];
+    }
+        std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+        std::vector<i64> sa(n + 1), sb(m + 1);
+    for (int i = 0; i < n; i++) {
+        sa[i + 1] = sa[i] + a[i];
+    }
+    for (int i = 0; i < m; i++) {
+        sb[i + 1] = sb[i] + b[i];
+    }
+        i64 ans = 0;
+    for (int i = 0; i <= n; i++) {
+        i64 res = (sa[n] - sa[i]) - sa[i] - sb[n - i] + (sb[m] - sb[m - i]);
+        ans = std::max(ans, res);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

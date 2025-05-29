@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        int ans = 2E9;
+        auto greedy = [&](int x) {
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            res += x / a[i];
+            x %= a[i];
+        }
+        return res;
+    };
+        for (int i = 0; i < n; i++) {
+        int x = a[i] - 1;
+        int res = 0;
+        for (int j = i + 1; j < n; j++) {
+            res += x / a[j];
+            x %= a[j];
+            if (greedy(a[i] - 1 - x + a[j]) > res + 1) {
+                ans = std::min(ans, a[i] - 1 - x + a[j]);
+            }
+        }
+    }
+        if (ans == 2E9) {
+        ans = -1;
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

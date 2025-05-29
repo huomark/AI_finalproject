@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 s, k;
+    std::cin >> s >> k;
+        i64 ans = s * k;
+        if (s % 2 == 1) {
+        s += s % 10;
+        k--;
+        ans = std::max(ans, s * k);
+    }
+        if (s % 10 == 0) {
+        std::cout << ans << "\n";
+        return;
+    }
+        for (int t = 0; t < 4 && t <= k; t++) {
+        i64 lo = 0, hi = (k - t) / 4;
+                auto get = [&](i64 n) {
+            i64 x = s;
+            for (int i = 0; i < t; i++) {
+                x += x % 10;
+            }
+            x += 20 * n;
+            return x * (k - 4 * n - t);
+        };
+        while (lo < hi) {
+            i64 x = (lo + hi) / 2;
+            if (get(x) < get(x + 1)) {
+                lo = x + 1;
+            } else {
+                hi = x;
+            }
+        }
+        ans = std::max(ans, get(lo));
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

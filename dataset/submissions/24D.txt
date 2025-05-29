@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::cout << std::fixed << std::setprecision(10);
+        int N, M;
+    std::cin >> N >> M;
+        int i, j;
+    std::cin >> i >> j;
+    i--, j--;
+        std::vector dp(N, std::vector<double>(M));
+    if (M == 1) {
+        std::cout << 2. * (N - 1 - i) << "\n";
+        return 0;
+    }
+        for (int i = N - 2; i >= 0; i--) {
+        std::vector<std::array<double, 4>> a(M);
+        for (int j = 0; j < M; j++) {
+            if (j == 0) {
+                a[j][1] = 2;
+                a[j][2] = -1;
+                a[j][3] = dp[i + 1][j] + 3;
+            } else if (j < M - 1) {
+                a[j][0] = -1;
+                a[j][1] = 3;
+                a[j][2] = -1;
+                a[j][3] = dp[i + 1][j] + 4;
+            } else {
+                a[j][0] = -1;
+                a[j][1] = 2;
+                a[j][3] = dp[i + 1][j] + 3;
+            }
+        }
+                for (int j = 0; j < M - 1; j++) {
+            double t = a[j + 1][0] / a[j][1];
+            a[j + 1][0] -= a[j][1] * t;
+            a[j + 1][1] -= a[j][2] * t;
+            a[j + 1][3] -= a[j][3] * t;
+        }
+        for (int j = M - 1; j; j--) {
+            double t = a[j - 1][2] / a[j][1];
+            a[j - 1][2] -= a[j][1] * t;
+            a[j - 1][3] -= a[j][3] * t;
+        }
+        for (int j = 0; j < M; j++) {
+            dp[i][j] = a[j][3] / a[j][1];
+        }
+    }
+        std::cout << dp[i][j] << "\n";
+        return 0;
+}

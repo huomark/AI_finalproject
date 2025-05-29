@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<std::vector<int>> a(n);
+    for (int i = 0; i < n; i++) {
+        int k;
+        std::cin >> k;
+        a[i].resize(k);
+        for (int j = 0; j < k; j++) {
+            std::cin >> a[i][j];
+            a[i][j]--;
+        }
+    }
+    std::vector<int> nxt(n + 1);
+    nxt[n] = n;
+    for (int i = n - 1; i >= 0; i--) {
+        nxt[i] = a[i].empty() ? i : nxt[i + 1];
+    }
+        int ans = 0;
+    std::vector<int> dp(n + 1);
+    dp[0] = 1;
+    dp[1] = -1;
+    int bad = 0;
+    std::map<int, int> cnt;
+    int sum = 0;
+    for (int i = 0, j = 0; i <= n; i++) {
+        if (i) {
+            dp[i] += dp[i - 1];
+        }
+        if (i == n) {
+            break;
+        }
+        while (!bad && j < n) {
+            for (auto x : a[j]) {
+                bad += ++cnt[x] == 2;
+            }
+            sum += a[j].size();
+            j++;
+        }
+        if (dp[i]) {
+            if (bad) {
+                dp[j] += 1;
+                if (j < n) {
+                    dp[j + 1] -= 1;
+                }
+            }
+            int nj = j - (bad > 0);
+            if (nxt[i] < nj) {
+                dp[nxt[i] + 1] += 1;
+                if (nj < n) {
+                    dp[nj + 1] -= 1;
+                }
+            }
+            if (nj == n) {
+                ans = std::max(ans, sum);
+                if (nxt[i] < n) {
+                    ans = m;
+                }
+            }
+        }
+        for (auto x : a[i]) {
+            bad -= --cnt[x] == 1;
+        }
+        sum -= a[i].size();
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

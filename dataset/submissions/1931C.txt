@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        int ans = n;
+    for (auto x : {a[0], a[n - 1]}) {
+        int l = 0, r = n;
+        while (l < n && a[l] == x) {
+            l++;
+        }
+        while (r > 0 && a[r - 1] == x) {
+            r--;
+        }
+        ans = std::min(ans, std::max(0, r - l));
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

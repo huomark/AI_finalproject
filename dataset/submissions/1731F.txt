@@ -1,0 +1,128 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int P = 998244353;
+using i64 = long long;
+// assume -P <= x < 2P
+int norm(int x) {
+    if (x < 0) {
+        x += P;
+    }
+    if (x >= P) {
+        x -= P;
+    }
+    return x;
+}
+template<class T>
+T power(T a, i64 b) {
+    T res = 1;
+    for (; b; b /= 2, a *= a) {
+        if (b % 2) {
+            res *= a;
+        }
+    }
+    return res;
+}
+struct Z {
+    int x;
+    Z(int x = 0) : x(norm(x)) {}
+    Z(i64 x) : x(norm(x % P)) {}
+    int val() const {
+        return x;
+    }
+    Z operator-() const {
+        return Z(norm(P - x));
+    }
+    Z inv() const {
+        assert(x != 0);
+        return power(*this, P - 2);
+    }
+    Z &operator*=(const Z &rhs) {
+        x = i64(x) * rhs.x % P;
+        return *this;
+    }
+    Z &operator+=(const Z &rhs) {
+        x = norm(x + rhs.x);
+        return *this;
+    }
+    Z &operator-=(const Z &rhs) {
+        x = norm(x - rhs.x);
+        return *this;
+    }
+    Z &operator/=(const Z &rhs) {
+        return *this *= rhs.inv();
+    }
+    friend Z operator*(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend Z operator+(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res += rhs;
+        return res;
+    }
+    friend Z operator-(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res -= rhs;
+        return res;
+    }
+    friend Z operator/(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream &operator>>(std::istream &is, Z &a) {
+        i64 v;
+        is >> v;
+        a = Z(v);
+        return is;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Z &a) {
+        return os << a.val();
+    }
+};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        std::vector binom(n + 1, std::vector<Z>(n + 1));
+    for (int i = 0; i <= n; i++) {
+        binom[i][0] = 1;
+        for (int j = 1; j <= i; j++) {
+            binom[i][j] = binom[i - 1][j] + binom[i - 1][j - 1];
+        }
+    }
+    std::vector<Z> f(n + 2);
+    for (int k = 1; k <= n + 1; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int v = 1; v <= k; v++) {
+                std::vector<Z> a(n), b(n);
+                for (int j = 0; j <= i; j++) {
+                    a[j] = binom[i][j] * power(Z(v - 1), j) * power(Z(k - v + 1), i - j);
+                }
+                for (int j = 0; j <= n - 1 - i; j++) {
+                    b[j] = binom[n - 1 - i][j] * power(Z(k - v), j) * power(Z(v), n - 1 - i - j);
+                }
+                Z s = 0;
+                for (int j = 0; j < n; j++) {
+                    f[k] += s * b[j] * v;
+                    s += a[j];
+                }
+            }
+        }
+    }
+        Z ans = 0;
+    for (int i = 0; i <= n + 1; i++) {
+        Z v = 1;
+        for (int j = 0; j <= n + 1; j++) {
+            if (i != j) {
+                v *= k - j;
+                v /= i - j;
+            }
+        }
+        ans += v * f[i];
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

@@ -1,0 +1,26 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, x0;
+    std::cin >> n >> x0;
+        int l = 0, r = 1000;
+    for (int i = 0; i < n; i++) {
+        int a, b;
+        std::cin >> a >> b;
+                if (a > b) {
+            std::swap(a, b);
+        }
+        l = std::max(l, a);
+        r = std::min(r, b);
+    }
+        if (l > r) {
+        std::cout << -1 << "\n";
+    } else if (l <= x0 && x0 <= r) {
+        std::cout << 0 << "\n";
+    } else {
+        std::cout << std::min(std::abs(x0 - l), std::abs(x0 - r)) << "\n";
+    }
+        return 0;
+}

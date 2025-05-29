@@ -1,0 +1,24 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> x(n), y(n), z(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i] >> z[i];
+    }
+        auto dist = [&](int i, int j) {
+        return std::sqrt((x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]) + (z[i] - z[j]) * (z[i] - z[j]));
+    };
+    double ans = 1E9;
+        for (int i = 1; i < n; i++) {
+        for (int j = i+1; j < n; j++) {
+            ans = std::min(ans, dist(0, i) + dist(i, j) + dist(j, 0));
+        }
+    }
+    ans /= 2;
+    std::cout << std::fixed << std::setprecision(10) << ans << "\n";
+        return 0;
+}

@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> c(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i];
+    }
+        i64 ans = -1E18;
+    for (int t = 0; t < 2; t++) {
+        i64 sum = 0;
+        int mx = -1E9;
+        for (int i = t; i < n; i += 2) {
+            if (c[i] > 0) {
+                sum += c[i];
+            }
+            mx = std::max(mx, c[i]);
+        }
+        if (sum == 0) {
+            sum = mx;
+        }
+        ans = std::max(ans, sum);
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

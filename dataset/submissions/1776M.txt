@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        if (n % 2 == 0) {
+        std::cout << n << "\n";
+        return 0;
+    }
+        int lo = 0, hi = n - 1;
+        auto check = [&](int v) {
+        for (int x = 0; x < n; x++) {
+            if (adj[x].size() == 1 && x >= v) {
+                return true;
+            }
+        }
+                bool have[2] {};
+                std::vector<int> dep(n), siz(n);
+        bool ok = false;
+        auto dfs = [&](auto self, int x, int p) -> void {
+            siz[x] = (x >= v);
+            if (x >= v) {
+                have[dep[x] % 2] = true;
+            }
+            for (auto y : adj[x]) {
+                if (y == p) {
+                    continue;
+                }
+                dep[y] = dep[x] + 1;
+                self(self, y, x);
+                siz[x] += siz[y];
+            }
+        };
+        dfs(dfs, 0, -1);
+                if (have[0] && have[1]) {
+            return true;
+        }
+                auto dfs1 = [&](auto self, int x, int p) -> void {
+            int cnt = 0;
+            for (auto y : adj[x]) {
+                if (y == p) {
+                    continue;
+                }
+                self(self, y, x);
+                cnt += (siz[y] > 0);
+            }
+            cnt += (siz[0] - siz[x] > 0);
+            if (cnt >= 3 && have[dep[x] % 2]) {
+                ok = true;
+            }
+        };
+        dfs1(dfs1, 0, -1);
+        return ok;
+    };
+        while (lo < hi) {
+        int x = (lo + hi + 1) / 2;
+                if (!check(x)) {
+            hi = x - 1;
+        } else {
+            lo = x;
+        }
+    }
+        int ans = lo + 1;
+    std::cout << ans << "\n";
+        return 0;
+}

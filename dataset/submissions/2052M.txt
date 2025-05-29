@@ -1,0 +1,81 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(2 * n);
+    for (int i = 0; i < 2 * n; i++) {
+        std::cin >> a[i];
+        a[i]--;
+    }
+        std::vector<std::vector<int>> adj(2 * n);
+    for (int i = 1; i < 2 * n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> match(2 * n, -1);
+    auto dfs = [&](auto &&self, int x, int p) -> void {
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            self(self, y, x);
+            if (match[x] == -1 && match[y] == -1) {
+                match[x] = y;
+                match[y] = x;
+            }
+        }
+    };
+    dfs(dfs, 0, -1);
+        std::vector<int> ia(n);
+    for (int i = 0; i < 2 * n; i++) {
+        ia[a[i]] ^= i;
+    }
+        {
+        int lst = -1;
+        for (int i = 0; i < 2 * n; i++) {
+            if (match[i] == -1) {
+                if (lst == -1) {
+                    lst = i;
+                } else {
+                    match[i] = lst;
+                    match[lst] = i;
+                    lst = -1;
+                }
+            }
+        }
+    }
+        std::vector<std::array<int, 2>> ans;
+        for (int i = 0; i < 2 * n; i++) {
+        int j = i;
+        int l = i;
+        while (a[j] != a[match[j]]) {
+            int k = ia[a[j]] ^ l;
+            std::swap(a[k], a[match[j]]);
+            ans.push_back({k, match[j]});
+            l = match[j];
+            j = k;
+        }
+    }
+        std::cout << ans.size() << "\n";
+    for (auto [x, y] : ans) {
+        std::cout << x + 1 << " " << y + 1 << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,151 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int B = 600;
+constexpr int V = 200001;
+constexpr int BV = 500;
+ int freq[V], cnt[V];
+int buck[V][V / BV + 1];
+int best = 0;
+ void add(int c) {
+    int &f = cnt[c];
+    buck[f][c / BV]--;
+    buck[f + 1][c / BV]++;
+    freq[f]--;
+    freq[++f]++;
+    best = std::max(best, f);
+}
+ void rem(int c) {
+    int &f = cnt[c];
+    buck[f][c / BV]--;
+    buck[f - 1][c / BV]++;
+    freq[f]--;
+    freq[--f]++;
+    if (!freq[best]) best--;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> val(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> val[i];
+    }
+        std::vector<std::vector<int>> adj(2 * n);
+    for (int i = 1; i < n; i++) {
+        int x, y;
+        std::cin >> x >> y;
+        x--, y--;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+    }
+        std::vector<int> in(n + 1), out(n + 1), down(n + 1, n), siz(n + 1), mx(n + 1, n);
+    std::vector<int> key, a;
+        int cur = 0;
+    auto dfs = [&](auto dfs, int x, int p) -> int {
+        if (p != -1) {
+            adj[x].erase(std::find(adj[x].begin(), adj[x].end(), p));
+        }
+        in[x] = cur++;
+        a.push_back(val[x]);
+        int res = 1;
+        int cnt = 0;
+        for (auto y : adj[x]) {
+            res += dfs(dfs, y, x);
+            cnt += (down[y] != n);
+            if (siz[down[y]] > siz[down[x]]) down[x] = down[y];
+        }
+        mx[x] = down[x];
+        out[x] = cur;
+        siz[x] = out[x] - in[x];
+        if (cnt >= 2 || res >= B) {
+            down[x] = x;
+            key.push_back(x);
+            return 0;
+        } else {
+            return res;
+        }
+    };
+    dfs(dfs, 0, -1);
+        key.push_back(n);
+    int K = key.size();
+        std::sort(key.begin(), key.end(), [&](int i, int j) {
+        return siz[i] < siz[j];
+    });
+        std::vector<int> id(n + 1, -1);
+    for (int i = 0; i < K; i++) {
+        id[key[i]] = i;
+    }
+        std::vector qry(K, std::vector<std::vector<std::tuple<int, int, int>>>(K));
+    std::vector ch(K, std::vector<std::vector<std::pair<int, int>>>(K));
+        auto query = [&](int x, int y) {
+        if (x == n && y == n) return; 
+        int dx = down[x];
+        int dy = down[y];
+                int ndx = mx[x], ndy = mx[y];
+        int ax = siz[dx] + siz[ndy];
+        int ay = siz[ndx] + siz[dy];
+                if (ax > ay && y != n) dy = ndy;
+        else dx = ndx;
+        if (id[dx] < id[dy]) std::swap(dx, dy);
+        ch[id[dx]][id[dy]].emplace_back(id[x], id[y]);
+    };
+        for (auto x : key) {
+        for (auto y : key) {
+            query(x, y);
+            if (y == x) break;
+        }
+    }
+        int q;
+    std::cin >> q;
+        for (int i = 0; i < q; i++) {
+        int x, y;
+        std::cin >> x >> y;
+        x--, y--;
+        int a = down[x], b = down[y];
+        if (id[a] < id[b]) {
+            std::swap(a, b);
+            std::swap(x, y);
+        }
+        qry[id[a]][id[b]].emplace_back(x, y, i);
+    }
+        std::vector<std::tuple<int, int, int>> Qry;
+    Qry.reserve(q);
+    auto dfs1 = [&](auto dfs1, int x, int y) -> void {
+        Qry.insert(Qry.end(), qry[x][y].begin(), qry[x][y].end());
+        for (auto [dx, dy] : ch[x][y]) dfs1(dfs1, dx, dy);
+    };
+    dfs1(dfs1, 0, 0);
+        assert(Qry.size() == q);
+        int l1 = 0, r1 = 0, l2 = 0, r2 = 0;
+        freq[0] = V;
+    for (int i = 0; i <= V / BV; i++) buck[0][i] = V;
+        std::vector<int> Ans(q);
+    for (auto [x, y, i] : Qry) {
+        if (r1 <= in[x] || l1 >= out[x]) {
+            while (l1 < r1) rem(a[l1++]);
+            l1 = r1 = in[x];
+        }
+        if (r2 <= in[y] || l2 >= out[y]) {
+            while (l2 < r2) rem(a[l2++]);
+            l2 = r2 = in[y];
+        }
+        while (l1 > in[x]) add(a[--l1]);
+        while (r1 < out[x]) add(a[r1++]);
+        while (l1 < in[x]) rem(a[l1++]);
+        while (r1 > out[x]) rem(a[--r1]);
+                while (l2 > in[y]) add(a[--l2]);
+        while (r2 < out[y]) add(a[r2++]);
+        while (l2 < in[y]) rem(a[l2++]);
+        while (r2 > out[y]) rem(a[--r2]);
+                int j = 0;
+        while (!buck[best][j]) j++;
+        j *= BV;
+        while (cnt[j] != best) j++;
+        Ans[i] = j;
+    }
+    for (int i = 0; i < q; i++) {
+        std::cout << Ans[i] << "\n";
+    }
+        return 0;
+}

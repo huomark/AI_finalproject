@@ -1,0 +1,84 @@
+#include<bits/stdc++.h>
+using namespace std;
+ const double eps=1e-8;
+const int N=100;
+ struct Point{
+    double x,y,arg;
+    Point(double x=0,double y=0):x(x),y(y){}
+    Point operator - (const Point&a)const{return Point(x-a.x,y-a.y);}
+    Point operator + (const Point&a)const{return Point(x+a.x,y+a.y);}
+    Point operator * (const double&a)const{return Point(x*a,y*a);}
+    Point operator / (const double&a)const{return Point(x/a,y/a);}
+    double operator * (const Point&a)const{return x*a.y-y*a.x;}
+    bool operator < (const Point&a)const{
+        double u=arg,v=a.arg;
+        if(abs(u-v)<eps)
+            return hypot(x,y)<hypot(a.x,a.y);
+        return u<v;
+    }
+    bool operator == (const Point&a)const{
+        return abs(x-a.x)+abs(y-a.y)<eps;
+    }
+}a[N],b[N];
+ int n;
+double ans=INFINITY;
+ void chk(Point p){
+    if(p.x==INFINITY)
+        return;
+    for(int i=1;i<=n;++i)
+        b[i]=a[i]-p,b[i+n]=p-a[i];
+    for(int i=1;i<=2*n;++i)
+        b[i].arg=atan2(b[i].y,b[i].x);
+    int m=2*n;
+    sort(b+1,b+m+1);
+    m=unique(b+1,b+m+1)-b-1;
+    for(int i=1;i<=m;++i){
+        int j=i%m+1,k=j%m+1;
+        if(b[i]*b[j]+b[j]*b[k]+eps<b[i]*b[k])
+            return;
+    }
+    double sum=0;
+    for(int i=1;i<=m;++i)
+        sum+=b[i]*b[i%m+1];
+    sum/=2;
+    ans=min(ans,sum);
+}
+ struct Line{
+    Point x,y;
+    Line(Point x=Point(),Point y=Point()):x(x),y(y){}
+};
+ vector<Line>vec;
+ Point calc(Line x,Line y){
+    double u=(x.x-y.x)*(y.y-y.x),v=(x.y-x.x)*(y.y-y.x);
+    if(abs(v)<eps)
+        return Point(INFINITY,INFINITY);
+    u=-u/v;
+    return x.x+(x.y-x.x)*u;
+}
+ int main(){
+    ios::sync_with_stdio(0);cin.tie(0);
+    cin>>n;
+    for(int i=1;i<=n;++i)
+        cin>>a[i].x>>a[i].y;
+    for(int i=1;i<=n;++i)
+        for(int j=i+1;j<=n;++j)
+            chk((a[i]+a[j])/2);
+        for(int i=1;i<=n;++i){
+        int j=i%n+1;
+        for(int k=1;k<=n;++k)
+            if(k!=i&&k!=j){
+                Point u=(a[i]+a[k])/2,v=(a[j]+a[k])/2;
+                vec.push_back({u,v});
+            }
+    }
+     for(int i=0;i<(int)vec.size();++i)
+        for(int j=i+1;j<(int)vec.size();++j){
+            Point o=calc(vec[i],vec[j]);
+            chk(o);
+        }
+            if(ans==INFINITY)
+        cout<<"-1\n";
+    else
+        cout<<fixed<<setprecision(10)<<ans<<endl;
+    return 0;
+}

@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int power(int a, int b, int p) {
+    int res = 1 % p;
+    for (; b > 0; b /= 2, a = 1LL * a * a % p) {
+        if (b % 2 == 1) {
+            res = 1LL * res * a % p;
+        }
+    }
+    return res;
+}
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        a[i]--;
+    }
+        std::vector<bool> vis(n);
+    std::vector<std::vector<std::vector<int>>> cyc(n + 1);
+    std::vector<int> cnt(n + 1);
+    for (int i = 0; i < n; i++) {
+        if (vis[i]) continue;
+        int j = i;
+        std::vector<int> c;
+        while (!vis[j]) {
+            c.push_back(j);
+            vis[j] = true;
+            j = a[j];
+        }
+        cyc[c.size()].push_back(c);
+    }
+        for (int i = 1; i <= n; i++) {
+        if (i % 2 == 0 && cyc[i].size() > 0) {
+            if (k > 20 || cyc[i].size() % (1 << k) != 0) {
+                std::cout << "NO\n";
+                return;
+            }
+        }
+    }
+        std::cout << "YES\n";
+        for (int i = 1; i <= n; i++) {
+        while (!cyc[i].empty()) {
+            int t = std::__lg(cyc[i].size());
+            t = std::min(t, k);
+                        int pw = power(2, k - t, i);
+                        std::vector cs(cyc[i].end() - (1 << t), cyc[i].end());
+            cyc[i].erase(cyc[i].end() - (1 << t), cyc[i].end());
+                        for (auto &c : cs) {
+                std::vector<int> nc(i);
+                for (int j = 0; j < i; j++) {
+                    nc[1LL * pw * j % i] = c[j];
+                }
+                c = nc;
+            }
+                        std::vector<int> nc;
+            nc.reserve(i << t);
+                        for (int j = 0; j < i; j++) {
+                for (int k = 0; k < (1 << t); k++) {
+                    nc.push_back(cs[k][j]);
+                }
+            }
+                        for (int j = 0; j < nc.size(); j++) {
+                a[nc[j]] = nc[(j + 1) % nc.size()];
+            }
+        }
+    }
+        for (int i = 0; i < n; i++) {
+        std::cout << a[i] + 1 << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> f(n, n), cnt(n);
+    for (int i = 0; i < m; i++) {
+        int l, r;
+        std::cin >> l >> r;
+        l--, r--;
+        f[r] = std::min(f[r], l);
+        cnt[l]++;
+        if (r + 1 < n) {
+            cnt[r + 1]--;
+        }
+    }
+    for (int i = 1; i < n; i++) {
+        cnt[i] += cnt[i - 1];
+    }
+        for (int i = n - 2; i >= 0; i--) {
+        f[i] = std::min(f[i], f[i + 1]);
+    }
+        std::vector<int> dp(n);
+    for (int i = 0; i < n; i++) {
+        dp[i] += cnt[i];
+        if (f[i] > 0) {
+            dp[i] += dp[f[i] - 1];
+        }
+        if (i > 0) {
+            dp[i] = std::max(dp[i], dp[i - 1]);
+        }
+    }
+    std::cout << dp[n - 1] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ void solve() {
+    int n, m, p;
+    std::cin >> n >> m >> p;
+        std::vector<int> w(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> w[i];
+    }
+        std::vector<std::vector<std::pair<int, int>>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v, w;
+        std::cin >> u >> v >> w;
+        u--, v--;
+        adj[u].emplace_back(v, w);
+    }
+        std::vector<int> order(n);
+    std::iota(order.begin(), order.end(), 0);
+    std::sort(order.begin(), order.end(), [&](int i, int j) {
+        return w[i] < w[j];
+    });
+        std::vector<std::array<i64, 2>> dp(n, {inf, inf});
+    dp[0] = {0, -p};
+        for (auto x : order) {
+        std::vector<i64> dis(n, -1);
+        std::priority_queue<std::pair<i64, int>> h;
+        h.emplace(0, x);
+                while (!h.empty()) {
+            auto [d, x] = h.top();
+            h.pop();
+                        if (dis[x] != -1) {
+                continue;
+            }
+            dis[x] = -d;
+                        for (auto [y, w] : adj[x]) {
+                h.emplace(d - w, y);
+            }
+        }
+                for (int y = 0; y < n; y++) {
+            if (dis[y] != -1) {
+                i64 t = std::max(0LL, (dis[y] + dp[x][1] + w[x] - 1) / w[x]);
+                dp[y] = std::min(dp[y], std::array{dp[x][0] + t, dp[x][1] - t * w[x] + dis[y]});
+            }
+        }
+    }
+        i64 ans = dp[n - 1][0];
+    if (ans == inf) {
+        ans = -1;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

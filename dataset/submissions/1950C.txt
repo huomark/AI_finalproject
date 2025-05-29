@@ -1,0 +1,21 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::string s;
+    std::cin >> s;
+        int hh = (s[0] - '0') * 10 + (s[1] - '0');
+    int nh = (hh + 11) % 12 + 1;
+        s[0] = nh / 10 + '0';
+    s[1] = nh % 10 + '0';
+    std::cout << s << " " << (hh < 12 ? "AM" : "PM") << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

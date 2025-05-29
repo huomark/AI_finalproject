@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int exgcd(int a, int b, int &x, int &y) {
+    if (b == 0) {
+        x = 1;
+        y = 0;
+        return a;
+    }
+    int g = exgcd(b, a % b, y, x);
+    y -= a / b * x;
+    return g;
+}
+ void solve() {
+    int n, m, H;
+    std::cin >> n >> m >> H;
+        std::vector<i64> dis(n, -1);
+    std::vector<int> l(n), s(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> l[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+    }
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    std::priority_queue<std::pair<i64, int>, std::vector<std::pair<i64, int>>, std::greater<>> q;
+    q.emplace(0LL, 0);
+        while (!q.empty()) {
+        auto [d, x] = q.top();
+        q.pop();
+                if (dis[x] != -1) {
+            continue;
+        }
+        dis[x] = d;
+                for (auto y : adj[x]) {
+            int curx = (l[x] + d % H * s[x]) % H;
+            int cury = (l[y] + d % H * s[y]) % H;
+            int diff = (cury - curx + H) % H;
+            int chg = (s[x] - s[y] + H) % H;
+            int a, b;
+            int g = exgcd(chg, H, a, b);
+            if (diff % g != 0) {
+                continue;
+            }
+            diff /= g;
+            a = 1LL * a * diff % (H / g);
+            if (a < 0) {
+                a += H / g;
+            }
+            q.emplace(d + a + 1, y);
+        }
+    }
+        std::cout << dis[n - 1] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

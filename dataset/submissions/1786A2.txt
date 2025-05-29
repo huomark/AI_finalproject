@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        int cur{};
+    std::array<int, 2> a{}, b{};
+    for (int i = 1; cur < n; i++) {
+        int t = std::min(i, n - cur);
+        if (i / 2 % 2 == 0) {
+            a[0] += (cur + t + 1) / 2 - (cur + 1) / 2;
+            a[1] += (cur + t) / 2 - cur / 2;
+        } else {
+            b[0] += (cur + t + 1) / 2 - (cur + 1) / 2;
+            b[1] += (cur + t) / 2 - cur / 2;
+        }
+        cur += t;
+    }
+        std::cout << a[0] << " " << a[1] << " " << b[0] << " " << b[1] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

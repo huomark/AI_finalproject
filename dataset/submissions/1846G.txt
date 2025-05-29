@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 n, m;
+    std::cin >> n >> m;
+        std::string s;
+    std::cin >> s;
+        int S = 0;
+    for (int i = 0; i < n; i++) {
+        S |= (s[i] - '0') << i;
+    }
+        std::vector<int> c(m), a(m), b(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> c[i];
+        std::cin >> s;
+        for (int j = 0; j < n; j++) {
+            a[i] |= (s[j] - '0') << j;
+        }
+        std::cin >> s;
+        for (int j = 0; j < n; j++) {
+            b[i] |= (s[j] - '0') << j;
+        }
+    }
+        std::vector dis(1 << n, -1);
+    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<>> q;
+    q.emplace(0, S);
+        while (!q.empty()) {
+        auto [d, x] = q.top();
+        q.pop();
+                if (dis[x] != -1) {
+            continue;
+        }
+                dis[x] = d;
+        for (int i = 0; i < m; i++) {
+            q.emplace(d + c[i], (x & ~a[i]) | b[i]);
+        }
+    }
+        std::cout << dis[0] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::cout << std::fixed << std::setprecision(10);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

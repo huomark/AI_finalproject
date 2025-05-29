@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+using i128 = __int128;
+ void solve() {
+    int n;
+    i64 l, r;
+    std::cin >> n >> l >> r;
+        std::vector<int> a(n + 1);
+    for (int i = 1; i <= n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> pre(n + 1);
+    for (int i = 1; i <= n; i++) {
+        pre[i] = a[i] ^ pre[i - 1];
+    }
+        if (n % 2 == 0) {
+        a.push_back(pre[(n + 1) / 2]);
+        pre.push_back(pre[n] ^ a[n + 1]);
+        n++;
+    }
+        auto get = [&](i64 x) -> int {
+        if (x <= n) {
+            return a[x];
+        }
+                int res = 0;
+        i64 i = x / 2;
+        while (i % 2 == 0 && i > n) {
+            res ^= pre[n];
+            i /= 2;
+        }
+        res ^= pre[std::min<i64>(i, n)];
+        return res;
+    };
+        i64 ans = 0;
+    for (i64 x = l; x <= r && x <= n; x++) {
+        ans += a[x];
+    }
+        if (r > n) {
+        l = std::max<i64>(l, n + 1);
+                if (l <= r && r % 2 == 0) {
+            ans += get(r);
+            r--;
+        }
+        if (l <= r && l % 2 == 1) {
+            ans += get(l);
+            l++;
+        }
+                if (l <= r) {
+            l /= 2;
+            r /= 2;
+                        for (i64 x = 1; x * (n / 2 + 1) <= r; x *= 2) {
+                // l<=a*x<=r
+                int t = __builtin_ctzll(x) & pre[n];
+                // a <= n, a*2>n
+                for (i64 a = n / 2 + 1; a <= n && a * x <= r; a++) {
+                    if (a * x >= l) {
+                        ans += 2 * (t ^ pre[a]);
+                    }
+                }
+                // a odd
+                i64 R = r / x;
+                i64 L = std::max<i64>(n + 1, (l + x - 1) / x);
+                if (L <= R) {
+                    // std::cerr << x << " " << L << " " << R << "\n";
+                    ans += 2 * ((R - L + 1) / 2 + (L % 2) * (R % 2)) * (t ^ pre[n]);
+                }
+            }
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

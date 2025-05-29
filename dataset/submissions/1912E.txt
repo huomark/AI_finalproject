@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        i64 p, q;
+    std::cin >> p >> q;
+        i64 d = p - q;
+        std::string ans = "0";
+        if (d % 9 != 0) {
+        int x = (d % 9 + 9) % 9;
+        x = x * 5 % 9;
+        d -= 2 * x;
+        p -= x;
+        ans += "+";
+        ans += std::to_string(x);
+        ans += "-0";
+    }
+    while (d != 0) {
+        i64 x = 9;
+        while (x < 999999999999999999LL && x * 10 + 9 <= std::abs(d)) {
+            x = x * 10 + 9;
+        }
+        int t = std::abs(d) / x;
+        if (t > 8) {
+            t = 8;
+        }
+        if (d > 0) {
+            d -= t * x;
+            ans += "+";
+            ans += std::to_string(x + t + 2 + t * x);
+            p -= x + t + 2 + t * x;
+        } else {
+            d += t * x;
+            ans += "+";
+            ans += std::to_string(x + t + 2);
+            p -= x + t + 2;
+        }
+    }
+    while (p < 0) {
+        i64 x = 1;
+        while (x < 1111111111111111111LL && x < -p) {
+            x = x * 10 + 1;
+        }
+        p += x;
+        ans += "+0-";
+        ans += std::to_string(x);
+        ans += "-0";
+    }
+    while (p > 0) {
+        i64 x = 1;
+        while (x < 1111111111111111111LL && x * 10 + 1 <= p) {
+            x = x * 10 + 1;
+        }
+        int t = p / x;
+        if (t > 9) {
+            t = 9;
+        }
+        ans += "+";
+        ans += std::to_string(t * x);
+        p -= t * x;
+    }
+        std::cout << ans << "\n";
+        return 0;
+}

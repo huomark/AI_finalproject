@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            int x = std::abs((i ? 4 : 4 * n - 5) * (j ? 4 : 4 * m - 5));
+            std::cout << x << " \n"[j == m - 1];
+        }
+    }
+        return 0;
+}

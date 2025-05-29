@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u] |= 1 << v;
+        adj[v] |= 1 << u;
+    }
+        std::vector<int> dp(1 << n);
+    for (int i = 0; i < n; i++) {
+        dp[1 << i] |= 1 << i;
+    }
+    for (int s = 1; s < (1 << n); s++) {
+        int sadj = 0;
+        for (int i = 0; i < n; i++) {
+            if (s >> i & 1) {
+                sadj |= adj[i];
+            }
+        }
+        int lo = __builtin_ctz(s);
+        if (sadj == (1 << n) - 1 && (adj[lo] & dp[s])) {
+            int nxt = lo;
+            std::vector<int> cyc;
+            int S = s;
+            while (S != (1 << lo)) {
+                int t = __builtin_ctz(dp[S] & adj[nxt]);
+                cyc.push_back(t);
+                S ^= 1 << t;
+                nxt = t;
+            }
+            cyc.push_back(lo);
+            std::cout << "Yes\n";
+            std::vector<int> a(n, -1);
+            std::queue<int> q;
+            for (int i = 0; i < cyc.size(); i++) {
+                a[cyc[i]] = cyc[(i + 1) % cyc.size()];
+                q.push(cyc[i]);
+            }
+            while (!q.empty()) {
+                int x = q.front();
+                q.pop();
+                for (int y = 0; y < n; y++) {
+                    if (~adj[x] >> y & 1) {
+                        continue;
+                    }
+                    if (a[y] == -1) {
+                        a[y] = x;
+                        q.push(y);
+                    }
+                }
+            }
+            for (int i = 0; i < n; i++) {
+                std::cout << a[i] + 1 << " \n"[i == n - 1];
+            }
+            return 0;
+        }
+        int mask = 0;
+        for (int i = 0; i < n; i++) {
+            if (dp[s] >> i & 1) {
+                mask |= adj[i];
+            }
+        }
+        for (int i = lo; i < n; i++) {
+            if ((~s & mask) >> i & 1) {
+                dp[s | 1 << i] |= 1 << i;
+            }
+        }
+    }
+        std::cout << "No\n";
+        return 0;
+}

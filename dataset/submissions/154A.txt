@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string s;
+    std::cin >> s;
+        int k;
+    std::cin >> k;
+        int n = s.size();
+        std::vector<int> mx(26);
+        bool forb[26][26] {};
+    for (int i = 0; i < k; i++) {
+        char x, y;
+        std::cin >> x >> y;
+        forb[x - 'a'][y - 'a'] = true;
+        forb[y - 'a'][x - 'a'] = true;
+    }
+        for (int i = 0; i < n; i++) {
+        int f = 0;
+        for (int j = 0; j < 26; j++) {
+            if (!forb[s[i] - 'a'][j]) {
+                f = std::max(f, mx[j] + 1);
+            }
+        }
+        mx[s[i] - 'a'] = f;
+    }
+    auto ans = n - *std::max_element(mx.begin(), mx.end());
+    std::cout << ans << "\n";
+        return 0;
+}

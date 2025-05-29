@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> l(n), r(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> l[i] >> r[i];
+        l[i] -= 1;
+    }
+        std::vector<std::pair<int, int>> f;
+    for (int i = 0; i < n; i++) {
+        if (l[i] != 0) {
+            f.emplace_back(l[i], 1);
+            f.emplace_back(r[i], -1);
+        }
+    }
+    int ans = 0;
+    int cur = 0, lst = 0;
+    std::sort(f.begin(), f.end());
+    for (auto [x, y] : f) {
+        if (x > lst) {
+            ans = std::max(ans, cur);
+        }
+        cur += y;
+        lst = x;
+    }
+    if (m > lst) {
+        ans = std::max(ans, cur);
+    }
+        f.clear();
+    for (int i = 0; i < n; i++) {
+        if (r[i] != m) {
+            f.emplace_back(l[i], 1);
+            f.emplace_back(r[i], -1);
+        }
+    }
+    cur = 0, lst = 0;
+    std::sort(f.begin(), f.end());
+    for (auto [x, y] : f) {
+        if (x > lst) {
+            ans = std::max(ans, cur);
+        }
+        cur += y;
+        lst = x;
+    }
+    if (m > lst) {
+        ans = std::max(ans, cur);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

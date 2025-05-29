@@ -1,0 +1,140 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ struct Node {
+    Node *l = nullptr;
+    Node *r = nullptr;
+    int sum = 0;
+};
+ void add(Node *&t, int l, int r, int x, int v) {
+    Node *t1 = t;
+    t = new Node();
+    if (t1) {
+        *t = *t1;
+    }
+    t->sum += v;
+    if (r - l == 1) {
+        return;
+    }
+    int m = (l + r) / 2;
+    if (x < m) {
+        add(t->l, l, m, x, v);
+    } else {
+        add(t->r, m, r, x, v);
+    }
+}
+ std::pair<int, int> query(Node *t1, Node *t2, int l, int r, int k) {
+    if (r - l == 1) {
+        return {l, k};
+    }
+    int m = (l + r) / 2;
+    int cnt = (t1 && t1->l ? t1->l->sum : 0) - (t2 && t2->l ? t2->l->sum : 0);
+    if (k < cnt) {
+        return query(t1 ? t1->l : nullptr, t2 ? t2->l : nullptr, l, m, k);
+    } else {
+        return query(t1 ? t1->r : nullptr, t2 ? t2->r : nullptr, m, r, k - cnt);
+    }
+}
+ void merge(Node *&t1, Node *t2) {
+    if (!t1) {
+        t1 = t2;
+        return;
+    }
+    if (!t2) {
+        return;
+    }
+    Node *t = new Node();
+    *t = *t1;
+    t->sum += t2->sum;
+    merge(t->l, t2->l);
+    merge(t->r, t2->r);
+    t1 = t;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, q;
+    std::cin >> n >> q;
+     std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+    }
+     int root = std::find(p.begin(), p.end(), -1) - p.begin();
+     std::vector<i64> ask(q);
+    std::vector<std::vector<int>> f(n);
+    for (int i = 0; i < q; i++) {
+        std::cin >> ask[i];
+        ask[i]--;
+        f[ask[i] / n].push_back(i);
+    }
+     std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < n; i++) {
+        if (p[i] != -1) {
+            adj[p[i]].push_back(i);
+        }
+    }
+     std::vector<int> siz(n), a, in(n), out(n);
+    a.reserve(n);
+    int cur = 0;
+    auto dfs1 = [&](auto self, int x) -> void {
+        in[x] = cur++;
+        siz[x] = 1;
+        a.push_back(x);
+        for (auto y : adj[x]) {
+            self(self, y);
+            siz[x] += siz[y];
+        }
+        out[x] = cur;
+    };
+    dfs1(dfs1, root);
+     Node *tree = nullptr;
+    add(tree, 0, n, root, n);
+     std::vector<std::pair<int, int>> lca(q);
+    std::vector<int> ans(q);
+    auto dfs2 = [&](auto self, int x) -> void {
+        for (auto i : f[x]) {
+            lca[i] = query(tree, nullptr, 0, n, ask[i] % n);
+        }
+        for (auto y : adj[x]) {
+            add(tree, 0, n, y, siz[y]);
+            add(tree, 0, n, x, -siz[y]);
+            self(self, y);
+            add(tree, 0, n, y, -siz[y]);
+            add(tree, 0, n, x, siz[y]);
+        }
+    };
+    dfs2(dfs2, root);
+     for (int i = 0; i < n; i++) {
+        f[i].clear();
+    }
+    for (int i = 0; i < q; i++) {
+        f[lca[i].first].push_back(i);
+    }
+     std::vector<Node *> seg(n);
+    auto dfs3 = [&](auto self, int x) -> void {
+        add(seg[x], 0, n, x, 1);
+        for (auto y : adj[x]) {
+            self(self, y);
+            merge(seg[x], seg[y]);
+        }
+        for (auto i : f[x]) {
+            Node *t = nullptr;
+            if (ask[i] / n != x) {
+                auto it = std::upper_bound(adj[x].begin(), adj[x].end(), ask[i] / n,
+                    [&](int a, int b) {
+                        return in[a] < in[b];
+                    });
+                int l = *(it - 1);
+                t = seg[l];
+            }
+            ans[i] = query(seg[x], t, 0, n, lca[i].second).first;
+        }
+    };
+    dfs3(dfs3, root);
+     for (int i = 0; i < q; i++) {
+        int x = ask[i] / n;
+        i64 res = 1LL * x * n * n + 1LL * lca[i].first * n + ans[i];
+        std::cout << res << "\n";
+    }
+     return 0;
+}

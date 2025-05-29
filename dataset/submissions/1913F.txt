@@ -1,0 +1,226 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+struct SuffixArray {
+    int n;
+    std::vector<int> sa, rk, lc;
+    SuffixArray(const std::string &s) {
+        n = s.length();
+        sa.resize(n);
+        lc.resize(n - 1);
+        rk.resize(n);
+        std::iota(sa.begin(), sa.end(), 0);
+        std::sort(sa.begin(), sa.end(), [&](int a, int b) {return s[a] < s[b];});
+        rk[sa[0]] = 0;
+        for (int i = 1; i < n; ++i)
+            rk[sa[i]] = rk[sa[i - 1]] + (s[sa[i]] != s[sa[i - 1]]);
+        int k = 1;
+        std::vector<int> tmp, cnt(n);
+        tmp.reserve(n);
+        while (rk[sa[n - 1]] < n - 1) {
+            tmp.clear();
+            for (int i = 0; i < k; ++i)
+                tmp.push_back(n - k + i);
+            for (auto i : sa)
+                if (i >= k)
+                    tmp.push_back(i - k);
+            std::fill(cnt.begin(), cnt.end(), 0);
+            for (int i = 0; i < n; ++i)
+                ++cnt[rk[i]];
+            for (int i = 1; i < n; ++i)
+                cnt[i] += cnt[i - 1];
+            for (int i = n - 1; i >= 0; --i)
+                sa[--cnt[rk[tmp[i]]]] = tmp[i];
+            std::swap(rk, tmp);
+            rk[sa[0]] = 0;
+            for (int i = 1; i < n; ++i)
+                rk[sa[i]] = rk[sa[i - 1]] + (tmp[sa[i - 1]] < tmp[sa[i]] || sa[i - 1] + k == n || tmp[sa[i - 1] + k] < tmp[sa[i] + k]);
+            k *= 2;
+        }
+        for (int i = 0, j = 0; i < n; ++i) {
+            if (rk[i] == 0) {
+                j = 0;
+            } else {
+                for (j -= j > 0; i + j < n && sa[rk[i] - 1] + j < n && s[i + j] == s[sa[rk[i] - 1] + j]; )
+                    ++j;
+                lc[rk[i] - 1] = j;
+            }
+        }
+    }
+};
+template<class T,
+    class Cmp = std::less<T>>
+struct RMQ {
+    const Cmp cmp = Cmp();
+    static constexpr unsigned B = 64;
+    using u64 = unsigned long long;
+    int n;
+    std::vector<std::vector<T>> a;
+    std::vector<T> pre, suf, ini;
+    std::vector<u64> stk;
+    RMQ() {}
+    RMQ(const std::vector<T> &v) {
+        init(v);
+    }
+    void init(const std::vector<T> &v) {
+        n = v.size();
+        pre = suf = ini = v;
+        stk.resize(n);
+        if (!n) {
+            return;
+        }
+        const int M = (n - 1) / B + 1;
+        const int lg = std::__lg(M);
+        a.assign(lg + 1, std::vector<T>(M));
+        for (int i = 0; i < M; i++) {
+            a[0][i] = v[i * B];
+            for (int j = 1; j < B && i * B + j < n; j++) {
+                a[0][i] = std::min(a[0][i], v[i * B + j], cmp);
+            }
+        }
+        for (int i = 1; i < n; i++) {
+            if (i % B) {
+                pre[i] = std::min(pre[i], pre[i - 1], cmp);
+            }
+        }
+        for (int i = n - 2; i >= 0; i--) {
+            if (i % B != B - 1) {
+                suf[i] = std::min(suf[i], suf[i + 1], cmp);
+            }
+        }
+        for (int j = 0; j < lg; j++) {
+            for (int i = 0; i + (2 << j) <= M; i++) {
+                a[j + 1][i] = std::min(a[j][i], a[j][i + (1 << j)], cmp);
+            }
+        }
+        for (int i = 0; i < M; i++) {
+            const int l = i * B;
+            const int r = std::min(1U * n, l + B);
+            u64 s = 0;
+            for (int j = l; j < r; j++) {
+                while (s && cmp(v[j], v[std::__lg(s) + l])) {
+                    s ^= 1ULL << std::__lg(s);
+                }
+                s |= 1ULL << (j - l);
+                stk[j] = s;
+            }
+        }
+    } 
+    T operator()(int l, int r) {
+        if (l / B != (r - 1) / B) {
+            T ans = std::min(suf[l], pre[r - 1], cmp);
+            l = l / B + 1;
+            r = r / B;
+            if (l < r) {
+                int k = std::__lg(r - l);
+                ans = std::min({ans, a[k][l], a[k][r - (1 << k)]}, cmp);
+            }
+            return ans;
+        } else {
+            int x = B * (l / B);
+            return ini[__builtin_ctzll(stk[r - 1] >> (l - x)) + l];
+        }
+    }
+};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        s = s + '0' + std::string(s.rbegin(), s.rend());
+        SuffixArray sa(s);
+    RMQ<int> rmq(sa.lc);
+        auto lcp = [&](int i, int j) {
+        i = sa.rk[i];
+        j = sa.rk[j];
+        if (i > j) {
+            std::swap(i, j);
+        }
+        assert(i != j);
+        return rmq(i, j);
+    };
+        i64 res = 0;
+    std::vector<i64> d1(n), d0(n);
+    std::vector<std::array<i64, 26>> add(n);
+    auto change = [&](int l, int r, int k, int b) {
+        if (l < n) {
+            d1[l] += k;
+            d0[l] += b;
+        }
+        if (r < n) {
+            d1[r] -= k;
+            d0[r] -= b;
+        }
+    };
+    for (int i = 0; i < n; i++) {
+        int len = lcp(i, 2 * n - i);
+        res += len;
+        if (i + len < n && i - len >= 0) {
+            int more = 1;
+            if (i + len + 1 < n && i - len - 1 >= 0) {
+                more += lcp(i + len + 1, 2 * n - (i - len - 1));
+            }
+            add[i + len][s[i - len] - 'a'] += more;
+            add[i - len][s[i + len] - 'a'] += more;
+        }
+        change(i - len + 1, i, 1, -(i - len));
+        change(i + 1, i + len, -1, i + len);
+    }
+    for (int i = 1; i < n; i++) {
+        int len = lcp(i, 2 * n - (i - 1));
+        res += len;
+        if (i + len < n && i - 1 - len >= 0) {
+            int more = 1;
+            if (i + len + 1 < n && i - 1 - len - 1 >= 0) {
+                more += lcp(i + len + 1, 2 * n - (i - 1 - len - 1));
+            }
+            add[i + len][s[i - 1 - len] - 'a'] += more;
+            add[i - 1 - len][s[i + len] - 'a'] += more;
+        }
+        change(i - len, i, 1, -(i - len - 1));
+        change(i, i + len, -1, i + len);
+    }
+        for (int i = 1; i < n; i++) {
+        d0[i] += d0[i - 1];
+        d1[i] += d1[i - 1];
+    }
+    std::vector<i64> f(n);
+    for (int i = 0; i < n; i++) {
+        f[i] = d0[i] + d1[i] * i;
+    }
+    i64 ans = -1;
+    int x = -1, y = -1;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < s[i] - 'a'; j++) {
+            i64 val = res + add[i][j] - f[i];
+            if (val > ans) {
+                ans = val;
+                x = i;
+                y = j;
+            }
+        }
+    }
+    if (res > ans) {
+        ans = res;
+        x = -1;
+        y = -1;
+    }
+    for (int i = n - 1; i >= 0; i--) {
+        for (int j = s[i] - 'a' + 1; j < 26; j++) {
+            i64 val = res + add[i][j] - f[i];
+            if (val > ans) {
+                ans = val;
+                x = i;
+                y = j;
+            }
+        }
+    }
+        std::cout << ans << "\n";
+    if (x != -1) {
+        s[x] = 'a' + y;
+    }
+    s.resize(n);
+    std::cout << s << "\n";
+        return 0;
+}

@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+struct DSU {
+    std::vector<int> f, siz;
+        DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+        void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+        siz.assign(n, 1);
+    }
+        int leader(int x) {
+        while (x != f[x]) {
+            x = f[x] = f[f[x]];
+        }
+        return x;
+    }
+        bool same(int x, int y) {
+        return leader(x) == leader(y);
+    }
+        bool merge(int x, int y) {
+        x = leader(x);
+        y = leader(y);
+        if (x == y) {
+            return false;
+        }
+        siz[x] += siz[y];
+        f[y] = x;
+        return true;
+    }
+        int size(int x) {
+        return siz[leader(x)];
+    }
+};
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        if (std::is_sorted(a.begin(), a.end())) {
+        std::cout << 0 << "\n";
+        return 0;
+    }
+        std::vector<int> q(n);
+    std::iota(q.begin(), q.end(), 0);
+    std::sort(q.begin(), q.end(), [&](int i, int j) {
+        return a[i] < a[j];
+    });
+        std::vector<int> p(n), invp(n);
+    for (int i = 0; i < n; i++) {
+        p[q[i]] = i;
+        invp[i] = q[i];
+    }
+        int x = -1;
+    for (int i = 0; i < n; i++) {
+        bool ok = true;
+        std::string s = std::to_string(a[i]);
+        for (auto c : s) {
+            if (c != '4' && c != '7') {
+                ok = false;
+            }
+        }
+        if (ok) {
+            x = i;
+            break;
+        }
+    }
+        if (x == -1) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+        std::iota(q.begin(), q.end(), 0);
+    std::iota(a.begin(), a.end(), 0);
+        DSU dsu(n);
+    for (int i = 0; i < n; i++) {
+        dsu.merge(i, p[i]);
+    }
+        std::vector<std::pair<int, int>> ans;
+        auto swap = [&](int x, int y) {
+        ans.emplace_back(q[x] + 1, q[y] + 1);
+        std::swap(q[x], q[y]);
+        std::swap(a[q[x]], a[q[y]]);
+        std::swap(p[q[x]], p[q[y]]);
+        std::swap(invp[p[q[x]]], invp[p[q[y]]]);
+    };
+        for (int i = 0; i < n; i++) {
+        if (!dsu.same(x, i)) {
+            swap(x, i);
+            dsu.merge(x, i);
+        }
+    }
+    while (p[q[x]] != q[x]) {
+        swap(x, a[invp[q[x]]]);
+    }
+        std::cout << ans.size() << "\n";
+    for (auto [x, y] : ans) {
+        std::cout << x << " " << y << "\n";
+    }
+        return 0;
+}

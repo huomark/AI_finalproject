@@ -1,0 +1,1 @@
+brute force, constructive algorithms, divide and conquer, greedy, hashing, implementation, math, strings

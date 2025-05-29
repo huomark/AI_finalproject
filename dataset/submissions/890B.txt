@@ -1,0 +1,20 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        int m = *std::max_element(a.begin(), a.end()) + 1;
+    std::vector lst(m, n);
+    for (int i = 0; i < n; i++) {
+        lst[a[i]] = i;
+    }
+        int x = std::min_element(lst.begin(), lst.end()) - lst.begin();
+    std::cout << x << "\n";
+        return 0;
+}

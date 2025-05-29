@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::string s, t;
+    std::cin >> s >> t;
+        int need = 0;
+    std::vector<int> vis(n);
+    for (int i = 0; i < n; i++) {
+        if (s[i] != '-' && s[i] != t[i]) {
+            need++;
+        } else if (s[i] != '-') {
+            vis[i] = 1;
+        }
+    }
+        if (need == 0) {
+        std::cout << 0 << "\n";
+        return 0;
+    }
+        std::vector<std::string> ans;
+        char cur = '-';
+    while (need > 0) {
+        if (cur != '-') {
+            int ok = 0;
+            for (int i = 0; i < n; i++) {
+                if (!vis[i] && s[i] == cur && t[i] != '-') {
+                    ans.push_back("DRIVE " + std::to_string(i + 1));
+                    ans.push_back("DROPOFF");
+                    ans.push_back("PICKUP");
+                    cur = t[i];
+                    vis[i] = 1;
+                    need--;
+                    ok = 1;
+                    break;
+                }
+            }
+            if (ok) {
+                continue;
+            }
+            for (int i = 0; i < n; i++) {
+                if (!vis[i] && s[i] == cur && t[i] == '-') {
+                    ans.push_back("DRIVE " + std::to_string(i + 1));
+                    ans.push_back("DROPOFF");
+                    cur = t[i];
+                    vis[i] = 1;
+                    need--;
+                    ok = 1;
+                    break;
+                }
+            }
+            if (ok) {
+                continue;
+            }
+        }
+                for (int i = 0; i < n; i++) {
+            if (!vis[i] && s[i] == '-' && t[i] != '-') {
+                ans.push_back("DRIVE " + std::to_string(i + 1));
+                if (cur != '-') {
+                    ans.push_back("DROPOFF");
+                }
+                ans.push_back("PICKUP");
+                cur = t[i];
+                vis[i] = 1;
+                break;
+            }
+        }
+    }
+        std::cout << ans.size() << "\n";
+    for (auto s : ans) {
+        std::cout << s << "\n";
+    }
+        return 0;
+}

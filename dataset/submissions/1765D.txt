@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(n);
+    std::multiset<int> s;
+    i64 ans = 0;
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        ans += a[i];
+        s.insert(a[i]);
+    }
+        int last = 0;
+    for (int i = 0; i < n; i++) {
+        auto it = s.upper_bound(m - last);
+        if (it == s.begin()) {
+            ans++;
+            last = *s.rbegin();
+            s.erase(std::prev(s.end()));
+        } else {
+            it--;
+            last = *it;
+            s.erase(it);
+        }
+    }
+        ans++;
+    std::cout << ans << "\n";
+        return 0;
+}

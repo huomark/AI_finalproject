@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ std::vector<bool> work(int W, int w1, int x1, int dx1, int w2, int x2, int dx2) {
+    int l = std::lcm(2 * (W - w1), 2 * (W - w2));
+    std::vector<bool> a(l);
+    for (int i = 0; i < l; i++) {
+        a[i] = std::max(x1, x2) < std::min(x1 + w1, x2 + w2);
+        x1 += dx1;
+        x2 += dx2;
+        if (x1 == 0 || x1 == W - w1) {
+            dx1 *= -1;
+        }
+        if (x2 == 0 || x2 == W - w2) {
+            dx2 *= -1;
+        }
+    }
+    return a;
+}
+ void solve() {
+    int W, H;
+    std::cin >> W >> H;
+        int w1, h1, x1, y1, dx1, dy1;
+    std::cin >> w1 >> h1 >> x1 >> y1 >> dx1 >> dy1;
+        int w2, h2, x2, y2, dx2, dy2;
+    std::cin >> w2 >> h2 >> x2 >> y2 >> dx2 >> dy2;
+        auto a = work(W, w1, x1, dx1, w2, x2, dx2);
+    auto b = work(H, h1, y1, dy1, h2, y2, dy2);
+        int g = std::gcd(a.size(), b.size());
+        i64 num = 0;
+    i64 den = 1LL * a.size() / g * b.size();
+    for (int i = 0; i < g; i++) {
+        int sa = 0, sb = 0;
+        for (int j = i; j < a.size(); j += g) {
+            sa += a[j];
+        }
+        for (int j = i; j < b.size(); j += g) {
+            sb += b[j];
+        }
+        num += 1LL * sa * sb;
+    }
+        {
+        i64 g = std::gcd(num, den);
+        num /= g;
+        den /= g;
+    }
+        std::cout << num << "/" << den << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

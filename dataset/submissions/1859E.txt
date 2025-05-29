@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n), b(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+    }
+        std::vector f(2, std::vector(2, std::vector<i64>(k + 1, -inf)));
+    std::vector<i64> g(k + 1, -inf);
+    g[0] = 0;
+        for (int i = 0; i < n; i++) {
+        for (int x = 0; x < 2; x++) {
+            for (int y = 0; y < 2; y++) {
+                for (int l = k; l >= 0; l--) {
+                    f[x][y][l] = l > 0 ? f[x][y][l - 1] : -inf;
+                }
+            }
+        }
+        for (int x = 0; x < 2; x++) {
+            for (int y = 0; y < 2; y++) {
+                for (int l = 0; l < k; l++) {
+                    f[x][y][l + 1] = std::max(f[x][y][l + 1], g[l] + (x ? -1 : 1) * b[i] + (y ? 1 : -1) * a[i]);
+                }
+            }
+        }
+        for (int x = 0; x < 2; x++) {
+            for (int y = 0; y < 2; y++) {
+                for (int l = 0; l <= k; l++) {
+                    g[l] = std::max(g[l], f[x][y][l] + (x ? 1 : -1) * a[i] + (y ? -1 : 1) * b[i]);
+                }
+            }
+        }
+    }
+        std::cout << g[k] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

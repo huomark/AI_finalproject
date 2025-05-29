@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> v(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> v[i];
+    }
+        std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+    }
+        std::vector<int> q(n);
+    std::iota(q.begin(), q.end(), 0);
+    std::sort(q.begin(), q.end(),
+        [&](int i, int j) {
+            return v[i] < v[j] || (v[i] == v[j] && i < j);
+        });
+        i64 ans = 0;
+    int num = 0;
+    int t = n - 1;
+    int cnt = 1;
+    std::vector<int> vis(n, 1);
+    for (int k = 1; k + k - 1 <= n; k++) {
+        if (k > 1) {
+            int i = p[k - 2];
+            vis[i] = 0;
+            if (v[i] > v[q[t]] || (v[i] == v[q[t]] && i >= q[t])) {
+                cnt--;
+            }
+        }
+        while (cnt < k) {
+            t--;
+            assert(t >= 0);
+            cnt += vis[q[t]];
+        }
+        i64 res = 1LL * k * v[q[t]];
+        if (res > ans) {
+            ans = res;
+            num = k;
+        }
+    }
+        std::cout << ans << " " << num << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

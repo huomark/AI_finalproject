@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ const int day[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        char dot;
+    int DD, MM, YY;
+    std::cin >> DD >> dot >> MM >> dot >> YY;
+    int BD, BM, BY;
+    std::cin >> BD >> dot >> BM >> dot >> BY;
+        auto check = [&](int d, int m, int y) {
+        if (m > 12) {
+            return;
+        }
+        if (d > day[m - 1] + (m == 2 && y % 4 == 0)) {
+            return;
+        }
+        if (YY - y < 18) {
+            return;
+        }
+        if (YY - y > 18) {
+            std::cout << "YES\n";
+            std::exit(0);
+        }
+        if (MM < m) {
+            return;
+        }
+        if (MM > m) {
+            std::cout << "YES\n";
+            std::exit(0);
+        }
+        if (d <= DD) {
+            std::cout << "YES\n";
+            std::exit(0);
+        }
+    };
+        check(BD, BM, BY);
+    check(BD, BY, BM);
+    check(BM, BD, BY);
+    check(BM, BY, BD);
+    check(BY, BD, BM);
+    check(BY, BM, BD);
+        std::cout << "NO\n";
+        return 0;
+}

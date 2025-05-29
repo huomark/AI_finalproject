@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int A[] = {25, 18, 15, 12, 10, 8, 6, 4, 2, 1};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        std::map<std::string, std::array<int, 51>> s1, s2;
+    while (t--) {
+        int n;
+        std::cin >> n;
+                for (int i = 0; i < n; i++) {
+            std::string s;
+            std::cin >> s;
+                        s1[s][i + 1] += 1;
+            if (i < 10) {
+                s1[s][0] += A[i];
+            }
+                        s2[s][i + (i > 0)] += 1;
+            if (i < 10) {
+                s2[s][1] += A[i];
+            }
+        }
+    }
+        std::string a, b;
+    std::array<int, 51> sa{}, sb{};
+        for (auto [x, sx] : s1) {
+        if (sx > sa) {
+            sa = sx;
+            a = x;
+        }
+    }
+    for (auto [x, sx] : s2) {
+        if (sx > sb) {
+            sb = sx;
+            b = x;
+        }
+    }
+    std::cout << a << "\n";
+    std::cout << b << "\n";
+        return 0;
+}

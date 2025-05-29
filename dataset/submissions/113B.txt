@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string a, b, c;
+    std::cin >> a >> b >> c;
+        int na = a.size();
+    int nb = b.size();
+    int nc = c.size();
+        if (na < nb || na < nc) {
+        std::cout << 0 << "\n";
+        return 0;
+    }
+        std::vector<int> p, q;
+    for (int i = 0; i + nb <= na; i++) {
+        if (a.substr(i, nb) == b) {
+            p.push_back(i);
+        }
+    }
+    for (int i = 0; i + nc <= na; i++) {
+        if (a.substr(i, nc) == c) {
+            q.push_back(i + nc);
+        }
+    }
+        std::vector lcp(na + 1, std::vector(na + 1, 0));
+    std::vector<std::pair<int, int>> x;
+    for (auto l : p) {
+        for (auto r : q) {
+            if (r - l >= std::max(nb, nc)) {
+                x.emplace_back(l, r);
+            }
+        }
+    }
+        for (int i = na - 1; i >= 0; i--) {
+        for (int j = na - 1; j >= 0; j--) {
+            lcp[i][j] = a[i] == a[j] ? 1 + lcp[i + 1][j + 1] : 0;
+        }
+    }
+        auto cmp = [&](auto x, auto y) {
+        int len = std::min({x.second - x.first, lcp[x.first][y.first], y.second - y.first});
+        if (len == y.second - y.first) {
+            return false;
+        }
+        if (len == x.second - x.first) {
+            return true;
+        }
+        return a[x.first + len] < a[y.first + len];
+    };
+        std::sort(x.begin(), x.end(), cmp);
+    int ans = 0;
+    for (int i = 0; i < x.size(); i++) {
+        if (i == 0 || cmp(x[i - 1], x[i])) {
+            ans += 1;
+        }
+    }
+        std::cout << ans << "\n";
+        return 0;
+}

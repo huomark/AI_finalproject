@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ using i128 = __int128;
+using u128 = unsigned __int128;
+ constexpr int inf = 2E9;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> s(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+    }
+        std::vector<int> dp(1 << n);
+    for (int mask = 0; mask < (1 << n); mask++) {
+        for (int i = 0; i < n; i++) {
+            if (~mask >> i & 1) {
+                dp[mask] += s[i];
+            }
+        }
+    }
+        for (int d = 0; d < m; d++) {
+        std::vector<int> a(n), b(n), c(n);
+        for (int i = 0; i < n; i++) {
+            std::cin >> a[i];
+        }
+        for (int i = 0; i < n; i++) {
+            std::cin >> b[i];
+        }
+        for (int i = 0; i < n; i++) {
+            std::cin >> c[i];
+        }
+                std::rotate(a.begin(), a.begin() + 1, a.end());
+        std::rotate(c.begin(), c.end() - 1, c.end());
+                std::vector<int> ndp(1 << n, inf);
+        for (int x = 0; x < 2; x++) {
+            std::vector f(1 << n, std::array<int, 2> {inf, inf});
+            std::vector nf(1 << n, std::array<int, 2> {inf, inf});
+            for (int s = 0; s < (1 << n); s++) {
+                if ((s & 1) == x) {
+                    f[s][s >> (n - 1) & 1] = dp[s];
+                }
+            }
+            for (int i = 0; i < n; i++) {
+                std::fill(nf.begin(), nf.end(), std::array {inf, inf});
+                for (int s = 0; s < (1 << n); s++) {
+                    for (int l = 0; l < 2; l++) {
+                        if (f[s][l] == inf) {
+                            continue;
+                        }
+                        for (int ti = 0; ti < 2; ti++) {
+                            int si = s >> i & 1;
+                            int t = s ^ (si ^ ti) << i;
+                            int res = f[s][l];
+                            if (!ti) {
+                                if (l) {
+                                    res += c[i];
+                                }
+                                if (si) {
+                                    res += b[i];
+                                }
+                                if (i == n - 1 ? x : s >> (i + 1) & 1) {
+                                    res += a[i];
+                                }
+                            }
+                            nf[t][si] = std::min(nf[t][si], res);
+                        }
+                    }
+                }
+                std::swap(f, nf);
+            }
+            for (int s = 0; s < (1 << n); s++) {
+                for (int l = 0; l < 2; l++) {
+                    ndp[s] = std::min(ndp[s], f[s][l]);
+                }
+            }
+        }
+        dp = std::move(ndp);
+                std::cout << dp[0] << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

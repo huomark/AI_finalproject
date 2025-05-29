@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> u(m), v(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> u[i] >> v[i];
+    }
+        if (n >= 20) {
+        std::cout << n << "\n";
+        for (int i = 1; i <= n; i++) {
+            std::cout << i << " \n"[i == n];
+        }
+        return;
+    }
+        int ans = -1;
+        auto check = [&](int s) {
+        if (__builtin_popcount(s) > n / 5) {
+            return;
+        }
+        for (int i = 1; i <= n; i++) {
+            if (s >> i & 1) {
+                for (int j = 2 * i; j <= n; j += i) {
+                    s ^= 1 << j;
+                }
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            if (s >> u[i] & ~s >> v[i] & 1) {
+                return;
+            }
+        }
+        ans = s;
+    };
+        for (int x = 1; x <= n; x++) {
+        check(1 << x);
+        for (int y = 1; y < x; y++) {
+            check(1 << x | 1 << y);
+            for (int z = 1; z < y; z++) {
+                check(1 << x | 1 << y | 1 << z);
+            }
+        }
+    }
+        if (ans == -1) {
+        std::cout << -1 << "\n";
+        return;
+    }
+    std::cout << __builtin_popcount(ans) << "\n";
+    for (int i = 1; i <= n; i++) {
+        if (ans >> i & 1) {
+            std::cout << i << " ";
+        }
+    }
+    std::cout << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

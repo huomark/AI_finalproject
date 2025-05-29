@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::string a, b;
+    std::cin >> a >> b;
+        if (a[0] == b[0]) {
+        std::cout << "YES\n";
+        std::cout << a[0] << '*' << "\n";
+        return;
+    }
+    if (a.back() == b.back()) {
+        std::cout << "YES\n";
+        std::cout << '*' << a.back() << "\n";
+        return;
+    }
+    for (int i = 0; i < a.size() - 1; i++) {
+        for (int j = 0; j < b.size() - 1; j++) {
+            if (a[i] == b[j] && a[i + 1] == b[j + 1]) {
+                std::cout << "YES\n";
+                std::cout << '*' << a[i] << a[i + 1] << '*' << "\n";
+                return;
+            }
+        }
+    }
+    std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

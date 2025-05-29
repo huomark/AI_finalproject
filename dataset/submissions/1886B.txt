@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ struct Point {
+    int x = 0;
+    int y = 0;
+};
+ double dist(const Point &a, const Point &b) {
+    return std::hypot(a.x - b.x, a.y - b.y);
+}
+ void solve() {
+    Point O, P, A, B;
+    std::cin >> P.x >> P.y >> A.x >> A.y >> B.x >> B.y;
+        double ans = std::min({
+        std::max(dist(O, A), dist(A, P)),
+        std::max(dist(O, B), dist(B, P)),
+        std::max({dist(O, A), dist(A, B) / 2, dist(B, P)}),
+        std::max({dist(O, B), dist(B, A) / 2, dist(A, P)}),
+    });
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::cout << std::fixed << std::setprecision(10);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

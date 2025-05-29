@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        a[i] = n - a[i];
+    }
+        i64 m;
+    std::cin >> m;
+        std::vector<int> l(n, -1), r(n, n);
+        std::vector<int> s;
+    for (int i = 0; i < n; i++) {
+        while (!s.empty() && a[i] < a[s.back()]) {
+            r[s.back()] = i;
+            s.pop_back();
+        }
+        if (!s.empty()) {
+            l[i] = s.back();
+        }
+        s.push_back(i);
+    }
+        std::vector<i64> cnt(n + 1);
+    for (int i = 0; i < n; i++) {
+        int len = r[i] - l[i] - 1;
+        int v = 0;
+        if (l[i] != -1) {
+            v = std::max(v, a[l[i]]);
+        }
+        if (r[i] != n) {
+            v = std::max(v, a[r[i]]);
+        }
+        cnt[len] += a[i] - v;
+    }
+        i64 ans = m;
+    i64 res = m;
+    for (int i = n; i >= 1; i--) {
+        if (i * cnt[i] < res) {
+            res -= i * cnt[i];
+            ans -= cnt[i];
+        } else {
+            ans -= (res + i - 1) / i;
+            break;
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

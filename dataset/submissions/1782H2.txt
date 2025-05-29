@@ -1,0 +1,220 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int P = 998244353;
+using i64 = long long;
+// assume -P <= x < 2P
+int norm(int x) {
+    if (x < 0) {
+        x += P;
+    }
+    if (x >= P) {
+        x -= P;
+    }
+    return x;
+}
+template<class T>
+T power(T a, i64 b) {
+    T res = 1;
+    for (; b; b /= 2, a *= a) {
+        if (b % 2) {
+            res *= a;
+        }
+    }
+    return res;
+}
+struct Z {
+    int x;
+    Z(int x = 0) : x(norm(x)) {}
+    Z(i64 x) : x(norm(x % P)) {}
+    int val() const {
+        return x;
+    }
+    Z operator-() const {
+        return Z(norm(P - x));
+    }
+    Z inv() const {
+        assert(x != 0);
+        return power(*this, P - 2);
+    }
+    Z &operator*=(const Z &rhs) {
+        x = i64(x) * rhs.x % P;
+        return *this;
+    }
+    Z &operator+=(const Z &rhs) {
+        x = norm(x + rhs.x);
+        return *this;
+    }
+    Z &operator-=(const Z &rhs) {
+        x = norm(x - rhs.x);
+        return *this;
+    }
+    Z &operator/=(const Z &rhs) {
+        return *this *= rhs.inv();
+    }
+    friend Z operator*(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend Z operator+(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res += rhs;
+        return res;
+    }
+    friend Z operator-(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res -= rhs;
+        return res;
+    }
+    friend Z operator/(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream &operator>>(std::istream &is, Z &a) {
+        i64 v;
+        is >> v;
+        a = Z(v);
+        return is;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Z &a) {
+        return os << a.val();
+    }
+};
+void solve() {
+    int h, w, k;
+    std::cin >> h >> w >> k;
+        if (k == 0) {
+        Z ans = power(Z(2), h * w) - power(Z(2), (h - 1) * w) - power(Z(2), h * (w - 1)) + power(Z(2), (h - 1) * (w - 1));
+        std::cout << ans << "\n";
+        return;
+    }
+        if (k == 1) {
+        int r, c;
+        std::cin >> r >> c;
+        r--, c--;
+                Z ans = 0;
+        for (int a = 1; a <= h; a++) {
+            for (int b = 1; b <= w; b++) {
+                for (auto U : {0, 1}) for (auto D : {a, a - 1}) for (auto L : {0, 1}) for (auto R : {b, b - 1}) {
+                    Z coef = (a + b - (D - U) - (R - L)) % 2 ? -1 : 1;
+                    ans += coef * power(Z(2), std::max(0, D - U) * std::max(0, R - L));
+                                        if (D <= U || R <= L) continue;
+                                        int x0 = r - (h - a);
+                    int y0 = c - (w - b);
+                    int x1 = r;
+                    int y1 = c;
+                                        auto valid = [&](int x, int y) {
+                        return U <= x && x < D && L <= y && y < R;
+                    };
+                                        if (!valid(x0, y0)) continue;
+                    if (!valid(x1, y1)) continue;
+                    if (!valid(x0, y1)) continue;
+                    if (!valid(x1, y0)) continue;
+                                        int total = (D - U) * (R - L);
+                    Z res = power(Z(2), total - (h - a + 1) * (w - b + 1));
+                    ans -= coef * res;
+                }
+            }
+        }
+        std::cout << ans << "\n";
+        return;
+    }
+        int r[2], c[2];
+    std::cin >> r[0] >> c[0];
+    std::cin >> r[1] >> c[1];
+    r[0]--, c[0]--;
+    r[1]--, c[1]--;
+        if (r[0] > r[1]) {
+        std::swap(r[0], r[1]);
+        std::swap(c[0], c[1]);
+    }
+    if (c[0] > c[1]) {
+        c[0] = w - 1 - c[0];
+        c[1] = w - 1 - c[1];
+    }
+        int dx = r[1] - r[0];
+    int dy = c[1] - c[0];
+        int N = std::max(h, w) + 2;
+        std::vector<Z> f(N + 1);
+    f[0] = 1, f[1] = 2;
+    for (int i = 2; i <= N; i++) {
+        f[i] = f[i - 1] + f[i - 2];
+    }
+        Z ans = 0;
+    for (int a = 1; a <= h; a++) {
+        for (int b = 1; b <= w; b++) {
+            for (auto U : {0, 1}) for (auto D : {a, a - 1}) for (auto L : {0, 1}) for (auto R : {b, b - 1}) {
+                Z coef = (a + b - (D - U) - (R - L)) % 2 ? -1 : 1;
+                ans += coef * power(Z(2), std::max(0, D - U) * std::max(0, R - L));
+                                if (D <= U || R <= L) continue;
+                                int x0 = r[0] - (h - a);
+                int y0 = c[0] - (w - b);
+                int x1 = r[0];
+                int y1 = c[0];
+                                auto valid = [&](int x, int y) {
+                    return U <= x && x < D && L <= y && y < R;
+                };
+                                if (!valid(x0, y0) && !valid(x0 + dx, y0 + dy)) continue;
+                if (!valid(x1, y1) && !valid(x1 + dx, y1 + dy)) continue;
+                if (!valid(x0, y1) && !valid(x0 + dx, y1 + dy)) continue;
+                if (!valid(x1, y0) && !valid(x1 + dx, y0 + dy)) continue;
+                if (U > D - dx && U > x0 && x1 + 1 > D - dx) continue;
+                if (L > R - dy && L > y0 && y1 + 1 > R - dy) continue;
+                                Z res = 1;
+                int total = (D - U) * (R - L);
+                std::vector<int> freq(N + 1);
+                for (int i = 2; i <= N; i++) {
+                    std::array<int, 3> cnt{};
+                    for (auto u : {0, 1}) for (auto v : {0, 1}) {
+                        for (int f = 1; f < 4; f++) for (int g = 1; g < 4; g++) {
+                            int xl = x0, xr = x1 + 1 - (i - 2) * dx;
+                            int yl = y0, yr = y1 + 1 - (i - 2) * dy;
+                            if (u) {
+                                xl = std::max(xl, U);
+                                yl = std::max(yl, L);
+                            }
+                            if (v) {
+                                xr = std::min(xr, D - (i - 1) * dx);
+                                yr = std::min(yr, R - (i - 1) * dy);
+                            }
+                            if (f & 1) xr = std::min(xr, x0 + dx);
+                            if (f & 2) yr = std::min(yr, y0 + dy);
+                            if (g & 1) xl = std::max(xl, x1 + 1 - (i - 1) * dx);
+                            if (g & 2) yl = std::max(yl, y1 + 1 - (i - 1) * dy);
+                            cnt[2 - u - v] += (__builtin_parity(f ^ g) ? -1 : 1) * std::max(0, xr - xl) * std::max(0, yr - yl);
+                        }
+                    }
+                    cnt[1] -= 2 * cnt[0];
+                    cnt[2] -= cnt[0] + cnt[1];
+                    freq[i] += cnt[0];
+                    freq[i - 2] += cnt[1];
+                    total -= cnt[1];
+                    if (i == 3) {
+                        total -= cnt[2];
+                    } else if (i >= 4) {
+                        freq[i - 4] += cnt[2];
+                        total -= 2 * cnt[2];
+                    }
+                }
+                for (int i = 2; i <= N; i++) {
+                    res *= power(f[i], freq[i]);
+                    total -= i * freq[i];
+                }
+                res *= power(f[1], total);
+                ans -= coef * res;
+            }
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

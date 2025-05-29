@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::string s[2];
+    std::cin >> s[0] >> s[1];
+        int n = s[0].size();
+    int t, q;
+    std::cin >> t >> q;
+        std::vector unblock(q, -1);
+    int diff = 0;
+        for (int i = 0; i < n; i++) {
+        diff += (s[0][i] != s[1][i]);
+    }
+        for (int i = 0; i < q; i++) {
+        int o;
+        std::cin >> o;
+                if (unblock[i] != -1) {
+            diff += (s[0][unblock[i]] != s[1][unblock[i]]);
+        }
+        if (o == 1) {
+            int p;
+            std::cin >> p;
+            p--;
+            diff -= (s[0][p] != s[1][p]);
+            if (i + t < q) {
+                unblock[i + t] = p;
+            }
+        } else if (o == 2) {
+            int i1, j1, i2, j2;
+            std::cin >> i1 >> j1 >> i2 >> j2;
+            i1--, j1--, i2--, j2--;
+            diff -= (s[0][j1] != s[1][j1]);
+            if (j1 != j2) {
+                diff -= (s[0][j2] != s[1][j2]);
+            }
+            std::swap(s[i1][j1], s[i2][j2]);
+            diff += (s[0][j1] != s[1][j1]);
+            if (j1 != j2) {
+                diff += (s[0][j2] != s[1][j2]);
+            }
+        } else {
+            std::cout << (diff == 0 ? "YES" : "NO") << "\n";
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+     return 0;
+}

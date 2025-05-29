@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n), b(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+    }
+        std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+        i64 match = 0, sum = 0;
+        for (int i = 0; i < n; i++) {
+        match += std::abs(a[i] - b[i]);
+    }
+        std::vector<i64> sb(n + 1);
+    for (int i = 0; i < n; i++) {
+        sb[i + 1] = sb[i] + b[i];
+    }
+    for (int i = 0, j = 0; i < n; i++) {
+        while (j < n && b[j] < a[i]) {
+            j++;
+        }
+        sum += 1LL * a[i] * (j - n + j) + sb[n] - sb[j] - sb[j];
+    }
+        sum -= match * (n - 1);
+    std::cout << sum << "\n";
+        return 0;
+}

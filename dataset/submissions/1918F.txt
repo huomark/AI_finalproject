@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        std::vector<int> p(n);
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+        adj[p[i]].push_back(i);
+    }
+        int ans = 2 * n - 2;
+    std::vector<int> a;
+    auto dfs = [&](auto self, int x, int d) -> int {
+        int l = 0;
+        for (auto y : adj[x]) {
+            int v = self(self, y, d + 1) + 1;
+            if (v > l) {
+                std::swap(v, l);
+            }
+            if (v > d) {
+                a.push_back(v - d);
+            }
+        }
+        return l;
+    };
+    a.push_back(dfs(dfs, 0, 0));
+    std::sort(a.begin(), a.end(), std::greater());
+    for (int i = 0; i < a.size() && i < k + 1; i++) {
+        ans -= a[i];
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

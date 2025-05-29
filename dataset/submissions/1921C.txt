@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, f, a, b;
+    std::cin >> n >> f >> a >> b;
+        i64 need = 0;
+    int last = 0;
+    for (int i = 0; i < n; i++) {
+        int m;
+        std::cin >> m;
+                need += std::min(1LL * b, 1LL * (m - last) * a);
+        last = m;
+    }
+    if (need < f) {
+        std::cout << "YES\n";
+    } else {
+        std::cout << "NO\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

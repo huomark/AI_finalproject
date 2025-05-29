@@ -1,0 +1,123 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::vector<std::pair<int, i64>>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        i64 w;
+        std::cin >> u >> v >> w;
+        u--, v--;
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+        std::vector<int> vis(n), dep(n), siz(n), t(n);
+    std::vector<i64> g(n);
+        auto dfs1 = [&](auto self, int x, int p) -> void {
+        siz[x] = 1;
+        for (auto [y, w] : adj[x]) {
+            if (vis[y] || y == p) {
+                continue;
+            }
+            self(self, y, x);
+            siz[x] += siz[y];
+        }
+    };
+    auto find = [&](auto self, int x, int p, int s) -> int {
+        for (auto [y, w] : adj[x]) {
+            if (vis[y] || y == p || 2 * siz[y] <= s) {
+                continue;
+            }
+            return self(self, y, x, s);
+        }
+        return x;
+    };
+    i64 ans = 0;
+    std::vector<i64> vals;
+    std::vector<std::array<int, 2>> mx, bel;
+    auto dfs2 = [&](auto self, int x, int p, int r) -> void {
+        ans = std::max(ans, g[x] * dep[x]);
+        if (g[x] != 0) {
+            vals.push_back(g[x]);
+        }
+        for (auto [y, w] : adj[x]) {
+            if (vis[y] || y == p) {
+                continue;
+            }
+            g[y] = std::gcd(g[x], w);
+            t[y] = x == r ? y : t[x];
+            dep[y] = dep[x] + 1;
+            self(self, y, x, r);
+        }
+    };
+    auto dfs3 = [&](auto self, int x, int p) -> void {
+        if (g[x] != 0) {
+            int i = std::lower_bound(vals.begin(), vals.end(), g[x]) - vals.begin();
+            if (dep[x] > mx[i][0]) {
+                if (bel[i][0] != t[x]) {
+                    mx[i][1] = mx[i][0];
+                    bel[i][1] = bel[i][0];
+                }
+                mx[i][0] = dep[x];
+                bel[i][0] = t[x];
+            } else if (dep[x] > mx[i][1] && t[x] != bel[i][0]) {
+                mx[i][1] = dep[x];
+                bel[i][1] = t[x];
+            }
+        }
+        for (auto [y, w] : adj[x]) {
+            if (vis[y] || y == p) {
+                continue;
+            }
+            self(self, y, x);
+        }
+    };
+    auto CD = [&](auto self, int x) -> void {
+        dfs1(dfs1, x, -1);
+        x = find(find, x, -1, siz[x]);
+        vis[x] = 1;
+        g[x] = 0;
+        t[x] = x;
+        dep[x] = 0;
+        vals.clear();
+        dfs2(dfs2, x, -1, x);
+        std::sort(vals.begin(), vals.end());
+        vals.erase(std::unique(vals.begin(), vals.end()), vals.end());
+        mx.assign(vals.size(), {0, 0});
+        bel.assign(vals.size(), {-1, -1});
+        dfs3(dfs3, x, -1);
+        for (int i = 0; i < vals.size(); i++) {
+            i64 g0 = vals[i];
+            for (int j = 0; j < 2; j++) {
+                int l0 = mx[i][j];
+                for (int k = 1; k <= l0 && (l0 + l0 / std::max(1, k - 1)) * g0 > ans; k++) {
+                    i64 g1 = g0 * k;
+                    int i1 = std::lower_bound(vals.begin(), vals.end(), g1) - vals.begin();
+                    if (i1 < vals.size() && vals[i1] == g1) {
+                        int l1 = mx[i1][bel[i1][0] == bel[i][j]];
+                        ans = std::max(ans, g0 * (l0 + l1));
+                    }
+                }
+            }
+        }
+        for (auto [y, w] : adj[x]) {
+            if (vis[y]) {
+                continue;
+            }
+            self(self, y);
+        }
+    };
+    CD(CD, 0);
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

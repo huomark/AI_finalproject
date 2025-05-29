@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+    }
+        int first = 0, second = 0, both = 0;
+        for (int i = 0; i < n; i++) {
+        if (p[i] != i && p[i] != n - 1 - i) {
+            both++;
+        } else if (p[i] != i) {
+            first++;
+        } else if (p[i] != n - 1 - i) {
+            second++;
+        }
+    }
+        if (first + both <= second) {
+        std::cout << "First\n";
+    } else if (first > second + both) {
+        std::cout << "Second\n";
+    } else {
+        std::cout << "Tie\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

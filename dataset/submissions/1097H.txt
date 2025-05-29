@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+using i128 = __int128;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int d, m;
+    std::cin >> d >> m;
+        std::vector<int> gen(d);
+    for (int i = 0; i < d; i++) {
+        std::cin >> gen[i];
+    }
+        int n;
+    std::cin >> n;
+        std::vector<int> B(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> B[i];
+    }
+        i64 l, r;
+    std::cin >> l >> r;
+        int N = 1;
+    std::vector dp(m, std::vector<bool>(N + n));
+    for (int a = 0; a < m; a++) {
+        for (int i = -N; i < n; i++) {
+            dp[a][i + N] = (i < 0 || a <= B[i]);
+        }
+    }
+    while (N < n) {
+        std::vector ndp(m, std::vector<bool>(N * d + n));
+        for (int a = 0; a < m; a++) {
+            for (int i = -N * d; i < n; i++) {
+                ndp[a][i + N * d] = true;
+                for (int j = 0; j < d; j++) {
+                    int idx = i + N + j * N;
+                    if (idx >= 0 && idx < N + n && !dp[(a + gen[j]) % m][i + N + j * N]) {
+                        ndp[a][i + N * d] = false;
+                    }
+                }
+            }
+        }
+        dp = std::move(ndp);
+        N *= d;
+    }
+        std::vector total(m, std::vector<int>(m));
+    for (int a = 0; a < m; a++) {
+        for (int b = 0; b < m; b++) {
+            for (int i = 0; i < N; i++) {
+                int idxa = N - i;
+                int idxb = N - i + N;
+                bool ok = true;
+                if (idxa >= 0 && idxa < N + n && !dp[a][idxa]) {
+                    ok = false;
+                }
+                if (idxb >= 0 && idxb < N + n && !dp[b][idxb]) {
+                    ok = false;
+                }
+                total[a][b] += ok;
+            }
+        }
+    }
+        std::vector count(60, std::vector(m, std::vector<i64>(m)));
+    for (int i = 1; i < 60; i++) {
+        for (int j = 0; j < d; j++) {
+            for (int a = 0; a < m; a++) {
+                for (int b = 0; b < m; b++) {
+                    count[i][(a + gen[j]) % m][(b + gen[j]) % m] += count[i - 1][a][b];
+                }
+            }
+        }
+        for (int j = 1; j < d; j++) {
+            int off = (i - 1) * gen[d - 1] + gen[j - 1];
+            count[i][off % m][gen[j]] += 1;
+        }
+    }
+        auto get = [&](i64 r) -> i64 {
+        if (r < n) {
+            return 0;
+        }
+        r -= n - 1;
+        i64 ans = 0;
+                int a = 0;
+        for (i64 x = r / N; x; x /= d) {
+            a = (a + gen[x % d]) % m;
+        }
+        int b = 0;
+        for (i64 x = r / N + 1; x; x /= d) {
+            b = (b + gen[x % d]) % m;
+        }
+        for (int i = 0; i < r % N; i++) {
+            int idxa = N - i;
+            int idxb = N - i + N;
+            bool ok = true;
+            if (idxa >= 0 && idxa < N + n && !dp[a][idxa]) {
+                ok = false;
+            }
+            if (idxb >= 0 && idxb < N + n && !dp[b][idxb]) {
+                ok = false;
+            }
+            ans += ok;
+        }
+        r /= N;
+                std::vector cnt(m, std::vector<i64>(m));
+        std::vector<int> digits;
+        while (r) {
+            digits.push_back(r % d);
+            r /= d;
+        }
+                int off = 0;
+        for (int i = digits.size() - 1; i >= 0; i--) {
+            for (int j = 0; j < digits[i]; j++) {
+                for (int a = 0; a < m; a++) {
+                    for (int b = 0; b < m; b++) {
+                        cnt[(a + off + gen[j]) % m][(b + off + gen[j]) % m] += count[i][a][b];
+                    }
+                }
+            }
+            for (int j = 0; j < digits[i]; j++) {
+                int off1 = i * gen[d - 1] + gen[j];
+                cnt[(off + off1) % m][(off + gen[j + 1]) % m] += 1;
+            }
+            off = (off + gen[digits[i]]) % m;
+        }
+                for (int a = 0; a < m; a++) {
+            for (int b = 0; b < m; b++) {
+                ans += cnt[a][b] * total[a][b];
+            }
+        }
+                return ans;
+    };
+        i64 ans = get(r) - get(l + n - 2);
+    std::cout << ans << "\n";
+        return 0;
+}

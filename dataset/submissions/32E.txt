@@ -1,0 +1,782 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ template<class T>
+struct Frac {
+    T num;
+    T den;
+    Frac(T num_, T den_) : num(num_), den(den_) {
+        if (den < 0) {
+            den = -den;
+            num = -num;
+        }
+    }
+    Frac() : Frac(0, 1) {}
+    Frac(T num_) : Frac(num_, 1) {}
+    explicit operator double() const {
+        return 1. * num / den;
+    }
+    Frac &operator+=(Frac rhs) {
+        num = num * rhs.den + rhs.num * den;
+        den *= rhs.den;
+        return *this;
+    }
+    Frac &operator-=(Frac rhs) {
+        num = num * rhs.den - rhs.num * den;
+        den *= rhs.den;
+        return *this;
+    }
+    Frac &operator*=(const Frac &rhs) {
+        num *= rhs.num;
+        den *= rhs.den;
+        return *this;
+    }
+    Frac &operator/=(const Frac &rhs) {
+        num *= rhs.den;
+        den *= rhs.num;
+        if (den < 0) {
+            num = -num;
+            den = -den;
+        }
+        return *this;
+    }
+    friend Frac operator+(Frac lhs, const Frac &rhs) {
+        return lhs += rhs;
+    }
+    friend Frac operator-(Frac lhs, const Frac &rhs) {
+        return lhs -= rhs;
+    }
+    friend Frac operator*(Frac lhs, const Frac &rhs) {
+        return lhs *= rhs;
+    }
+    friend Frac operator/(Frac lhs, const Frac &rhs) {
+        return lhs /= rhs;
+    }
+    friend Frac operator-(Frac &a) {
+        return Frac(-a.num, a.den);
+    }
+    friend bool operator==(Frac lhs, Frac rhs) {
+        return lhs.num * rhs.den == rhs.num * lhs.den;
+    }
+    friend bool operator!=(Frac lhs, Frac rhs) {
+        return lhs.num * rhs.den != rhs.num * lhs.den;
+    }
+    friend bool operator<(Frac lhs, Frac rhs) {
+        return lhs.num * rhs.den < rhs.num * lhs.den;
+    }
+    friend bool operator>(Frac lhs, Frac rhs) {
+        return lhs.num * rhs.den > rhs.num * lhs.den;
+    }
+    friend bool operator<=(Frac lhs, Frac rhs) {
+        return lhs.num * rhs.den <= rhs.num * lhs.den;
+    }
+    friend bool operator>=(const Frac &lhs, const Frac &rhs) {
+        return lhs.num * rhs.den >= rhs.num * lhs.den;
+    }
+    friend std::ostream &operator<<(std::ostream &os, Frac x) {
+        T g = std::gcd(x.num, x.den);
+        if (x.den == g) {
+            return os << x.num / g;
+        } else {
+            return os << x.num / g << "/" << x.den / g;
+        }
+    }
+};
+template<class T>
+struct Point {
+    T x;
+    T y;
+    Point(T x_ = T(0), T y_ = T(0)) : x(x_), y(y_) {}
+        Point &operator+=(Point p) & {
+        x += p.x;
+        y += p.y;
+        return *this;
+    }
+    Point &operator-=(Point p) & {
+        x -= p.x;
+        y -= p.y;
+        return *this;
+    }
+    Point &operator*=(T v) & {
+        x *= v;
+        y *= v;
+        return *this;
+    }
+    Point &operator*=(Point p) & {
+        std::tie(x, y) = std::pair{
+            x * p.x - y * p.y,
+            x * p.y + y * p.x
+        };
+        return *this;
+    }
+    Point &operator/=(Point p) & {
+        auto t = p.x * p.x + p.y * p.y;
+        std::tie(x, y) = std::pair{
+            (x * p.x + y * p.y) / t,
+            (y * p.x - x * p.y) / t
+        };
+        return *this;
+    }
+    Point operator-() const {
+        return Point(-x, -y);
+    }
+    friend Point operator+(Point a, Point b) {
+        return a += b;
+    }
+    friend Point operator-(Point a, Point b) {
+        return a -= b;
+    }
+    friend Point operator*(Point a, T b) {
+        return a *= b;
+    }
+    friend Point operator*(T a, Point b) {
+        return b *= a;
+    }
+    friend Point operator*(Point a, Point b) {
+        return a *= b;
+    }
+    friend Point operator/(Point a, Point b) {
+        return a /= b;
+    }
+    friend bool operator==(Point a, Point b) {
+        return a.x == b.x && a.y == b.y;
+    }
+    friend std::istream &operator>>(std::istream &is, Point &p) {
+        return is >> p.x >> p.y;
+    }
+    friend std::ostream &operator<<(std::ostream &os, Point p) {
+        return os << "(" << p.x << ", " << p.y << ")";
+    }
+    Point conj() {
+        return Point(x, -y);
+    }
+};
+ template<class T>
+T dot(Point<T> a, Point<T> b) {
+    return a.x * b.x + a.y * b.y;
+}
+ template<class T>
+T cross(Point<T> a, Point<T> b) {
+    return a.x * b.y - a.y * b.x;
+}
+ template<class T>
+T square(Point<T> p) {
+    return dot(p, p);
+}
+ template<class T>
+double length(Point<T> p) {
+    return std::sqrt(double(square(p)));
+}
+ long double length(Point<long double> p) {
+    return std::sqrt(square(p));
+}
+ template<class T>
+struct Line {
+    Point<T> a;
+    Point<T> b;
+    Line(Point<T> a_ = Point<T>(), Point<T> b_ = Point<T>()) : a(a_), b(b_) {}
+};
+ template<class T>
+Point<T> rotate(Point<T> a) {
+    return Point(-a.y, a.x);
+}
+ template<class T>
+int sgn(Point<T> a) {
+    return a.y > 0 || (a.y == 0 && a.x > 0) ? 1 : -1;
+}
+ template<class T>
+bool pointOnLineLeft(Point<T> p, Line<T> l) {
+    return cross(l.b - l.a, p - l.a) > 0;
+}
+ template<class T>
+Point<T> lineIntersection(Line<T> l1, Line<T> l2) {
+    return l1.a + (l1.b - l1.a) * (cross(l2.b - l2.a, l1.a - l2.a) / cross(l2.b - l2.a, l1.a - l1.b));
+}
+ template<class T>
+bool pointOnSegment(Point<T> p, Line<T> l) {
+    return cross(p - l.a, l.b - l.a) == T(0) && std::min(l.a.x, l.b.x) <= p.x && p.x <= std::max(l.a.x, l.b.x)
+        && std::min(l.a.y, l.b.y) <= p.y && p.y <= std::max(l.a.y, l.b.y);
+}
+ template<class T>
+bool pointInPolygon(Point<T> a, std::vector<Point<T>> p) {
+    int n = p.size();
+    for (int i = 0; i < n; i++) {
+        if (pointOnSegment(a, Line(p[i], p[(i + 1) % n]))) {
+            return true;
+        }
+    }
+        int t = 0;
+    for (int i = 0; i < n; i++) {
+        auto u = p[i];
+        auto v = p[(i + 1) % n];
+        if (u.x < a.x && v.x >= a.x && pointOnLineLeft(a, Line(v, u))) {
+            t ^= 1;
+        }
+        if (u.x >= a.x && v.x < a.x && pointOnLineLeft(a, Line(u, v))) {
+            t ^= 1;
+        }
+    }
+        return t == 1;
+}
+ // 0 : not intersect
+// 1 : strictly intersect
+// 2 : overlap
+// 3 : intersect at endpoint
+template<class T>
+std::tuple<int, Point<T>, Point<T>> segmentIntersection(Line<T> l1, Line<T> l2) {
+    if (std::max(l1.a.x, l1.b.x) < std::min(l2.a.x, l2.b.x)) {
+        return {0, Point<T>(), Point<T>()};
+    }
+    if (std::min(l1.a.x, l1.b.x) > std::max(l2.a.x, l2.b.x)) {
+        return {0, Point<T>(), Point<T>()};
+    }
+    if (std::max(l1.a.y, l1.b.y) < std::min(l2.a.y, l2.b.y)) {
+        return {0, Point<T>(), Point<T>()};
+    }
+    if (std::min(l1.a.y, l1.b.y) > std::max(l2.a.y, l2.b.y)) {
+        return {0, Point<T>(), Point<T>()};
+    }
+    if (cross(l1.b - l1.a, l2.b - l2.a) == T(0)) {
+        if (cross(l1.b - l1.a, l2.a - l1.a) != T(0)) {
+            return {0, Point<T>(), Point<T>()};
+        } else {
+            auto maxx1 = std::max(l1.a.x, l1.b.x);
+            auto minx1 = std::min(l1.a.x, l1.b.x);
+            auto maxy1 = std::max(l1.a.y, l1.b.y);
+            auto miny1 = std::min(l1.a.y, l1.b.y);
+            auto maxx2 = std::max(l2.a.x, l2.b.x);
+            auto minx2 = std::min(l2.a.x, l2.b.x);
+            auto maxy2 = std::max(l2.a.y, l2.b.y);
+            auto miny2 = std::min(l2.a.y, l2.b.y);
+            Point<T> p1(std::max(minx1, minx2), std::max(miny1, miny2));
+            Point<T> p2(std::min(maxx1, maxx2), std::min(maxy1, maxy2));
+            if (!pointOnSegment(p1, l1)) {
+                std::swap(p1.y, p2.y);
+            }
+            if (p1 == p2) {
+                return {3, p1, p2};
+            } else {
+                return {2, p1, p2};
+            }
+        }
+    }
+    auto cp1 = cross(l2.a - l1.a, l2.b - l1.a);
+    auto cp2 = cross(l2.a - l1.b, l2.b - l1.b);
+    auto cp3 = cross(l1.a - l2.a, l1.b - l2.a);
+    auto cp4 = cross(l1.a - l2.b, l1.b - l2.b);
+        if ((cp1 > T(0) && cp2 > T(0)) || (cp1 < T(0) && cp2 < T(0)) || (cp3 > T(0) && cp4 > T(0)) || (cp3 < T(0) && cp4 < T(0))) {
+        return {0, Point<T>(), Point<T>()};
+    }
+        Point p = lineIntersection(l1, l2);
+    if (cp1 != T(0) && cp2 != T(0) && cp3 != T(0) && cp4 != T(0)) {
+        return {1, p, p};
+    } else {
+        return {3, p, p};
+    }
+}
+ template<class T>
+bool segmentInPolygon(Line<T> l, std::vector<Point<T>> p) {
+    int n = p.size();
+    if (!pointInPolygon(l.a, p)) {
+        return false;
+    }
+    if (!pointInPolygon(l.b, p)) {
+        return false;
+    }
+    for (int i = 0; i < n; i++) {
+        auto u = p[i];
+        auto v = p[(i + 1) % n];
+        auto w = p[(i + 2) % n];
+        auto [t, p1, p2] = segmentIntersection(l, Line(u, v));
+                if (t == 1) {
+            return false;
+        }
+        if (t == 0) {
+            continue;
+        }
+        if (t == 2) {
+            if (pointOnSegment(v, l) && v != l.a && v != l.b) {
+                if (cross(v - u, w - v) > 0) {
+                    return false;
+                }
+            }
+        } else {
+            if (p1 != u && p1 != v) {
+                if (pointOnLineLeft(l.a, Line(v, u))
+                    || pointOnLineLeft(l.b, Line(v, u))) {
+                    return false;
+                }
+            } else if (p1 == v) {
+                if (l.a == v) {
+                    if (pointOnLineLeft(u, l)) {
+                        if (pointOnLineLeft(w, l)
+                            && pointOnLineLeft(w, Line(u, v))) {
+                            return false;
+                        }
+                    } else {
+                        if (pointOnLineLeft(w, l)
+                            || pointOnLineLeft(w, Line(u, v))) {
+                            return false;
+                        }
+                    }
+                } else if (l.b == v) {
+                    if (pointOnLineLeft(u, Line(l.b, l.a))) {
+                        if (pointOnLineLeft(w, Line(l.b, l.a))
+                            && pointOnLineLeft(w, Line(u, v))) {
+                            return false;
+                        }
+                    } else {
+                        if (pointOnLineLeft(w, Line(l.b, l.a))
+                            || pointOnLineLeft(w, Line(u, v))) {
+                            return false;
+                        }
+                    }
+                } else {
+                    if (pointOnLineLeft(u, l)) {
+                        if (pointOnLineLeft(w, Line(l.b, l.a))
+                            || pointOnLineLeft(w, Line(u, v))) {
+                            return false;
+                        }
+                    } else {
+                        if (pointOnLineLeft(w, l)
+                            || pointOnLineLeft(w, Line(u, v))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+ template<class T>
+std::vector<Point<T>> hp(std::vector<Line<T>> lines) {
+    std::sort(lines.begin(), lines.end(), [&](auto l1, auto l2) {
+        auto d1 = l1.b - l1.a;
+        auto d2 = l2.b - l2.a;
+                if (sgn(d1) != sgn(d2)) {
+            return sgn(d1) == 1;
+        }
+                return cross(d1, d2) > 0;
+    });
+        std::deque<Line<T>> ls;
+    std::deque<Point<T>> ps;
+    for (auto l : lines) {
+        if (ls.empty()) {
+            ls.push_back(l);
+            continue;
+        }
+                while (!ps.empty() && !pointOnLineLeft(ps.back(), l)) {
+            ps.pop_back();
+            ls.pop_back();
+        }
+                while (!ps.empty() && !pointOnLineLeft(ps[0], l)) {
+            ps.pop_front();
+            ls.pop_front();
+        }
+                if (cross(l.b - l.a, ls.back().b - ls.back().a) == 0) {
+            if (dot(l.b - l.a, ls.back().b - ls.back().a) > 0) {
+                                if (!pointOnLineLeft(ls.back().a, l)) {
+                    assert(ls.size() == 1);
+                    ls[0] = l;
+                }
+                continue;
+            }
+            return {};
+        }
+                ps.push_back(lineIntersection(ls.back(), l));
+        ls.push_back(l);
+    }
+        while (!ps.empty() && !pointOnLineLeft(ps.back(), ls[0])) {
+        ps.pop_back();
+        ls.pop_back();
+    }
+    if (ls.size() <= 2) {
+        return {};
+    }
+    ps.push_back(lineIntersection(ls[0], ls.back()));
+        return std::vector(ps.begin(), ps.end());
+}
+/*
+ * @author panks
+ * Big Integer library in C++, single file implementation.
+ */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <cmath>
+#define MAX 10000 // for strings
+ using namespace std;
+class BigInteger {
+private:
+    string number;
+    bool sign;
+public:
+    BigInteger(); // empty constructor initializes zero
+    BigInteger(string s); // "string" constructor
+    BigInteger(string s, bool sin); // "string" constructor
+    BigInteger(int n); // "int" constructor
+    void setNumber(string s);
+    const string& getNumber(); // retrieves the number
+    void setSign(bool s);
+    const bool& getSign();
+    BigInteger absolute(); // returns the absolute value
+    void operator = (BigInteger b);
+    bool operator == (BigInteger b);
+    bool operator != (BigInteger b);
+    bool operator > (BigInteger b);
+    bool operator < (BigInteger b);
+    bool operator >= (BigInteger b);
+    bool operator <= (BigInteger b);
+    BigInteger& operator ++(); // prefix
+    BigInteger  operator ++(int); // postfix
+    BigInteger& operator --(); // prefix
+    BigInteger  operator --(int); // postfix
+    BigInteger operator + (BigInteger b);
+    BigInteger operator - (BigInteger b);
+    BigInteger operator * (BigInteger b);
+    BigInteger operator / (BigInteger b);
+    BigInteger operator % (BigInteger b);
+    BigInteger& operator += (BigInteger b);
+    BigInteger& operator -= (BigInteger b);
+    BigInteger& operator *= (BigInteger b);
+    BigInteger& operator /= (BigInteger b);
+    BigInteger& operator %= (BigInteger b);
+    BigInteger& operator [] (int n);
+    BigInteger operator -(); // unary minus sign
+    operator string(); // for conversion from BigInteger to string
+private:
+    bool equals(BigInteger n1, BigInteger n2);
+    bool less(BigInteger n1, BigInteger n2);
+    bool greater(BigInteger n1, BigInteger n2);
+    string add(string number1, string number2);
+    string subtract(string number1, string number2);
+    string multiply(string n1, string n2);
+    pair<string, long long> divide(string n, long long den);
+    string toString(long long n);
+    long long toInt(string s);
+};
+ BigInteger::BigInteger() { // empty constructor initializes zero
+    number = "0";
+    sign = false;
+}
+ BigInteger::BigInteger(string s) { // "string" constructor
+    if( isdigit(s[0]) ) { // if not signed
+        setNumber(s);
+        sign = false; // +ve
+    } else {
+        setNumber( s.substr(1) );
+        sign = (s[0] == '-');
+    }
+}
+ BigInteger::BigInteger(string s, bool sin) { // "string" constructor
+    setNumber( s );
+    setSign( sin );
+}
+ BigInteger::BigInteger(int n) { // "int" constructor
+    stringstream ss;
+    string s;
+    ss << n;
+    ss >> s;
+      if( isdigit(s[0]) ) { // if not signed
+        setNumber( s );
+        setSign( false ); // +ve
+    } else {
+        setNumber( s.substr(1) );
+        setSign( s[0] == '-' );
+    }
+}
+ void BigInteger::setNumber(string s) {
+    number = s;
+}
+ const string& BigInteger::getNumber() { // retrieves the number
+    return number;
+}
+ void BigInteger::setSign(bool s) {
+    sign = s;
+}
+ const bool& BigInteger::getSign() {
+    return sign;
+}
+ BigInteger BigInteger::absolute() {
+    return BigInteger( getNumber() ); // +ve by default
+}
+ void BigInteger::operator = (BigInteger b) {
+    setNumber( b.getNumber() );
+    setSign( b.getSign() );
+}
+ bool BigInteger::operator == (BigInteger b) {
+    return equals((*this) , b);
+}
+ bool BigInteger::operator != (BigInteger b) {
+    return ! equals((*this) , b);
+}
+ bool BigInteger::operator > (BigInteger b) {
+    return greater((*this) , b);
+}
+ bool BigInteger::operator < (BigInteger b) {
+    return less((*this) , b);
+}
+ bool BigInteger::operator >= (BigInteger b) {
+    return equals((*this) , b)
+           || greater((*this), b);
+}
+ bool BigInteger::operator <= (BigInteger b) {
+    return equals((*this) , b)
+           || less((*this) , b);
+}
+ BigInteger& BigInteger::operator ++() { // prefix
+    (*this) = (*this) + 1;
+    return (*this);
+}
+ BigInteger BigInteger::operator ++(int) { // postfix
+    BigInteger before = (*this);
+     (*this) = (*this) + 1;
+     return before;
+}
+ BigInteger& BigInteger::operator --() { // prefix
+    (*this) = (*this) - 1;
+    return (*this);
+ }
+ BigInteger BigInteger::operator --(int) { // postfix
+    BigInteger before = (*this);
+     (*this) = (*this) - 1;
+     return before;
+}
+ BigInteger BigInteger::operator + (BigInteger b) {
+    BigInteger addition;
+    if( getSign() == b.getSign() ) { // both +ve or -ve
+        addition.setNumber( add(getNumber(), b.getNumber() ) );
+        addition.setSign( getSign() );
+    } else { // sign different
+        if( absolute() > b.absolute() ) {
+            addition.setNumber( subtract(getNumber(), b.getNumber() ) );
+            addition.setSign( getSign() );
+        } else {
+            addition.setNumber( subtract(b.getNumber(), getNumber() ) );
+            addition.setSign( b.getSign() );
+        }
+    }
+    if(addition.getNumber() == "0") // avoid (-0) problem
+        addition.setSign(false);
+     return addition;
+}
+ BigInteger BigInteger::operator - (BigInteger b) {
+    b.setSign( ! b.getSign() ); // x - y = x + (-y)
+    return (*this) + b;
+}
+ BigInteger BigInteger::operator * (BigInteger b) {
+    BigInteger mul;
+     mul.setNumber( multiply(getNumber(), b.getNumber() ) );
+    mul.setSign( getSign() != b.getSign() );
+     if(mul.getNumber() == "0") // avoid (-0) problem
+        mul.setSign(false);
+     return mul;
+}
+ // Warning: Denomerator must be within "long long" size not "BigInteger"
+BigInteger BigInteger::operator / (BigInteger b) {
+    long long den = toInt( b.getNumber() );
+    BigInteger div;
+     div.setNumber( divide(getNumber(), den).first );
+    div.setSign( getSign() != b.getSign() );
+     if(div.getNumber() == "0") // avoid (-0) problem
+        div.setSign(false);
+     return div;
+}
+ // Warning: Denomerator must be within "long long" size not "BigInteger"
+BigInteger BigInteger::operator % (BigInteger b) {
+    long long den = toInt( b.getNumber() );
+     BigInteger rem;
+    long long rem_int = divide(number, den).second;
+    rem.setNumber( toString(rem_int) );
+    rem.setSign( getSign() != b.getSign() );
+     if(rem.getNumber() == "0") // avoid (-0) problem
+        rem.setSign(false);
+     return rem;
+}
+ BigInteger& BigInteger::operator += (BigInteger b) {
+    (*this) = (*this) + b;
+    return (*this);
+}
+ BigInteger& BigInteger::operator -= (BigInteger b) {
+    (*this) = (*this) - b;
+    return (*this);
+}
+ BigInteger& BigInteger::operator *= (BigInteger b) {
+    (*this) = (*this) * b;
+    return (*this);
+}
+ BigInteger& BigInteger::operator /= (BigInteger b) {
+    (*this) = (*this) / b;
+    return (*this);
+}
+ BigInteger& BigInteger::operator %= (BigInteger b) {
+    (*this) = (*this) % b;
+    return (*this);
+}
+ BigInteger& BigInteger::operator [] (int n) {
+    return *(this + (n*sizeof(BigInteger)));
+}
+ BigInteger BigInteger::operator -() { // unary minus sign
+    return (*this) * -1;
+}
+ BigInteger::operator string() { // for conversion from BigInteger to string
+    string signedString = ( getSign() ) ? "-" : ""; // if +ve, don't print + sign
+    signedString += number;
+    return signedString;
+}
+ bool BigInteger::equals(BigInteger n1, BigInteger n2) {
+    return n1.getNumber() == n2.getNumber()
+           && n1.getSign() == n2.getSign();
+}
+ bool BigInteger::less(BigInteger n1, BigInteger n2) {
+    bool sign1 = n1.getSign();
+    bool sign2 = n2.getSign();
+     if(sign1 && ! sign2) // if n1 is -ve and n2 is +ve
+        return true;
+     else if(! sign1 && sign2)
+        return false;
+     else if(! sign1) { // both +ve
+        if(n1.getNumber().length() < n2.getNumber().length() )
+            return true;
+        if(n1.getNumber().length() > n2.getNumber().length() )
+            return false;
+        return n1.getNumber() < n2.getNumber();
+    } else { // both -ve
+        if(n1.getNumber().length() > n2.getNumber().length())
+            return true;
+        if(n1.getNumber().length() < n2.getNumber().length())
+            return false;
+        return n1.getNumber().compare( n2.getNumber() ) > 0; // greater with -ve sign is LESS
+    }
+}
+ bool BigInteger::greater(BigInteger n1, BigInteger n2) {
+    return ! equals(n1, n2) && ! less(n1, n2);
+}
+ string BigInteger::add(string number1, string number2) {
+    string add = (number1.length() > number2.length()) ?  number1 : number2;
+    char carry = '0';
+    int differenceInLength = abs( (int) (number1.size() - number2.size()) );
+     if(number1.size() > number2.size())
+        number2.insert(0, differenceInLength, '0'); // put zeros from left
+     else// if(number1.size() < number2.size())
+        number1.insert(0, differenceInLength, '0');
+     for(int i=number1.size()-1; i>=0; --i) {
+        add[i] = ((carry-'0')+(number1[i]-'0')+(number2[i]-'0')) + '0';
+         if(i != 0) {
+            if(add[i] > '9') {
+                add[i] -= 10;
+                carry = '1';
+            } else
+                carry = '0';
+        }
+    }
+    if(add[0] > '9') {
+        add[0]-= 10;
+        add.insert(0,1,'1');
+    }
+    return add;
+}
+ string BigInteger::subtract(string number1, string number2) {
+    string sub = (number1.length()>number2.length())? number1 : number2;
+    int differenceInLength = abs( (int)(number1.size() - number2.size()) );
+     if(number1.size() > number2.size())
+        number2.insert(0, differenceInLength, '0');
+     else
+        number1.insert(0, differenceInLength, '0');
+     for(int i=number1.length()-1; i>=0; --i) {
+        if(number1[i] < number2[i]) {
+            number1[i] += 10;
+            number1[i-1]--;
+        }
+        sub[i] = ((number1[i]-'0')-(number2[i]-'0')) + '0';
+    }
+     while(sub[0]=='0' && sub.length()!=1) // erase leading zeros
+        sub.erase(0,1);
+     return sub;
+}
+ string BigInteger::multiply(string n1, string n2) {
+    if(n1.length() > n2.length())
+        n1.swap(n2);
+     string res = "0";
+    for(int i=n1.length()-1; i>=0; --i) {
+        string temp = n2;
+        int currentDigit = n1[i]-'0';
+        int carry = 0;
+         for(int j=temp.length()-1; j>=0; --j) {
+            temp[j] = ((temp[j]-'0') * currentDigit) + carry;
+             if(temp[j] > 9) {
+                carry = (temp[j]/10);
+                temp[j] -= (carry*10);
+            } else
+                carry = 0;
+             temp[j] += '0'; // back to string mood
+        }
+         if(carry > 0)
+            temp.insert(0, 1, (carry+'0'));
+         temp.append((n1.length()-i-1), '0'); // as like mult by 10, 100, 1000, 10000 and so on
+         res = add(res, temp); // O(n)
+    }
+     while(res[0] == '0' && res.length()!=1) // erase leading zeros
+        res.erase(0,1);
+     return res;
+}
+ pair<string, long long> BigInteger::divide(string n, long long den) {
+    long long rem = 0;
+    string result;
+    result.resize(MAX);
+     for(int indx=0, len = n.length(); indx<len; ++indx) {
+        rem = (rem * 10) + (n[indx] - '0');
+        result[indx] = rem / den + '0';
+        rem %= den;
+    }
+    result.resize( n.length() );
+     while( result[0] == '0' && result.length() != 1)
+        result.erase(0,1);
+     if(result.length() == 0)
+        result = "0";
+     return make_pair(result, rem);
+}
+ string BigInteger::toString(long long n) {
+    stringstream ss;
+    string temp;
+     ss << n;
+    ss >> temp;
+     return temp;
+}
+ long long BigInteger::toInt(string s) {
+    long long sum = 0;
+     for(int i=0; i<s.length(); i++)
+        sum = (sum*10) + (s[i] - '0');
+     return sum;
+}
+ using P = Point<Frac<BigInteger>>;
+ P read() {
+    int x, y;
+    std::cin >> x >> y;
+    return P(BigInteger(x), BigInteger(y));
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        P A = read(), B = read();
+    P C = read(), D = read();
+    P E = read(), F = read();
+        if (std::get<0>(segmentIntersection(Line(A, B), Line(C, D))) == 0
+        && std::get<0>(segmentIntersection(Line(A, B), Line(E, F))) % 2 == 0) {
+        std::cout << "YES\n";
+        return 0;
+    }
+        auto B1 = ((B - E) / (F - E)).conj() * (F - E) + E;
+        auto [t, U, V] = segmentIntersection(Line(A, B1), Line(E, F));
+    if (t != 1 && t != 3) {
+        std::cout << "NO\n";
+        return 0;
+    }
+    if (std::get<0>(segmentIntersection(Line(A, U), Line(C, D))) == 0
+        && std::get<0>(segmentIntersection(Line(B, U), Line(C, D))) == 0) {
+        std::cout << "YES\n";
+        return 0;
+    }
+        std::cout << "NO\n";
+        return 0;
+}

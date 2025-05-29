@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::string x;
+    int k;
+    std::cin >> x >> k;
+        int n = x.size();
+        int p = 0;
+    for (int i = 0; i <= k; i++) {
+        if (x[i] != '0' && x[i] < x[p]) {
+            p = i;
+        }
+    }
+        k -= p;
+        std::string ans;
+    ans += x[p];
+    for (int i = p + 1; i < n; i++) {
+        while (k > 0 && ans.size() > 1 && x[i] < ans.back()) {
+            ans.pop_back();
+            k--;
+        }
+        ans += x[i];
+    }
+    while (k--) {
+        ans.pop_back();
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

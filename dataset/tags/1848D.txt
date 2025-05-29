@@ -1,0 +1,1 @@
+binary search, brute force, math, ternary search

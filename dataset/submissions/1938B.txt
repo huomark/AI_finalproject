@@ -1,0 +1,149 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int M = 1E6;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+     int n, m;
+    std::cin >> n >> m;
+     std::vector<int> x(n), y(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i];
+    }
+     std::vector<int> u(m), v(m), a(m);
+    std::vector<std::vector<int>> adj(n);
+    int ans = 0;
+    std::map<std::pair<int, int>, int> edges;
+    for (int i = 0; i < m; i++) {
+        std::cin >> u[i] >> v[i] >> a[i];
+        u[i]--, v[i]--;
+        // (2, 1)
+        ans = std::max(ans, a[i]);
+        adj[u[i]].push_back(i);
+        adj[v[i]].push_back(i);
+        edges[{u[i], v[i]}] = a[i];
+        edges[{v[i], u[i]}] = a[i];
+    }
+     // for (int x = 0; x < n; x++) {
+    //     if (adj[x].size() >= 2) {
+    //         std::sort(adj[x].begin(), adj[x].end(),
+    //             [&](int i, int j) {
+    //                 return a[i] > a[j];
+    //             });
+    //         int sum = a[adj[x][0]] + a[adj[x][1]];
+    //         ans = std::max(ans, sum - M);
+    //     }
+    // }
+     auto dist = [&](int a, int b) {
+        return 1LL * (x[a] - x[b]) * (x[a] - x[b]) + 1LL * (y[a] - y[b]) * (y[a] - y[b]);
+    };
+     std::vector<int> p(n), deg(n);
+    for (int i = 0; i < n; i++) {
+        deg[i] = adj[i].size();
+    }
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(),
+        [&](int i, int j) {
+            return deg[i] < deg[j] || (deg[i] == deg[j] && i < j);
+        });
+    std::vector<int> vis(n, -1);
+    std::vector<std::vector<int>> adj1(n);
+    for (int x = 0; x < n; x++) {
+        for (auto i : adj[x]) {
+            int y = u[i] ^ v[i] ^ x;
+            if (deg[y] > deg[x] || (deg[y] == deg[x] && y > x)) {
+                adj1[x].push_back(i);
+            }
+        }
+    }
+     std::vector<std::array<int, 2>> mx(m, {-1, -1});
+    std::vector<std::array<int, 2>> far(m, {-1, -1});
+    auto work = [&](int i, int j, int k, int p) {
+        i64 cross = 1LL * (x[v[i]] - x[u[i]]) * (y[p] - y[u[i]]) - 1LL * (y[v[i]] - y[u[i]]) * (x[p] - x[u[i]]);
+        int t = (cross > 0 ? 0 : 1);
+        int res = a[j] + a[k];
+        for (int x = 0; x < 2; x++) {
+            if (res > mx[i][x]) {
+                std::swap(res, mx[i][x]);
+            }
+        }
+        if (far[i][t] == -1 || dist(far[i][t], u[i]) < dist(p, u[i])) {
+            far[i][t] = p;
+        }
+    };
+     for (int x = 0; x < n; x++) {
+        for (auto i : adj1[x]) {
+            int y = u[i] ^ v[i] ^ x;
+            vis[y] = i;
+        }
+        for (auto i : adj1[x]) {
+            int y = u[i] ^ v[i] ^ x;
+            for (auto j : adj1[y]) {
+                int z = u[j] ^ v[j] ^ y;
+                if (vis[z] != -1) {
+                    // std::cerr << "found " << x << " " << y << " " << z << "\n";
+                    // (3, 3)
+                    ans = std::max(ans, a[i] + a[j] + a[vis[z]]);
+                    work(i, j, vis[z], z);
+                    work(j, i, vis[z], x);
+                    work(vis[z], i, j, y);
+                }
+            }
+        }
+        for (auto i : adj1[x]) {
+            int y = u[i] ^ v[i] ^ x;
+            vis[y] = -1;
+        }
+    }
+     std::map<std::pair<int, int>, std::vector<int>> e;
+    for (int i = 0; i < m; i++) {
+        if (mx[i][1] != -1) {
+            // (4, 5)
+            ans = std::max(ans, a[i] + mx[i][0] + mx[i][1] - M);
+        }
+        if (far[i][0] != -1 && far[i][1] != -1) {
+            int x = far[i][0], y = far[i][1];
+            if (edges.count({x, y})) {
+                // (4, 6)
+                ans = std::max(ans, edges[{x, y}] + a[i] + edges[{u[i], x}] + edges[{u[i], y}] + edges[{v[i], x}] + edges[{v[i], y}]);
+            }
+            if (x > y) {
+                std::swap(x, y);
+            }
+            // std::cerr << u[i] << " " << v[i] << " " << x << " " << y << "\n";
+            e[{x, y}].push_back(i);
+        }
+    }
+     deg.assign(n, 0);
+    std::vector<int> sum(n);
+    for (auto [pair, es] : e) {
+        auto [x, y] = pair;
+        for (auto i : es) {
+            deg[u[i]] = 0;
+            deg[v[i]] = 0;
+            sum[u[i]] = 0;
+            sum[v[i]] = 0;
+        }
+        for (auto i : es) {
+            deg[u[i]]++;
+            deg[v[i]]++;
+            int res = a[i] + edges[{u[i], x}] + edges[{u[i], y}] + edges[{v[i], x}] + edges[{v[i], y}];
+            sum[u[i]] += res;
+            sum[v[i]] += res;
+        }
+        for (auto i : es) {
+            for (auto t : {u[i], v[i]}) {
+                if (deg[t] == 2) {
+                    // (5, 8)
+                    ans = std::max(ans, sum[t] - edges[{t, x}] - edges[{t, y}] - 4 * M);
+                    if (edges.count({x, y})) {
+                        // (5, 9)
+                        ans = std::max(ans, sum[t] - edges[{t, x}] - edges[{t, y}] + edges[{x, y}] - M);
+                    }
+                }
+            }
+        }
+    }
+        std::cout << ans << "\n";
+     return 0;
+}

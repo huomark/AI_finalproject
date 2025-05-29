@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int N = 1 << 18;
+ std::vector<std::pair<int, int>> e[2 * N];
+ void add(int p, int l, int r, int x, int y, int u, int v) {
+    if (l >= y || r <= x) {
+        return;
+    }
+    if (l >= x && r <= y) {
+        e[p].emplace_back(u, v);
+        return;
+    }
+    int m = (l + r) / 2;
+    add(2 * p, l, m, x, y, u, v);
+    add(2 * p + 1, m, r, x, y, u, v);
+}
+ constexpr int L = 2E7;
+ int f[N], lc[N], rc[N], ok[N];
+ int find(int x) {
+    while (f[x] >= 0) {
+        x = f[x];
+    }
+    return x;
+}
+ std::vector<std::array<int, 5>> h;
+ void solve(int p, int l, int r) {
+    int s = h.size();
+    for (auto [u, v] : e[p]) {
+        u = find(u);
+        v = find(v);
+        if (u != v) {
+            if (f[u] > f[v]) {
+                std::swap(u, v);
+            }
+            h.push_back({u, v, f[u], f[v], ok[u]});
+            f[u] += f[v];
+            f[v] = u;
+            ok[u] = find(0) == u;
+        }
+    }
+    if (r - l > 1) {
+        int m = (l + r) / 2;
+        solve(2 * p, l, m);
+        solve(2 * p + 1, m, r);
+    }
+    while (h.size() > s) {
+        auto [u, v, fu, fv, oku] = h.back();
+        h.pop_back();
+        f[u] = fu;
+        f[v] = fv;
+        if (ok[u]) {
+            ok[u] = ok[v] = 1;
+        } else {
+            ok[u] = oku;
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> l(n), r(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> l[i] >> r[i];
+    }
+        for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+                int L = std::max(l[u], l[v]);
+        int R = std::min(r[u], r[v]);
+        if (L <= R) {
+            add(1, 0, N, L, R + 1, u, v);
+        }
+    }
+        std::fill(f, f + n, -1);
+    ok[0] = 1;
+    solve(1, 0, N);
+        for (int i = 0; i < n; i++) {
+        if (ok[i]) {
+            std::cout << i + 1 << " ";
+        }
+    }
+    std::cout << "\n";
+        return 0;
+}

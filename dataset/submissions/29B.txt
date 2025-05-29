@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        double ans;
+    std::cout << std::fixed << std::setprecision(10);
+        int l, d, v, g, r;
+    std::cin >> l >> d >> v >> g >> r;
+        int a = d % (v * (r + g));
+    if (a < g * v) {
+        ans = 1. * l / v;
+    } else {
+        ans = (d / (v * (r + g)) + 1) * (r + g) + 1. * (l - d) / v;
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        int p, b;
+    std::cin >> p >> b;
+        std::vector<bool> piece(n), bonus(n);
+    for (int i = 0; i < p; i++) {
+        int x;
+        std::cin >> x;
+        x--;
+        piece[x] = true;
+    }
+    for (int i = 0; i < b; i++) {
+        int x;
+        std::cin >> x;
+        x--;
+        bonus[x] = true;
+    }
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<bool> infb(n);
+    for (int i = 0; i < n; i++) {
+        for (auto j : adj[i]) {
+            if (bonus[i] && bonus[j]) {
+                infb[i] = true;
+            }
+        }
+    }
+        std::vector<int> type(n);
+    for (int i = 0; i < n; i++) {
+        if (!piece[i]) {
+            continue;
+        }
+        for (auto j : adj[i]) {
+            if (bonus[j]) {
+                type[i] = 1;
+            }
+            if (infb[j]) {
+                type[i] = 2;
+                break;
+            }
+        }
+    }
+        std::vector<int> dis(n, -1);
+    std::queue<int> q;
+    dis[0] = 0;
+    q.push(0);
+        while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+                for (auto y : adj[x]) {
+            if (bonus[y] && dis[y] == -1) {
+                dis[y] = dis[x] + 1;
+                q.push(y);
+            }
+        }
+    }
+        std::array<int, 3> cnt {};
+    for (int i = 0; i < n; i++) {
+        cnt[type[i]]++;
+    }
+        for (int i = 0; i < n; i++) {
+        if (piece[i]) {
+            cnt[type[i]]--;
+            int res = dis[i];
+            for (auto j : adj[i]) {
+                if (dis[j] != -1 && (res == -1 || res > dis[j] + 1)) {
+                    res = dis[j] + 1;
+                }
+            }
+            if (res != -1 && (cnt[2] > 0 || cnt[1] >= res - 1)) {
+                std::cout << "YES\n";
+                return;
+            }
+            cnt[type[i]]++;
+        }
+    }
+        std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

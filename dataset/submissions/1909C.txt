@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::pair<int, int>> a;
+    for (int i = 0; i < n; i++) {
+        int l;
+        std::cin >> l;
+        a.emplace_back(l, 1);
+    }
+    for (int i = 0; i < n; i++) {
+        int r;
+        std::cin >> r;
+        a.emplace_back(r, -1);
+    }
+        std::sort(a.begin(), a.end());
+        std::vector<int> c(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i];
+    }
+    std::sort(c.begin(), c.end());
+        i64 ans = 0;
+    std::vector<int> len, stk;
+    for (auto [x, t] : a) {
+        if (t == 1) {
+            stk.push_back(x);
+        } else {
+            assert(!stk.empty());
+            len.push_back(x - stk.back());
+            stk.pop_back();
+        }
+    }
+    std::sort(len.begin(), len.end(), std::greater());
+    for (int i = 0; i < n; i++) {
+        ans += 1LL * c[i] * len[i];
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,1 @@
+brute force, combinatorics, constructive algorithms, dfs and similar, graph matchings, greedy, math

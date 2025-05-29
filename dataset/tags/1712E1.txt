@@ -1,0 +1,1 @@
+binary search, brute force, combinatorics, math, number theory, two pointers

@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int M = 1E5;
+ int minp[M + 1];
+std::vector<int> primes;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::pair<int, int>> a;
+    int ans = 0;
+    for (auto p : primes) {
+        if (p * p > n) break;
+        int t = 0;
+        while (n % p == 0) {
+            n /= p;
+            t++;
+        }
+        if (t > 0) {
+            a.emplace_back(p, t);
+        }
+    }
+    if (n > 1) {
+        a.emplace_back(n, 1);
+    }
+        while (!a.empty()) {
+        std::vector<std::pair<int, int>> b;
+        int res = 1;
+        for (auto [x, y] : a) {
+            res *= x;
+            if (y > 1) b.emplace_back(x, y - 1);
+        }
+        ans += res;
+        a = b;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        for (int i = 2; i <= M; i++) {
+        if (minp[i] == 0) {
+            minp[i] = i;
+            primes.push_back(i);
+        }
+        for (auto p : primes) {
+            if (i * p > M) break;
+            minp[i * p] = p;
+            if (minp[i] == p) break;
+        }
+    }
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

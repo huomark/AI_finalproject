@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::string s;
+    std::cin >> s;
+        std::vector<int> u, l;
+    for (int i = 0; i < s.size(); i++) {
+        if (s[i] == 'B') {
+            if (!u.empty()) {
+                u.pop_back();
+            }
+        } else if (s[i] == 'b') {
+            if (!l.empty()) {
+                l.pop_back();
+            }
+        } else if (std::isupper(s[i])) {
+            u.push_back(i);
+        } else {
+            l.push_back(i);
+        }
+    }
+        int i = 0, j = 0;
+    while (i < u.size() || j < l.size()) {
+        if (i < u.size() && (j == l.size() || u[i] < l[j])) {
+            std::cout << s[u[i++]];
+        } else {
+            std::cout << s[l[j++]];
+        }
+    }
+    std::cout << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

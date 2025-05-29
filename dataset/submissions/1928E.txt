@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, x, y, s;
+    std::cin >> n >> x >> y >> s;
+        if (s < 1LL * (x % y) * n) {
+        std::cout << "No\n";
+        return;
+    }
+    s -= x % y * n;
+        if (s % y != 0) {
+        std::cout << "No\n";
+        return;
+    }
+    s /= y;
+        std::vector<int> dp(s + 1, n + 1);
+    dp[0] = 0;
+    for (int x = 1; x * (x - 1) / 2 <= s; x++) {
+        int v = x * (x - 1) / 2;
+        for (int i = v; i <= s; i++) {
+            dp[i] = std::min(dp[i], dp[i - v] + x);
+        }
+    }
+        int a = x / y;
+    for (int p = 1; p * (a + a + p - 1) / 2 <= s; p++) {
+        int res = s - p * (a + a + p - 1) / 2;
+        if (dp[res] + p <= n) {
+            std::cout << "YES\n";
+            std::vector<int> ans;
+            for (int i = 0; i < p; i++) {
+                ans.push_back(x + y * i);
+            }
+            for (int l = 1; l * (l - 1) / 2 <= s; l++) {
+                int v = l * (l - 1) / 2;
+                while (res >= v && dp[res - v] + l == dp[res]) {
+                    for (int i = 0; i < l; i++) {
+                        ans.push_back(x % y + y * i);
+                    }
+                    res -= v;
+                }
+            }
+            while (ans.size() < n) {
+                ans.push_back(x % y);
+            }
+            for (int i = 0; i < n; i++) {
+                std::cout << ans[i] << " \n"[i == n - 1];
+            }
+            return;
+        }
+    }
+    std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

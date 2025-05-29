@@ -1,0 +1,113 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::string chdir = "^<v>";
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector s(n, std::vector(n, 0));
+        for (int i = 0; i < n; i++) {
+        if (i % 2 == 0) {
+            for (int j = 0; j < n - 1; j++) {
+                s[i][j] = 3;
+            }
+            s[i][n - 1] = 2;
+        } else {
+            s[i][0] = 2;
+            for (int j = 1; j < n; j++) {
+                s[i][j] = 1;
+            }
+        }
+    }
+        auto rotates = [&](auto &s) {
+        std::vector ns(n, std::vector(n, 0));
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                ns[n - 1 - j][i] = (s[i][j] + 1) % 4;
+            }
+        }
+        s = ns;
+    };
+        auto rotate = [&](auto &x, auto &y) {
+        if (x != -2) {
+            std::tie(x, y) = std::make_pair(n - 1 - y, x);
+        }
+    };
+        auto query = [&](auto s, auto x, auto y) {
+        std::cout << "? " << x + 1 << " " << y + 1 << std::endl;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                std::cout << chdir[s[i][j]];
+            }
+            std::cout << std::endl;
+        }
+        std::cin >> x >> y;
+        return std::make_pair(x - 1, y - 1);
+    };
+        int dir = 0;
+    while (dir < 3) {
+        auto a = s;
+                int x = 0, y = 0;
+                for (int j = 0; j < dir; j++) {
+            rotates(a);
+            rotate(x, y);
+        }
+                auto [rx, ry] = query(a, x, y);
+        for (int i = 0; i < 4 - dir; i++) {
+            rotate(rx, ry);
+        }
+        if (rx == -1) {
+            break;
+        }
+                if (rx != -2) {
+            dir++;
+            continue;
+        }
+                a = s;
+        for (auto &v : a) {
+            std::reverse(v.begin(), v.end());
+            for (auto &x : v) {
+                x = (4 - x) % 4;
+            }
+        }
+                x = 0, y = 0;
+                for (int j = 0; j < dir; j++) {
+            rotates(a);
+            rotate(x, y);
+        }
+                std::tie(rx, ry) = query(a, x, y);
+        for (int i = 0; i < 4 - dir; i++) {
+            rotate(rx, ry);
+        }
+        if (rx == -2) {
+            break;
+        }
+                dir++;
+    }
+        int lo = 0, hi = n * n - 1;
+        while (lo < hi) {
+        int m = (lo + hi + 1) / 2;
+                auto a = s;
+                int x = m / n, y = x % 2 == 0 ? m % n : n - m % n - 1;
+                for (int j = 0; j < dir; j++) {
+            rotates(a);
+            rotate(x, y);
+        }
+                auto [rx, ry] = query(a, x, y);
+        for (int i = 0; i < 4 - dir; i++) {
+            rotate(rx, ry);
+        }
+        if (rx == -1 || rx == -2) {
+            lo = m;
+        } else {
+            hi = m - 1;
+        }
+    }
+        int x = lo / n, y = x % 2 == 0 ? lo % n : n - lo % n - 1;
+    for (int j = 0; j < dir; j++) {
+        rotate(x, y);
+    }
+    std::cout << "! " << x + 1 << " " << y + 1 << " " << chdir[dir] << std::endl;
+        return 0;
+}

@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int inf = 1E9;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector dis(n, std::vector(n, inf));
+    for (int i = 0; i < n; i++) {
+        dis[i][i] = 0;
+    }
+    for (int i = 0; i < m; i++) {
+        int a, b, w;
+        std::cin >> a >> b >> w;
+        a--, b--;
+        dis[a][b] = dis[b][a] = w;
+    }
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                dis[i][j] = std::min(dis[i][j], dis[i][k] + dis[k][j]);
+            }
+        }
+    }
+        int ans = 1E9;
+        for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (i == j) {
+                continue;
+            }
+            std::multiset<int> sa{0}, sb{0};
+            for (int k = 0; k < n; k++) {
+                sa.insert(dis[i][k]);
+            }
+            std::vector<int> p(n);
+            std::iota(p.begin(), p.end(), 0);
+            std::sort(p.begin(), p.end(),
+                [&](int x, int y) {
+                    return dis[j][x] - dis[i][x] < dis[j][y] - dis[i][y];
+                });
+            for (auto x : p) {
+                sa.extract(dis[i][x]);
+                sb.insert(dis[j][x]);
+                                int A = *sa.rbegin();
+                int B = *sb.rbegin();
+                                ans = std::min(ans, std::max({A + B + dis[i][j], 2 * A, 2 * B}));
+            }
+        }
+    }
+        std::cout << std::fixed << std::setprecision(2);
+    std::cout << .5 * ans << "\n";
+        return 0;
+}

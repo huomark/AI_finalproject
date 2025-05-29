@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int N = 5E3;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int m, n;
+    std::cin >> m >> n;
+        std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+    }
+        std::vector r(m, std::vector<int>(n));
+    std::vector<std::bitset<N>> f(n, ~std::bitset<N>{});
+    std::vector<int> o;
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            std::cin >> r[i][j];
+        }
+        std::vector<int> ord(n);
+        std::iota(ord.begin(), ord.end(), 0);
+        std::sort(ord.begin(), ord.end(), [&](int x, int y) {
+            return r[i][x] < r[i][y];
+        });
+        o = ord;
+        std::bitset<N> s{};
+        for (int j = 0, k = 0; j < n; j++) {
+            while (k < j && r[i][ord[k]] < r[i][ord[j]]) {
+                s.set(ord[k]);
+                k++;
+            }
+            f[ord[j]] &= s;
+        }
+    }
+        std::vector<i64> dp(n);
+    for (auto x : o) {
+        dp[x] = p[x];
+        for (int y = 0; y < n; y++) {
+            if (f[x][y]) {
+                dp[x] = std::max(dp[x], dp[y] + p[x]);
+            }
+        }
+    }
+    i64 ans = *std::max_element(dp.begin(), dp.end());
+    std::cout << ans << "\n";
+        return 0;
+}

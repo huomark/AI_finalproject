@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+ std::mt19937_64 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+ constexpr int V = 1E6;
+ u64 val[V + 1];
+ void solve() {
+    int n, q;
+    std::cin >> n >> q;
+        std::vector<u64> pre(n + 1);
+    for (int i = 0; i < n; i++) {
+        int a;
+        std::cin >> a;
+        pre[i + 1] = pre[i] ^ val[a];
+    }
+        while (q--) {
+        int l, r;
+        std::cin >> l >> r;
+        l--;
+        if (pre[l] == pre[r]) {
+            std::cout << "YES\n";
+        } else {
+            std::cout << "NO\n";
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        for (int i = 1; i <= V; i++) {
+        val[i] = rng();
+    }
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int inf = 1E9;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int a;
+        std::cin >> a;
+        a--;
+        adj[a].push_back(i);
+    }
+        std::string s;
+    std::cin >> s;
+        std::vector<std::array<int, 3>> dp(n);
+    auto dfs = [&](auto self, int x) -> void {
+        dp[x].fill(inf);
+        dp[x][s[x] == 'P' ? 1 : s[x] == 'S' ? 2 : 0] = 0;
+                for (auto y : adj[x]) {
+            self(self, y);
+            std::array<int, 3> g;
+            g.fill(inf);
+            for (int a = 0; a < 3; a++) {
+                for (int b = 0; b < 3; b++) {
+                    if ((a | b) != 3) {
+                        g[a | b] = std::min(g[a | b], dp[x][a] + dp[y][b]);
+                    }
+                    g[a] = std::min(g[a], dp[x][a] + dp[y][b] + 1);
+                }
+            }
+            dp[x] = g;
+        }
+    };
+    dfs(dfs, 0);
+        int ans = std::min({dp[0][0], dp[0][1], dp[0][2]});
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

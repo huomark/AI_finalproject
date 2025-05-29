@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<std::map<int, std::vector<int>>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v, c;
+        std::cin >> u >> v >> c;
+        u--, v--;
+        adj[u][c].push_back(v);
+        adj[v][c].push_back(u);
+    }
+        std::map<std::pair<int, int>, int> dis;
+    std::deque<std::tuple<int, int, int>> q;
+    int b, e;
+    std::cin >> b >> e;
+    b--, e--;
+    q.emplace_back(0, b, 0);
+    while (!q.empty()) {
+        auto [d, x, a] = q.front();
+        q.pop_front();
+                if (dis.count({x, a})) {
+            continue;
+        }
+        dis[{x, a}] = d;
+                if (a) {
+            q.emplace_front(d, x, 0);
+            for (auto y : adj[x][a]) {
+                q.emplace_front(d, y, a);
+            }
+        } else {
+            for (auto &[a, _] : adj[x]) {
+                q.emplace_back(d + 1, x, a);
+            }
+        }
+    }
+        std::cout << dis[{e, 0}] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

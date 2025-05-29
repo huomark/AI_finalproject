@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::array<int, 4> operator*(const std::array<int, 4> &a, const std::array<int, 4> &b) {
+    std::array<int, 4> c{};
+    c[0] = a[0] * b[0];
+    c[1] = a[0] * b[1] + a[1] * b[0];
+    c[2] = a[0] * b[2] + a[2] * b[0];
+    c[3] = a[0] * b[3] + a[1] * b[2] + a[2] * b[1] + a[3] * b[0];
+    return c;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        if (n % 2 == 1) {
+        std::cout << 0 << "\n";
+        return 0;
+    }
+        i64 ans = 0;
+    std::vector<std::array<int, 4>> dp(n), up(n);
+    std::vector<int> siz(n);
+    auto dfs1 = [&](auto self, int x, int p) -> void {
+        siz[x] = 1;
+        dp[x][0] = 1;
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            self(self, y, x);
+            siz[x] += siz[y];
+            dp[x] = dp[x] * dp[y];
+        }
+        std::swap(dp[x][0], dp[x][1]);
+        std::swap(dp[x][2], dp[x][3]);
+        dp[x][2] += dp[x][1];
+    };
+    dfs1(dfs1, 0, -1);
+        auto dfs2 = [&](auto self, int x, int p) -> void {
+        int d = adj[x].size();
+        if (d == 0) {
+            return;
+        }
+        std::vector<std::array<int, 4>> suf(d), pre(d);
+        suf[d - 1][0] = 1;
+        pre[0][0] = 1;
+        for (int i = 0; i < d - 1; i++) {
+            int y = adj[x][i];
+            pre[i + 1] = pre[i] * (y == p ? up[x] : dp[y]);
+        }
+        for (int i = d - 1; i > 0; i--) {
+            int y = adj[x][i];
+            suf[i - 1] = suf[i] * (y == p ? up[x] : dp[y]);
+        }
+        for (int i = 0; i < d; i++) {
+            int y = adj[x][i];
+            if (y == p) {
+                continue;
+            }
+            up[y] = pre[i] * suf[i];
+            std::swap(up[y][0], up[y][1]);
+            std::swap(up[y][2], up[y][3]);
+            up[y][2] += up[y][1];
+            self(self, y, x);
+        }
+    };
+    dfs2(dfs2, 0, -1);
+        for (int i = 1; i < n; i++) {
+        if (dp[i][0] && up[i][0]) {
+            ans += 1LL * siz[i] * (n - siz[i]);
+        } else {
+            ans += 1LL * dp[i][2] * up[i][2];
+        }
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

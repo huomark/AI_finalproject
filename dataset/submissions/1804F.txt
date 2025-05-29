@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m, q;
+    std::cin >> n >> m >> q;
+        std::vector<std::vector<std::pair<int, int>>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v, 0);
+        adj[v].emplace_back(u, 0);
+    }
+    for (int i = 0; i < q; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].emplace_back(v, i + 1);
+        adj[v].emplace_back(u, i + 1);
+    }
+        auto get = [&](int t) {
+        std::queue<int> q;
+        std::vector<int> dis(n, -1);
+        q.push(0);
+        dis[0] = 0;
+        while (!q.empty()) {
+            int x = q.front();
+            q.pop();
+            for (auto [y, w] : adj[x]) {
+                if (w <= t && dis[y] == -1) {
+                    dis[y] = dis[x] + 1;
+                    q.push(y);
+                }
+            }
+        }
+        return *std::max_element(dis.begin(), dis.end());
+    };
+        std::vector<int> ans(q + 1);
+    for (int i = 0; i < q + 1; ) {
+        int val = get(i);
+        int lo = i + 1, hi = q + 1;
+        while (lo < hi) {
+            int x = (lo + hi) / 2;
+            if (2 * get(x) < val) {
+                hi = x;
+            } else {
+                lo = x + 1;
+            }
+        }
+        while (i < lo) {
+            ans[i] = val;
+            i += 1;
+        }
+    }
+    for (int i = 0; i <= q; i++) {
+        std::cout << ans[i] << " \n"[i == q];
+    }
+        return 0;
+}

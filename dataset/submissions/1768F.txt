@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> last(500, -1), next(500, -1);
+    std::vector<int> rep(n, -1);
+    for (int i = n - 1; i >= 0; i--) {
+        if (a[i] < 500) {
+            rep[i] = next[a[i]];
+            next[a[i]] = i;
+        }
+    }
+        std::vector<i64> dp(n, inf);
+    dp[0] = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = std::max(0, i - 500); j < i; j++) {
+            dp[i] = std::min(dp[i], std::min(a[i], a[j]) * 1LL * (i - j) * (i - j) + dp[j]);
+        }
+        for (int j = 1; j < 500; j++) {
+            if (last[j] != -1) {
+                dp[i] = std::min(dp[i], dp[last[j]] + 1LL * j * (i - last[j]) * (i - last[j]));
+            }
+        }
+        if (a[i] < 500) {
+            last[a[i]] = i;
+            next[a[i]] = rep[i];
+        }
+        for (int j = 1; j < 500; j++) {
+            if (next[j] != -1) {
+                dp[next[j]] = std::min(dp[next[j]], dp[i] + 1LL * j * (i - next[j]) * (i - next[j]));
+            }
+        }
+    }
+        for (int i = 0; i < n; i++) {
+        std::cout << dp[i] << " \n"[i == n - 1];
+    }
+        return 0;
+}

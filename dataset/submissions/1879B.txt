@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        i64 sa = 0;
+    int mina = 1E9;
+    for (int i = 0; i < n; i++) {
+        int a;
+        std::cin >> a;
+        sa += a;
+        mina = std::min(mina, a);
+    }
+        i64 sb = 0;
+    int minb = 1E9;
+    for (int i = 0; i < n; i++) {
+        int b;
+        std::cin >> b;
+        sb += b;
+        minb = std::min(minb, b);
+    }
+        i64 ans = std::min(sa + 1LL * n * minb, sb + 1LL * n * mina);
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,24 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        int i = s.find("**");
+    if (i == -1) {
+        i = s.size();
+    }
+        int ans = std::count(s.begin(), s.begin() + i, '@');
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

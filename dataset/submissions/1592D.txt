@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int query(std::vector<int> a) {
+    std::cout << "? " << a.size();
+    for (auto x : a) {
+        std::cout << " " << x + 1;
+    }
+    std::cout << std::endl;
+    int ans;
+    std::cin >> ans;
+    return ans;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<std::vector<std::pair<int, int>>> adj(n);
+    std::vector<int> u(n - 1), v(n - 1);
+    for (int i = 0; i < n - 1; i++) {
+        std::cin >> u[i] >> v[i];
+        u[i]--, v[i]--;
+        adj[u[i]].emplace_back(v[i], i);
+        adj[v[i]].emplace_back(u[i], i);
+    }
+        std::vector<int> f(n - 1);
+    std::iota(f.begin(), f.end(), 0);
+        auto ver = [&](auto f) {
+        std::vector<int> deg(n);
+        for (auto i : f) {
+            deg[u[i]] += 1;
+            deg[v[i]] += 1;
+        }
+        std::vector<int> a;
+        for (int i = 0; i < n; i++) {
+            if (deg[i] > 0) {
+                a.push_back(i);
+            }
+        }
+        return a;
+    };
+        int max = query(ver(f));
+        while (f.size() > 1) {
+        std::vector<int> deg(n);
+        std::vector<bool> inf(n - 1);
+        for (auto i : f) {
+            inf[i] = true;
+            deg[u[i]] += 1;
+            deg[v[i]] += 1;
+        }
+                std::vector<bool> vis(n);
+        std::vector<int> e;
+        for (int i = 0; i < n; i++) {
+            if (!vis[i] && deg[i] > 0) {
+                std::queue<int> q;
+                vis[i] = true;
+                q.push(i);
+                while (!q.empty()) {
+                    int x = q.front();
+                    q.pop();
+                                        for (auto [y, j] : adj[x]) {
+                        if (inf[j] && !vis[y]) {
+                            e.push_back(j);
+                            vis[y] = true;
+                            q.push(y);
+                        }
+                    }
+                }
+            }
+        }
+        int cnt = f.size() / 2;
+        if (query(ver(std::vector(e.begin(), e.begin() + cnt))) == max) {
+            f = std::vector(e.begin(), e.begin() + cnt);
+        } else {
+            f = std::vector(e.begin() + cnt, e.end());
+        }
+    }
+        std::cout << "! " << u[f[0]] + 1 << " " << v[f[0]] + 1 << std::endl;
+        return 0;
+}

@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, g, r;
+    std::cin >> n >> g >> r;
+    n++;
+        std::vector<int> l(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> l[i];
+    }
+        int q;
+    std::cin >> q;
+        std::vector<i64> ans(n + q), t(n + q);
+    std::map<i64, int> s;
+    int tot = q;
+        std::vector<int> p(n + q, -1);
+    std::vector<int> a;
+        const i64 T = g + r;
+    for (int i = 0; i < q; i++) {
+        std::cin >> t[i];
+        t[i] += l[0];
+                if (!s.count(t[i] % T)) {
+            s[t[i] % T] = i;
+        } else {
+            p[i] = s[t[i] % T];
+            a.push_back(i);
+        }
+    }
+        i64 sum = 0;
+    for (int i = 1; i < n; i++) {
+        i64 L = (g - sum % T + T) % T;
+        i64 R = (-sum % T + T) % T;
+        if (L < R) {
+            if (!s.count(R)) {
+                s[R] = tot++;
+            }
+            auto it = s.lower_bound(L);
+            while (it != s.end() && it->first < R) {
+                auto r = std::next(it);
+                p[it->second] = s[R];
+                ans[it->second] += R - it->first;
+                a.push_back(it->second);
+                it = s.erase(it);
+            }
+        } else {
+            if (!s.count(R)) {
+                s[R] = tot++;
+            }
+            auto it = s.lower_bound(L);
+            while (it != s.end()) {
+                auto r = std::next(it);
+                p[it->second] = s[R];
+                ans[it->second] += R - it->first + T;
+                a.push_back(it->second);
+                it = s.erase(it);
+            }
+            it = s.begin();
+            while (it != s.end() && it->first < R) {
+                auto r = std::next(it);
+                p[it->second] = s[R];
+                ans[it->second] += R - it->first;
+                a.push_back(it->second);
+                it = s.erase(it);
+            }
+        }
+        sum += l[i];
+    }
+    std::reverse(a.begin(), a.end());
+    for (auto i : a) {
+        ans[i] += ans[p[i]];
+    }
+        for (int i = 0; i < q; i++) {
+        ans[i] += t[i] + sum;
+        std::cout << ans[i] << "\n";
+    }
+        return 0;
+}

@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+    }
+    std::vector ans(p.rbegin(), p.rend());
+    int x = std::find(p.begin(), p.end(), n) - p.begin();
+    if (x == 0 && n > 1) {
+        x = std::find(p.begin(), p.end(), n - 1) - p.begin();
+    }
+    for (int i = 0; i < n; i++) {
+        auto q = p;
+        std::reverse(q.begin() + i, q.end());
+        std::rotate(q.begin(), q.begin() + i, q.end());
+        ans = std::max(ans, q);
+    }
+    for (int i = 0; i < x; i++) {
+        auto q = p;
+        std::reverse(q.begin() + i, q.begin() + x);
+        std::rotate(q.begin(), q.begin() + i, q.end());
+        std::rotate(q.begin(), q.begin() + x - i, q.end() - i);
+        ans = std::max(ans, q);
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << ans[i] << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

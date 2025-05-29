@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<i64> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<i64> b(n);
+    while (*std::max_element(a.begin(), a.end()) >= 3) {
+        std::vector<i64> c(n);
+        for (int i = 0; i < n; i++) {
+            c[i] = a[i] / 2;
+            b[i] += c[i];
+        }
+        for (int i = 0; i < n; i++) {
+            a[i] -= c[i] * 2;
+            a[(i + 1) % n] += c[i];
+        }
+    }
+        if (a != std::vector(n, a[0])) {
+        std::cout << -1 << "\n";
+        return;
+    }
+        std::cout << std::accumulate(b.begin(), b.end(), 0LL) - *std::min_element(b.begin(), b.end()) * n << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,218 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+template<class Info>
+struct SegmentTree {
+    int n;
+    std::vector<Info> info;
+    SegmentTree() : n(0) {}
+    SegmentTree(int n_, Info v_ = Info()) {
+        init(n_, v_);
+    }
+    template<class T>
+    SegmentTree(std::vector<T> init_) {
+        init(init_);
+    }
+    void init(int n_, Info v_ = Info()) {
+        init(std::vector(n_, v_));
+    }
+    template<class T>
+    void init(std::vector<T> init_) {
+        n = init_.size();
+        info.assign(4 << std::__lg(n), Info());
+        std::function<void(int, int, int)> build = [&](int p, int l, int r) {
+            if (r - l == 1) {
+                info[p] = init_[l];
+                return;
+            }
+            int m = (l + r) / 2;
+            build(2 * p, l, m);
+            build(2 * p + 1, m, r);
+            pull(p);
+        };
+        build(1, 0, n);
+    }
+    void pull(int p) {
+        info[p] = info[2 * p] + info[2 * p + 1];
+    }
+    void modify(int p, int l, int r, int x, const Info &v) {
+        if (r - l == 1) {
+            info[p] = v;
+            return;
+        }
+        int m = (l + r) / 2;
+        if (x < m) {
+            modify(2 * p, l, m, x, v);
+        } else {
+            modify(2 * p + 1, m, r, x, v);
+        }
+        pull(p);
+    }
+    void modify(int p, const Info &v) {
+        modify(1, 0, n, p, v);
+    }
+    Info rangeQuery(int p, int l, int r, int x, int y) {
+        if (l >= y || r <= x) {
+            return Info();
+        }
+        if (l >= x && r <= y) {
+            return info[p];
+        }
+        int m = (l + r) / 2;
+        return rangeQuery(2 * p, l, m, x, y) + rangeQuery(2 * p + 1, m, r, x, y);
+    }
+    Info rangeQuery(int l, int r) {
+        return rangeQuery(1, 0, n, l, r);
+    }
+    template<class F>
+    int findFirst(int p, int l, int r, int x, int y, F pred) {
+        if (l >= y || r <= x || !pred(info[p])) {
+            return -1;
+        }
+        if (r - l == 1) {
+            return l;
+        }
+        int m = (l + r) / 2;
+        int res = findFirst(2 * p, l, m, x, y, pred);
+        if (res == -1) {
+            res = findFirst(2 * p + 1, m, r, x, y, pred);
+        }
+        return res;
+    }
+    template<class F>
+    int findFirst(int l, int r, F pred) {
+        return findFirst(1, 0, n, l, r, pred);
+    }
+    template<class F>
+    int findLast(int p, int l, int r, int x, int y, F pred) {
+        if (l >= y || r <= x || !pred(info[p])) {
+            return -1;
+        }
+        if (r - l == 1) {
+            return l;
+        }
+        int m = (l + r) / 2;
+        int res = findLast(2 * p + 1, m, r, x, y, pred);
+        if (res == -1) {
+            res = findLast(2 * p, l, m, x, y, pred);
+        }
+        return res;
+    }
+    template<class F>
+    int findLast(int l, int r, F pred) {
+        return findLast(1, 0, n, l, r, pred);
+    }
+};
+ int n, v;
+ constexpr int inf = 1 << 30;
+struct Info {
+    std::pair<int, int> l[30];
+    std::pair<int, int> r[30];
+    int ans;
+    int max;
+        Info(int b = 0, int a = 0) {
+        int p = 0, q = 0;
+        for (int i = 0; i < 30; i++) {
+            if (b >> i & 1) {
+                l[p++] = {a, i};
+                r[q++] = {a, i};
+            }
+        }
+        for (int i = 0; i < 30; i++) {
+            if (~b >> i & 1) {
+                l[p++] = {inf, i};
+                r[q++] = {inf, i};
+            }
+        }
+        ans = b >= v ? a : inf;
+        max = a;
+    }
+};
+ Info operator+(const Info &a, const Info &b) {
+    Info c;
+    c.ans = std::min(a.ans, b.ans);
+    c.max = std::max(a.max, b.max);
+    int xa = (1 << 30) - 1;
+    int xb = 0;
+    for (int i = 29, j = 0; i >= 0; i--) {
+        while ((xa | xb) < v) {
+            assert(j < 30);
+            xb ^= 1 << b.l[j].second;
+            j++;
+        }
+        if (j > 0) {
+            int l = a.r[i].first;
+            int r = b.l[j - 1].first;
+            c.ans = std::min(c.ans, std::max(l, r));
+        }
+        xa ^= 1 << a.r[i].second;
+    }
+    int p = 0, q = 0;
+    int ma = 0, mb = 0;
+    for (int i = 0; i < 30; i++) {
+        if (a.l[i].first != inf) {
+            c.l[p++] = a.l[i];
+            ma |= 1 << a.l[i].second;
+        }
+        if (b.r[i].first != inf) {
+            c.r[q++] = b.r[i];
+            mb |= 1 << b.r[i].second;
+        }
+    }
+    for (int i = 0; i < 30; i++) {
+        if (~ma >> b.l[i].second & 1) {
+            c.l[p++] = {std::max(a.max, b.l[i].first), b.l[i].second};
+        }
+        if (~mb >> a.r[i].second & 1) {
+            c.r[q++] = {std::max(b.max, a.r[i].first), a.r[i].second};
+        }
+    }
+    return c;
+}
+ void solve() {
+    std::cin >> n >> v;
+        std::vector<int> a(n), b(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+    }
+        std::vector<Info> init(n);
+    for (int i = 0; i < n; i++) {
+        init[i] = Info(b[i], a[i]);
+    }
+    SegmentTree<Info> seg(init);
+        int q;
+    std::cin >> q;
+        while (q--) {
+        int o;
+        std::cin >> o;
+                if (o == 1) {
+            int i, x;
+            std::cin >> i >> x;
+            i--;
+            seg.modify(i, Info(x, a[i]));
+        } else {
+            int l, r;
+            std::cin >> l >> r;
+            l--;
+            auto res = seg.rangeQuery(l, r);
+            int ans = res.ans;
+            if (ans == inf) {
+                ans = -1;
+            }
+            std::cout << ans << " ";
+        }
+    }
+    std::cout << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n), b(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+    }
+        i64 ans = 0;
+    i64 mx1 = -inf, mx2 = -inf;
+    for (int i = 0; i < n; i++) {
+        int d = std::abs(a[i] - b[i]);
+        ans += d;
+        mx1 = std::max(mx1, 1LL * a[i] + b[i] - d);
+        mx2 = std::max(mx2, 1LL * -a[i] - b[i] - d);
+    }
+    ans += std::max(0LL, mx1 + mx2);
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,129 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+  constexpr int P = 998244353;
+using i64 = long long;
+// assume -P <= x < 2P
+int norm(int x) {
+    if (x < 0) {
+        x += P;
+    }
+    if (x >= P) {
+        x -= P;
+    }
+    return x;
+}
+template<class T>
+T power(T a, i64 b) {
+    T res = 1;
+    for (; b; b /= 2, a *= a) {
+        if (b % 2) {
+            res *= a;
+        }
+    }
+    return res;
+}
+struct Z {
+    int x;
+    Z(int x = 0) : x(norm(x)) {}
+    Z(i64 x) : x(norm(x % P)) {}
+    int val() const {
+        return x;
+    }
+    Z operator-() const {
+        return Z(norm(P - x));
+    }
+    Z inv() const {
+        assert(x != 0);
+        return power(*this, P - 2);
+    }
+    Z &operator*=(const Z &rhs) {
+        x = i64(x) * rhs.x % P;
+        return *this;
+    }
+    Z &operator+=(const Z &rhs) {
+        x = norm(x + rhs.x);
+        return *this;
+    }
+    Z &operator-=(const Z &rhs) {
+        x = norm(x - rhs.x);
+        return *this;
+    }
+    Z &operator/=(const Z &rhs) {
+        return *this *= rhs.inv();
+    }
+    friend Z operator*(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend Z operator+(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res += rhs;
+        return res;
+    }
+    friend Z operator-(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res -= rhs;
+        return res;
+    }
+    friend Z operator/(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream &operator>>(std::istream &is, Z &a) {
+        i64 v;
+        is >> v;
+        a = Z(v);
+        return is;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Z &a) {
+        return os << a.val();
+    }
+};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(k);
+    for (int i = 0; i < k; i++) {
+        std::cin >> a[i];
+        a[i]--;
+    }
+        std::vector<int> u(n - 1), v(n - 1);
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < n - 1; i++) {
+        std::cin >> u[i] >> v[i];
+        u[i]--, v[i]--;
+        adj[u[i]].push_back(v[i]);
+        adj[v[i]].push_back(u[i]);
+    }
+        std::vector<int> parent(n, -1), siz(n);
+    for (auto x : a) siz[x] = 1;
+    auto dfs = [&](auto dfs, int x) -> void {
+        for (auto y : adj[x]) {
+            if (y == parent[x]) continue;
+            parent[y] = x;
+            dfs(dfs, y);
+            siz[x] += siz[y];
+        }
+    };
+    dfs(dfs, 0);
+        std::vector<Z> f(n);
+    for (int i = 0; i < k; i++) {
+        f[a[i]] = 1;
+    }
+    Z ans = 0;
+    for (int i = 0; i < n - 1; i++) {
+        if (parent[v[i]] == u[i]) std::swap(u[i], v[i]);
+                ans += Z(k) * (siz[u[i]] + (f[v[i]] * (1 - f[u[i]]) - f[u[i]] * (1 - f[v[i]])) / 2);
+        ans -= Z(siz[u[i]]) * siz[u[i]];
+        ans -= (f[v[i]] * (1 - f[u[i]]) + f[u[i]] * (1 - f[v[i]])) / 2;
+        ans -= siz[u[i]] * (f[v[i]] * (1 - f[u[i]]) - f[u[i]] * (1 - f[v[i]]));
+                f[u[i]] = f[v[i]] = (f[u[i]] + f[v[i]]) / 2;
+    }
+    ans /= Z(k) * (k - 1) / 2;
+    std::cout << ans << "\n";
+        return 0;
+}

@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        std::vector<int> w(n);
+    for (int i = 1; i < n; i++) {
+        w[i] = w[i - 1] + (s[i] != s[i - 1]);
+    }
+        std::vector<int> f(n + 1, n);
+    for (int i = n - 1; i >= 0; i--) {
+        f[w[i]] = i;
+    }
+        std::vector<int> ans(n);
+    int tot = 0;
+    for (int x = 0; x < n; x++) {
+        int g = !x;
+        int pos = 0;
+        int cur = 0;
+        int kl = 0;
+        while (cur < n) {
+            tot++;
+            int npos = pos < n ? w[pos] + x : n;
+            int nkl = (kl + 1) * (x + 1);
+            int goal = std::min({n, npos, nkl});
+            int min = std::max(cur + 1, f[goal]);
+            ans[cur] += std::max(0, g - kl);
+            if (min < n) {
+                ans[min] -= std::max(0, g - kl);
+            } else {
+                break;
+            }
+            cur = min;
+            if (w[cur] >= npos) {
+                g++;
+                pos = cur + 1;
+            }
+            if (w[cur] >= nkl) {
+                kl++;
+            }
+        }
+    }
+        for (int i = 1; i < n; i++) {
+        ans[i] += ans[i - 1];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << ans[i] << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

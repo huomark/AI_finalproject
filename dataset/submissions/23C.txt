@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int N;
+    std::cin >> N;
+        std::vector<int> a(2 * N - 1), b(2 * N - 1);
+    for (int i = 0; i < 2 * N - 1; i++) {
+        std::cin >> a[i] >> b[i];
+    }
+    std::vector<i64> sa(2 * N), sb(2 * N);
+    for (int i = 0; i < 2 * N - 1; i++) {
+        sa[i + 1] = sa[i] + a[i];
+        sb[i + 1] = sb[i] + b[i];
+    }
+        std::cout << "YES\n";
+    for (int i = 0; i < 2 * N - 1; i++) {
+        i64 A, B;
+        if (i < N) {
+            A = sa[i + N] - sa[i];
+            B = sb[i + N] - sb[i];
+        } else {
+            A = sa[i - N + 1] - sa[i] + sa[2 * N - 1];
+            B = sb[i - N + 1] - sb[i] + sb[2 * N - 1];
+        }
+        if (2 * A >= sa[2 * N - 1] && 2 * B >= sb[2 * N - 1]) {
+            for (int j = 0; j < N; j++) {
+                std::cout << (i + j) % (2 * N - 1) + 1 << " \n"[j == N - 1];
+            }
+            return;
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

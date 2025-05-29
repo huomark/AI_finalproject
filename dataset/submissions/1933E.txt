@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ i64 calc(int u, int x) {
+    return 1LL * (u + u - x + 1) * x / 2;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> s(n + 1);
+    for (int i = 0; i < n; i++) {
+        s[i + 1] = s[i] + a[i];
+    }
+        int q;
+    std::cin >> q;
+        while (q--) {
+        int l, u;
+        std::cin >> l >> u;
+        l--;
+                int j = std::lower_bound(s.begin() + l + 1, s.end(), s[l] + u) - s.begin();
+        i64 ans = -1E18;
+        int r = -1;
+        if (j <= n) {
+            if (calc(u, s[j] - s[l]) > ans) {
+                ans = calc(u, s[j] - s[l]);
+                r = j;
+            }
+        }
+        if (j - 1 > l) {
+            if (calc(u, s[j - 1] - s[l]) >= ans) {
+                ans = calc(u, s[j - 1] - s[l]);
+                r = j - 1;
+            }
+        }
+        std::cout << r << " \n"[q == 0];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

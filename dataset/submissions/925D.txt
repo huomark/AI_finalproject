@@ -1,0 +1,112 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<std::vector<int>> adj(n);
+    std::vector<bool> f(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> dis(n, -1);
+    std::vector<int> pre(n);
+    std::queue<int> q;
+    dis[0] = 0;
+    pre[0] = -1;
+    q.push(0);
+        for (auto x : adj[0]) {
+        f[x] = true;
+    }
+        while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+                for (auto y : adj[x]) {
+            if (dis[y] == -1) {
+                dis[y] = dis[x] + 1;
+                pre[y] = x;
+                q.push(y);
+            }
+        }
+    }
+        std::vector<int> ans;
+    if (dis[n - 1] != -1) {
+        for (int i = n - 1; i != -1; i = pre[i]) {
+            ans.push_back(i);
+        }
+        std::reverse(ans.begin(), ans.end());
+    }
+        int x = -1;
+    for (int i = 1; i < n; i++) {
+        if (!f[i] && dis[i] != -1 && (x == -1 || dis[x] > dis[i])) {
+            x = i;
+        }
+    }
+    if (x != -1 && (ans.empty() || ans.size() - 1 > dis[x] + 2)) {
+        ans.clear();
+        for (int i = x; i != -1; i = pre[i]) {
+            ans.push_back(i);
+        }
+        std::reverse(ans.begin(), ans.end());
+        ans.push_back(0);
+        ans.push_back(n - 1);
+    }
+        // std::vector<int> o(n), pos(n);
+    // std::iota(o.begin(), o.end(), 0);
+    // std::sort(o.begin(), o.end(), [&](int i, int j) {
+    //     return adj[i].size() < adj[j].size();
+    // });
+        // for (int i = 0; i < n; i++) {
+    //     pos[o[i]] = i;
+    // }
+        std::vector<std::vector<int>> e(n);
+    for (int i = 0; i < n; i++) {
+        for (auto j : adj[i]) {
+            if (f[i] && f[j]) {
+                e[i].push_back(j);
+            }
+        }
+    }
+        std::vector<bool> h(n);
+    for (int i = 0; i < n; i++) {
+        for (auto j : e[i]) {
+            h[j] = true;
+        }
+        for (auto j : e[i]) {
+            for (auto k : e[j]) {
+                if (k != i && !h[k]) {
+                    if (ans.empty() || ans.size() > 6) {
+                        ans = {0, i, j, k, i, n - 1};
+                        break;
+                    }
+                }
+                if (!ans.empty() && ans.size() > 6) {
+                    break;
+                }
+            }
+            if (!ans.empty() && ans.size() > 6) {
+                break;
+            }
+        }
+        for (auto j : e[i]) {
+            h[j] = false;
+        }
+        if (!ans.empty() && ans.size() > 6) {
+            break;
+        }
+    }
+        if (ans.empty()) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+        std::cout << ans.size() - 1 << "\n";
+    for (auto x : ans) {
+        std::cout << x + 1 << " \n"[x == ans.back()];
+    }
+        return 0;
+}

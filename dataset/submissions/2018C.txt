@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> dep(n), mx(n);
+    std::vector<int> f(n);
+    auto dfs = [&](auto &self, int x, int p) -> void {
+        mx[x] = dep[x];
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            dep[y] = dep[x] + 1;
+            self(self, y, x);
+            mx[x] = std::max(mx[x], mx[y]);
+        }
+        f[0]++;
+        f[dep[x]]--;
+        if (mx[x] + 1 < n) {
+            f[mx[x] + 1]++;
+        }
+    };
+    dfs(dfs, 0, -1);
+        for (int i = 1; i < n; i++) {
+        f[i] += f[i - 1];
+    }
+    int ans = *std::min_element(f.begin(), f.end());
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

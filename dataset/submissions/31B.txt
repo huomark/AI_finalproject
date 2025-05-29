@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void gg() {
+    std::cout << "No solution\n";
+    std::exit(0);
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string s;
+    std::cin >> s;
+        std::string ans;
+        bool fst = true;
+    for (auto c : s) {
+        if (c == '@') {
+            if (ans.empty()) {
+                gg();
+            } else if (fst) {
+                fst = false;
+                ans += c;
+            } else if (ans.back() == '@') {
+                gg();
+            } else {
+                char x = ans.back();
+                ans.pop_back();
+                if (ans.empty() || ans.back() == '@') {
+                    gg();
+                }
+                ans += ',';
+                ans += x;
+                ans += '@';
+            }
+        } else {
+            ans += c;
+        }
+    }
+        if (ans.back() == '@' || fst) {
+        gg();
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

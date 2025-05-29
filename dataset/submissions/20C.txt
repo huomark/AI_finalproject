@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<std::vector<std::pair<int, int>>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v, w;
+        std::cin >> u >> v >> w;
+        u--, v--;
+        adj[u].emplace_back(v, w);
+        adj[v].emplace_back(u, w);
+    }
+        std::vector<i64> dis(n, -1);
+    std::vector<int> pre(n, -1);
+    std::priority_queue<std::tuple<i64, int, int>> h;
+    h.emplace(0, 0, -1);
+        while (!h.empty()) {
+        auto [d, x, t] = h.top();
+        h.pop();
+                if (dis[x] != -1) {
+            continue;
+        }
+        dis[x] = -d;
+        pre[x] = t;
+        for (auto [y, w] : adj[x]) {
+            h.emplace(d - w, y, x);
+        }
+    }
+        if (dis[n - 1] == -1) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+        std::vector<int> a;
+    for (int x = n - 1; x != -1; x = pre[x]) {
+        a.push_back(x);
+    }
+    std::reverse(a.begin(), a.end());
+    for (auto x : a) {
+        std::cout << x + 1 << " \n"[x == n - 1];
+    }
+        return 0;
+}

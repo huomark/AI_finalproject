@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m, q;
+    std::cin >> n >> m >> q;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::map<int, int> f;
+    f[0] = 0;
+        auto split = [&](int x) {
+        auto it = std::prev(f.upper_bound(x));
+        f[x] = it->second;
+    };
+        auto add = [&](int x) {
+        split(x);
+        auto it = f.find(x);
+        while (it->second == m - 1) {
+            it = f.erase(it);
+        }
+        if (it->first > x) {
+            f[x] = 0;
+        }
+        split(it->first + 1);
+        it->second += 1;
+    };
+        auto del = [&](int x) {
+        split(x);
+        auto it = f.find(x);
+        while (it->second == 0) {
+            it = f.erase(it);
+        }
+        if (it->first > x) {
+            f[x] = m - 1;
+        }
+        split(it->first + 1);
+        it->second -= 1;
+    };
+        for (int i = 0; i < n; i++) {
+        add(a[i]);
+    }
+        while (q--) {
+        int x, y;
+        std::cin >> x >> y;
+        x--;
+        del(a[x]);
+        add(a[x] = y);
+                del(0);
+                auto it = std::prev(f.end());
+        while (it != f.begin() && std::prev(it)->second == 0) {
+            it--;
+            f.erase(std::next(it));
+        }
+        std::cout << it->first << " \n"[q == 0];
+                add(0);
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

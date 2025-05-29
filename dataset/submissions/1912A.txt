@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        i64 x;
+    int k;
+    std::cin >> x >> k;
+        std::vector<std::array<i64, 2>> all;
+    for (int i = 0; i < k; i++) {
+        int l;
+        std::cin >> l;
+                std::vector<int> a(l);
+        for (int j = 0; j < l; j++) {
+            std::cin >> a[j];
+        }
+                std::vector<std::array<i64, 2>> stk;
+        for (int j = l - 1; j >= 0; j--) {
+            i64 x = 0, y = 0;
+            x = std::min(a[j], 0);
+            y = a[j];
+            while (!stk.empty() && (y <= 0 || y + stk.back()[0] >= 0)) {
+                auto v = stk.back();
+                stk.pop_back();
+                x = std::min(x, y + v[0]);
+                y += v[1];
+            }
+            if (y > 0) {
+                stk.push_back({x, y});
+            }
+        }
+        all.insert(all.end(), stk.begin(), stk.end());
+    }
+        std::sort(all.begin(), all.end(), std::greater());
+    for (auto [a, b] : all) {
+        if (x + a >= 0) {
+            x += b;
+        } else {
+            break;
+        }
+    }
+    std::cout << x << "\n";
+        return 0;
+}

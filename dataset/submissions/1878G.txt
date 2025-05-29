@@ -1,0 +1,163 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> dep(n), siz(n), in(n), s(n), p(n), top(n), pre(n);
+    std::vector nxt(n + 1, std::vector<int>(30, n));
+    std::vector lst(n + 1, std::vector<int>(30, 0));
+    int cur = 0;
+    auto dfs1 = [&](auto self, int x) -> void {
+        if (x) {
+            adj[x].erase(std::find(adj[x].begin(), adj[x].end(), p[x]));
+        }
+        siz[x] = 1;
+        for (auto &y : adj[x]) {
+            p[y] = x;
+            dep[y] = dep[x] + 1;
+            self(self, y);
+            siz[x] += siz[y];
+            if (siz[y] > siz[adj[x][0]]) {
+                std::swap(y, adj[x][0]);
+            }
+        }
+    };
+    dfs1(dfs1, 0);
+    auto dfs2 = [&](auto self, int x) -> void {
+        in[x] = cur++;
+        s[in[x]] = x;
+        pre[x] = a[x];
+        if (top[x] != x) {
+            pre[x] |= pre[p[x]];
+        }
+        for (auto y : adj[x]) {
+            top[y] = y == adj[x][0] ? top[x] : y;
+            self(self, y);
+        }
+    };
+    dfs2(dfs2, 0);
+        for (int i = n - 1; i >= 0; i--) {
+        nxt[i] = nxt[i + 1];
+        for (int j = 0; j < 30; j++) {
+            if (a[s[i]] >> j & 1) {
+                nxt[i][j] = i;
+            }
+        }
+    }
+    for (int i = 1; i <= n; i++) {
+        lst[i] = lst[i - 1];
+        for (int j = 0; j < 30; j++) {
+            if (a[s[i - 1]] >> j & 1) {
+                lst[i][j] = i;
+            }
+        }
+    }
+        int q;
+    std::cin >> q;
+        while (q--) {
+        int x, y;
+        std::cin >> x >> y;
+        x--, y--;
+                std::vector<std::array<int, 3>> seg, segr;
+        while (top[x] != top[y]) {
+            if (dep[top[x]] > dep[top[y]]) {
+                seg.push_back({in[x] + 1, in[top[x]], pre[x]});
+                x = p[top[x]];
+            } else {
+                segr.push_back({in[top[y]], in[y] + 1, pre[y]});
+                y = p[top[y]];
+            }
+        }
+        if (dep[x] < dep[y]) {
+            int val = 0;
+            for (int i = 0; i < 30; i++) {
+                if (nxt[in[x]][i] <= in[y]) {
+                    val |= 1 << i;
+                }
+            }
+            seg.push_back({in[x], in[y] + 1, val});
+        } else {
+            int val = 0;
+            for (int i = 0; i < 30; i++) {
+                if (nxt[in[y]][i] <= in[x]) {
+                    val |= 1 << i;
+                }
+            }
+            seg.push_back({in[x] + 1, in[y], val});
+        }
+        int d = 0;
+        seg.insert(seg.end(), segr.rbegin(), segr.rend());
+        for (auto [l, r, v] : seg) {
+            d += std::abs(l - r);
+        }
+        auto get = [&]() {
+            std::vector<std::pair<int, int>> a;
+            int o = 0;
+            int cnt = 0;
+            for (auto [l, r, x] : seg) {
+                int no = o | x;
+                int diff = no ^ o;
+                o = no;
+                while (diff) {
+                    int i = __builtin_ctz(diff);
+                    diff ^= 1 << i;
+                    if (l < r) {
+                        a.emplace_back(nxt[l][i] - l + cnt, 1);
+                    } else {
+                        a.emplace_back(l - lst[l][i] + cnt, 1);
+                    }
+                }
+                cnt += std::abs(l - r);
+            }
+            return a;
+        };
+        auto a = get();
+        std::reverse(seg.begin(), seg.end());
+        for (auto &[l, r, v] : seg) {
+            std::swap(l, r);
+        }
+        auto b = get();
+        for (auto &[x, y] : b) {
+            x = d - x;
+            y = -1;
+        }
+        a.insert(a.end(), b.begin(), b.end());
+        std::sort(a.begin(), a.end());
+        int res = b.size();
+        int ans = 0;
+        int lst = 0;
+        for (auto [u, v] : a) {
+            if (u > lst) {
+                ans = std::max(ans, res);
+            }
+            lst = u;
+            res += v;
+        }
+        if (d > lst) {
+            ans = std::max(ans, res);
+        }
+        std::cout << ans << " \n"[q == 0];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

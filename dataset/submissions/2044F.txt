@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m, q;
+    std::cin >> n >> m >> q;
+        std::vector<i64> a(n), b(m);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < m; i++) {
+        std::cin >> b[i];
+    }
+        std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+        i64 sa = std::accumulate(a.begin(), a.end(), 0LL);
+    i64 sb = std::accumulate(b.begin(), b.end(), 0LL);
+        constexpr int N = 2E5;
+    std::vector<std::vector<int>> ds(N + 1);
+    for (int i = 1; i <= N; i++) {
+        for (int j = i; j <= N; j += i) {
+            ds[j].push_back(i);
+        }
+    }
+        std::vector<bool> ans(2 * N + 1);
+    for (int x = -N; x <= N; x++) {
+        if (x == 0) {
+            continue;
+        }
+        for (auto y : ds[std::abs(x)]) {
+            if (std::binary_search(a.begin(), a.end(), sa - y) && std::binary_search(b.begin(), b.end(), sb - x / y)) {
+                ans[x + N] = true;
+                break;
+            }
+            if (std::binary_search(a.begin(), a.end(), sa + y) && std::binary_search(b.begin(), b.end(), sb + x / y)) {
+                ans[x + N] = true;
+                break;
+            }
+        }
+    }
+        for (int i = 0; i < q; i++) {
+        int x;
+        std::cin >> x;
+                std::cout << (ans[x + N] ? "YES" : "NO") << "\n";
+    }
+        return 0;
+}

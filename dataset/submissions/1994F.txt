@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<std::vector<int>> adj(n);
+    std::vector<int> u(m), v(m), c(m);
+    std::vector<int> deg(n);
+    for (int i = 0; i < m; i++) {
+        std::cin >> u[i] >> v[i] >> c[i];
+        u[i]--;
+        v[i]--;
+        deg[u[i]] ^= c[i];
+        deg[v[i]] ^= c[i];
+        adj[u[i]].push_back(i);
+        adj[v[i]].push_back(i);
+    }
+        std::vector<bool> vis(n);
+    auto dfs = [&](auto self, int x) -> void {
+        vis[x] = true;
+        for (auto i : adj[x]) {
+            int y = u[i] ^ v[i] ^ x;
+            if (vis[y] || c[i] == 1) {
+                continue;
+            }
+            self(self, y);
+            if (deg[y] == 1) {
+                deg[x] ^= 1;
+                deg[y] ^= 1;
+                c[i] = 1;
+            }
+        }
+    };
+    for (int x = 0; x < n; x++) {
+        if (vis[x]) {
+            continue;
+        }
+        dfs(dfs, x);
+        if (deg[x] == 1) {
+            std::cout << "NO\n";
+            return;
+        }
+    }
+    std::cout << "YES\n";
+        std::vector<int> ans;
+    auto find = [&](auto self, int x) -> void {
+        while (!adj[x].empty()) {
+            int i = adj[x].back();
+            adj[x].pop_back();
+            int y = u[i] ^ v[i] ^ x;
+            if (c[i] == 0) {
+                continue;
+            }
+            c[i] = 0;
+            self(self, y);
+        }
+        ans.push_back(x);
+    };
+    find(find, 0);
+    std::cout << ans.size() - 1 << "\n";
+    for (int i = 0; i < ans.size(); i++) {
+        std::cout << ans[i] + 1 << " \n"[i == ans.size() - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

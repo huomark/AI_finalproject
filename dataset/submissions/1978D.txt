@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, c;
+    std::cin >> n >> c;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    a[0] += c;
+    int t = std::max_element(a.begin(), a.end()) - a.begin();
+        i64 sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum += a[i];
+        int ans;
+        if (i == t) {
+            ans = 0;
+        } else if (i > t) {
+            ans = i;
+        } else {
+            ans = i + (sum < a[t]);
+        }
+        std::cout << ans << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

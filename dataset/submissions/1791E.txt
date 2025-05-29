@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        i64 sum = 0;
+    int neg = 0;
+    std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        if (a[i] < 0) {
+            neg++;
+            a[i] = -a[i];
+        }
+        sum += a[i];
+    }
+    if (neg % 2 == 1) {
+        int mn = *std::min_element(a.begin(), a.end());
+        sum -= 2 * mn;
+    }
+    std::cout << sum << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

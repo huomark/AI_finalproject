@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int pw[7] = {1, 10, 100, 1000, 10000, 100000, 1000000};
+ void solve() {
+    int A, B, C;
+    std::cin >> A >> B >> C;
+    i64 k;
+    std::cin >> k;
+        for (int x = pw[A - 1]; x < pw[A]; x++) {
+        int lo = std::max(pw[B - 1], pw[C - 1] - x);
+        int hi = std::min(pw[B] - 1, pw[C] - 1 - x);
+        int cnt = std::max(0, hi - lo + 1);
+        if (k <= cnt) {
+            std::cout << x << " + " << lo + k - 1 << " = " << x + lo + k - 1 << "\n";
+            return;
+        }
+        k -= cnt;
+    }
+    std::cout << -1 << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

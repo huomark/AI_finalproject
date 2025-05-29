@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<std::string> s(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+    }
+        std::vector a(n, std::vector<int>(m));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            a[i][j] = (s[i][j] == 'B');
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m - 1; j++) {
+            a[i][j] ^= a[i][j + 1];
+        }
+    }
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < m; j++) {
+            a[i][j] ^= a[i + 1][j];
+        }
+    }
+    int ans = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            ans += a[i][j];
+        }
+    }
+    int matching = 0;
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < m - 1; j++) {
+            if (a[i][j] && a[i][m - 1] && a[n - 1][j]) {
+                adj[i].push_back(j);
+            }
+        }
+    }
+    if (a[n - 1][m - 1]) {
+        adj[n - 1].push_back(m - 1);
+    }
+    std::vector<int> yx(m, -1);
+    std::vector<bool> vis(n, false);
+    auto find = [&](auto self, int x) -> bool {
+        vis[x] = true;
+        for (auto y : adj[x]) {
+            if (yx[y] == -1 || (!vis[yx[y]] && self(self, yx[y]))) {
+                yx[y] = x;
+                return true;
+            }
+        }
+        return false;
+    };
+    for (int i = 0; i < n; i++) {
+        if (find(find, i)) {
+            matching += 1;
+            vis.assign(n, false);
+        }
+    }
+    ans -= matching / 2 * 2;
+        std::cout << ans << "\n";
+        return 0;
+}

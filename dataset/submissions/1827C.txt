@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+std::vector<int> manacher(std::string s) {
+    std::string t = "#";
+    for (auto c : s) {
+        t += c;
+        t += '#';
+    }
+    int n = t.size();
+    std::vector<int> r(n);
+    for (int i = 0, j = 0; i < n; i++) {
+        if (2 * j - i >= 0 && j + r[j] > i) {
+            r[i] = std::min(r[2 * j - i], j + r[j] - i);
+        }
+        while (i - r[i] >= 0 && i + r[i] < n && t[i - r[i]] == t[i + r[i]]) {
+            r[i] += 1;
+        }
+        if (i + r[i] > j + r[j]) {
+            j = i;
+        }
+    }
+    return r;
+}
+struct DSU {
+    std::vector<int> f, siz;
+        DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+        void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+        siz.assign(n, 1);
+    }
+        int find(int x) {
+        while (x != f[x]) {
+            x = f[x] = f[f[x]];
+        }
+        return x;
+    }
+        bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+        bool merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) {
+            return false;
+        }
+        siz[x] += siz[y];
+        f[y] = x;
+        return true;
+    }
+        int size(int x) {
+        return siz[find(x)];
+    }
+};
+void solve() {
+    int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        auto r = manacher(s);
+    DSU dsu(n + 1);
+    std::vector<int> f(n, -1);
+    for (int i = 0; i <= n; i++) {
+        int d = r[2 * i] / 2;
+        for (int l = dsu.find(i - d); l < i; l = dsu.find(l)) {
+            dsu.merge(l + 1, l);
+            f[l] = 2 * i - l;
+        }
+    }
+    std::vector<int> dp(n + 1);
+    i64 ans = 0;
+    for (int i = n - 1; i >= 0; i--) {
+        if (f[i] != -1) {
+            dp[i] = 1 + dp[f[i]];
+            ans += dp[i];
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

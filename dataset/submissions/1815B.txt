@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void add(int x) {
+    std::cout << "+ " << x << std::endl;
+    int res;
+    std::cin >> res;
+}
+ int query(int i, int j) {
+    std::cout << "? " << i << " " << j << std::endl;
+    int res;
+    std::cin >> res;
+    return res;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        add(n + 1);
+    add(n);
+        std::vector<int> a(n), b(n), c(n);
+    for (int i = 1; i < n; i++) {
+        a[i] = query(1, i + 1);
+    }
+        int j = std::find(a.begin(), a.end(), 1) - a.begin();
+    b[0] = a[j];
+    for (int i = 1; i < n; i++) {
+        b[i] = query(j + 1, i + 1);
+    }
+    for (int i = 0; i < n; i++) {
+        if (a[i] < b[i]) {
+            c[i] = -a[i];
+        } else {
+            c[i] = a[i];
+        }
+    }
+    int min = *std::min_element(c.begin(), c.end());
+    for (int i = 0; i < n; i++) {
+        c[i] -= min;
+    }
+        std::vector<int> p;
+    int l = 1, r = n, t = 0;
+    while (l <= r) {
+        if (!t) {
+            p.push_back(r--);
+        } else {
+            p.push_back(l++);
+        }
+        t ^= 1;
+    }
+        std::cout << "!";
+    for (int i = 0; i < n; i++) {
+        std::cout << " " << p[c[i]];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << " " << p[n - 1 - c[i]];
+    }
+    std::cout << std::endl;
+    int res;
+    std::cin >> res;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

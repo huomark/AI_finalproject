@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int inf = 1E9;
+ void solve() {
+    int n;
+    std::cin >> n;
+        int ans = inf;
+        std::vector f(4, inf);
+    for (int i = 0; i < n; i++) {
+        int x;
+        std::string s;
+        std::cin >> x >> s;
+        int t = (s[0] - '0') | (s[1] - '0') << 1;
+        f[t] = std::min(f[t], x);
+    }
+        ans = std::min(f[3], f[1] + f[2]);
+    if (ans == inf) {
+        ans = -1;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

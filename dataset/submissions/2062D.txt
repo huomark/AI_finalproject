@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ using i128 = __int128;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> l(n), r(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> l[i] >> r[i];
+    }
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> siz(n), f(n);
+    i128 ans = 0;
+    auto dfs = [&](auto &&self, int x, int p) -> void {
+        siz[x] = 1;
+        f[x] = l[x];
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            self(self, y, x);
+            siz[x] += siz[y];
+            f[x] = std::min(r[x], std::max(f[x], f[y]));
+        }
+        ans += f[x];
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            if (f[x] > f[y]) {
+                ans += 1LL * (f[x] - f[y]) * siz[y];
+            } else {
+                ans += 1LL * (f[y] - f[x]) * (n - siz[y]);
+            }
+        }
+    };
+    dfs(dfs, 0, -1);
+        auto find = [&](auto &&self, int x, int p) -> int {
+        for (auto y : adj[x]) {
+            if (y == p || 2 * siz[y] <= n) {
+                continue;
+            }
+            return self(self, y, x);
+        }
+        return x;
+    };
+        int rt = find(find, 0, -1);
+    ans = 0;
+    dfs(dfs, rt, -1);
+        ans /= n;
+    std::cout << i64(ans) << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

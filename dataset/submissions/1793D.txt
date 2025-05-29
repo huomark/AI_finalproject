@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> p(n), q(n), invp(n), invq(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+        invp[p[i]] = i;
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> q[i];
+        q[i]--;
+        invq[q[i]] = i;
+    }
+        int maxl = n;
+    int minr = -1;
+    i64 ans = 0;
+    for (int mex = 1; mex <= n; mex++) {
+        maxl = std::min(maxl, invp[mex - 1]);
+        minr = std::max(minr, invp[mex - 1]);
+        maxl = std::min(maxl, invq[mex - 1]);
+        minr = std::max(minr, invq[mex - 1]);
+                int minl = 0;
+        int maxr = n - 1;
+                if (mex < n) {
+            if (invp[mex] < maxl) {
+                minl = std::max(minl, invp[mex] + 1);
+            } else {
+                maxr = std::min(maxr, invp[mex] - 1);
+            }
+            if (invq[mex] < maxl) {
+                minl = std::max(minl, invq[mex] + 1);
+            } else {
+                maxr = std::min(maxr, invq[mex] - 1);
+            }
+        }
+                if (minl <= maxl && minr <= maxr) {
+            ans += 1LL * (maxl - minl + 1) * (maxr - minr + 1);
+        }
+    }
+        int lenl = std::min(invp[0], invq[0]);
+    int lenr = std::min(n - 1 - invp[0], n - 1 - invq[0]);
+    int lenm = std::abs(invp[0] - invq[0]) - 1;
+    ans += 1LL * lenl * (lenl + 1) / 2;
+    ans += 1LL * lenr * (lenr + 1) / 2;
+    ans += 1LL * lenm * (lenm + 1) / 2;
+    std::cout << ans << "\n";
+        return 0;
+}

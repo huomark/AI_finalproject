@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        for (int x = 1; x <= 10; x++) {
+        for (int y = x + 1; y <= 10; y++) {
+            int z = n - x - y;
+            if (x % 3 != 0 && y % 3 != 0 && z % 3 != 0 && z > y) {
+                std::cout << "YES\n";
+                std::cout << x << " " << y << " " << z << "\n";
+                return;
+            }
+        }
+    }
+    std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m, k;
+    std::cin >> n >> m >> k;
+        std::vector<int> a(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> a[i];
+    }
+        std::sort(a.begin(), a.end(), std::greater());
+    int sum = 0;
+    for (int i = 1; i <= m; i++) {
+        sum += a[i - 1];
+        if (sum > n / k * i + std::min(i, n % k)) {
+            std::cout << "NO\n";
+            return;
+        }
+    }
+        std::cout << "YES\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

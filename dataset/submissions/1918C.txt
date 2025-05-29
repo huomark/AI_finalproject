@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 a, b, r;
+    std::cin >> a >> b >> r;
+        i64 ans = 1E18;
+    for (int t = 0; t < 2; t++) {
+        bool gt = false;
+        i64 x = 0, res = 0;
+        for (int i = 59; i >= 0; i--) {
+            int ai = a >> i & 1;
+            int bi = b >> i & 1;
+            if (ai != bi) {
+                if (!gt) {
+                    if (!ai) {
+                        x += 1LL << i;
+                    }
+                    res += 1LL << i;
+                    gt = true;
+                } else {
+                    if (!ai) {
+                        res -= 1LL << i;
+                    } else if (x + (1LL << i) <= r) {
+                        res -= 1LL << i;
+                        x += 1LL << i;
+                    } else {
+                        res += 1LL << i;
+                    }
+                }
+            }
+        }
+        if (x <= r) {
+            ans = std::min(ans, res);
+        }
+                std::swap(a, b);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

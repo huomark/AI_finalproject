@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> u(n), d(n), l(n), r(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> u[i] >> l[i] >> d[i] >> r[i];
+    }
+        std::map<int, int> f[2], g[2];
+    std::vector<int> p(n);
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(), [&](int i, int j) {
+        return l[i] < l[j];
+    });
+        for (auto i : p) {
+        if (d[i] - u[i] == 1) continue;
+        for (int x = u[i] - 1; x < d[i]; x++) {
+            if (!f[x].empty() && f[x].rbegin()->second >= l[i] - 1) {
+                f[x].rbegin()->second = std::max(f[x].rbegin()->second, r[i]);
+            } else {
+                f[x][l[i]] = r[i];
+            }
+        }
+    }
+        std::vector<int> q;
+    for (auto i : p) {
+        if (d[i] - u[i] != 1) continue;
+        int cv[2] {};
+        for (int x = 0; x < 2; x++) {
+            auto it = f[x].upper_bound(l[i]);
+            if (it != f[x].begin() && std::prev(it)->second >= r[i]) {
+                cv[x] = 1;
+            }
+        }
+        if (cv[0] && cv[1]) {
+            u[i] = d[i] = l[i] = r[i] = 0;
+            continue;
+        }
+        if (!cv[0] && !cv[1]) {
+            if (!g[0].empty() && g[0].rbegin()->second >= r[i]) {
+                u[i] = d[i] = l[i] = r[i] = 0;
+            } else if (!g[0].empty() && l[i] <= g[0].rbegin()->second + 1) {
+                l[i] = g[0].rbegin()->second + 1;
+                g[0].rbegin()->second = r[i];
+            } else {
+                g[0][l[i]] = r[i];
+            }
+            continue;
+        }
+        if (cv[0]) u[i] = 2;
+        else d[i] = 1;
+    }
+    g[1] = g[0];
+        for (auto i : p) {
+        if (!u[i] || d[i] - u[i] == 1) continue;
+        int x = u[i] - 1;
+        auto it = g[x].upper_bound(l[i]);
+        if (it != g[x].end()) {
+            r[i] = std::min(r[i], it->first - 1);
+        }
+        if (it != g[x].begin() && std::prev(it)->second >= r[i]) {
+            u[i] = d[i] = l[i] = r[i] = 0;
+            continue;
+        }
+        if (it != g[x].begin() && std::prev(it)->second >= l[i]) {
+            l[i] = std::prev(it)->second + 1;
+            std::prev(it)->second = r[i];
+        } else {
+            g[x][l[i]] = r[i];
+        }
+    }
+        int ans = 0;
+    for (int x = 0; x < 2; x++) {
+        for (auto [l, r] : g[x]) {
+            ans += r - l + 1;
+        }
+    }
+    std::cout << ans << "\n";
+        for (int i = 0; i < n; i++) {
+        std::cout << u[i] << " " << l[i] << " " << d[i] << " " << r[i] << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, k, d, w;
+    std::cin >> n >> k >> d >> w;
+        std::vector<int> t(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> t[i];
+    }
+        int ans = 0;
+    for (int i = 0; i < n; ) {
+        ans += 1;
+        int j = i;
+        while (j < n && t[j] - t[i] <= d + w && j - i < k) {
+            j++;
+        }
+        i = j;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

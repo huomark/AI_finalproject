@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> L(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> L[i];
+    }
+    for (int i = n - 1; i > 0; i--) {
+        L[i - 1] = std::max(L[i - 1], L[i] - 1);
+    }
+    int ans = 1 + std::count(L.begin() + 1, L.end(), 0);
+    std::cout << ans << "\n";
+        return 0;
+}

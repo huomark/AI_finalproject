@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ using i128 = __int128;
+ constexpr i64 inf = 1E18;
+ void chmin(i64 &a, i64 b) {
+    if (a > b) {
+        a = b;
+    }
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<i64> a(n), b(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i] >> b[i];
+        b[i] -= a[i];
+    }
+        std::vector dp(n + 1, std::array<i64, 3> {inf, inf, inf});
+    std::vector<int> p(n);
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(),
+        [&](int i, int j) {
+            return b[i] < b[j];
+        });
+    std::vector ans(n + 1, inf);
+    for (int j = 0; j < n; j++) {
+        int i = p[j];
+        auto ndp = dp;
+        chmin(ndp[1][0], 2 * a[i]);
+        chmin(ndp[1][1], a[i]);
+        for (int k = 1; k <= j; k++) {
+            for (int x = 0; x < 3; x++) {
+                chmin(ndp[k + 1][x], dp[k][x] + 2 * a[i] + b[i]);
+            }
+            chmin(ndp[k + 1][1], dp[k][0] + a[i] + b[i]);
+            chmin(ndp[k + 1][2], dp[k][1] + a[i]);
+            chmin(ans[k + 1], dp[k][1] + a[i] + b[i]);
+            chmin(ans[k + 1], dp[k][2] + 2 * a[i] + 2 * b[i]);
+        }
+        dp[1][1] = inf;
+        dp = std::move(ndp);
+    }
+        for (int k = 2; k <= n; k++) {
+        std::cout << ans[k] << " \n"[k == n];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

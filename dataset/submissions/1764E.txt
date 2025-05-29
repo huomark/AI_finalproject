@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n), b(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i] >> b[i];
+    }
+        if (k <= a[0]) {
+        std::cout << "YES\n";
+        return;
+    }
+        if (k > a[0] + b[0]) {
+        std::cout << "NO\n";
+        return;
+    }
+        k -= b[0];
+        std::vector<std::pair<int, int>> A;
+    for (int i = 1; i < n; i++) {
+        A.emplace_back(a[i] + b[i], b[i]);
+    }
+        std::sort(A.begin(), A.end());
+    n--;
+        std::vector<int> s(n + 1);
+    for (int i = n - 1; i >= 0; i--) {
+        s[i] = s[i + 1] + A[i].second;
+    }
+        int L = n;
+    while (L && k - s[L] <= A[L - 1].first) {
+        L--;
+    }
+        i64 mn = 1E18;
+    std::vector<i64> v(n);
+    for (int i = 0; i < n; i++) {
+        v[i] = A[i].first + s[i + 1];
+    }
+    std::vector<int> stk;
+    for (int i = 0; i < n; i++) {
+        if (i < L) {
+            if (k - s[L] <= A[i].first - A[i].second) {
+                std::cout << "YES\n";
+                return;
+            }
+        } else {
+            // int e = i;
+            // while (e && A[e - 1].first + s[e] - A[i].second >= k) {
+            //     e--;
+            // }
+            auto it = std::partition_point(stk.begin(), stk.end(), [&](int e) {
+                return v[e] < A[i].second + k;
+            });
+            int e;
+            if (it == stk.begin()) {
+                e = 0;
+            } else {
+                e = *(it - 1) + 1;
+            }
+            if (k <= A[i].first - A[i].second * 2 + s[e]) {
+                std::cout << "YES\n";
+                return;
+            }
+        }
+        while (!stk.empty() && v[i] < v[stk.back()]) {
+            stk.pop_back();
+        }
+        stk.push_back(i);
+    }
+        std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

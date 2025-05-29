@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ void solve() {
+    int n, m, L;
+    std::cin >> n >> m >> L;
+        std::vector<int> l(n), r(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> l[i] >> r[i];
+    }
+        std::priority_queue<int> pq;
+        std::vector<int> x(m), v(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> x[i] >> v[i];
+    }
+        i64 cur = 1;
+    int ans = 0;
+    for (int i = 0, j = 0; i < n; i++) {
+        while (j < m && x[j] < l[i]) {
+            pq.push(v[j]);
+            j++;
+        }
+        while (cur < r[i] - l[i] + 2) {
+            if (pq.empty()) {
+                std::cout << -1 << "\n";
+                return;
+            }
+            cur += pq.top();
+            pq.pop();
+            ans++;
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ const long double phi = (1 + std::sqrt(5.L)) / 2;
+ i64 floor_sum(i64 n, i64 m, i64 a, i64 b) {
+    i64 ans = 0;
+    if (a >= m) {
+        ans += (n - 1) * n * (a / m) / 2;
+        a %= m;
+    }
+    if (b >= m) {
+        ans += n * (b / m);
+        b %= m;
+    }
+     long long y_max = (a * n + b) / m, x_max = (y_max * m - b);
+    if (y_max == 0) return ans;
+    ans += (n - (x_max + a - 1) / a) * y_max;
+    ans += floor_sum(y_max, a, m, (a - x_max % a) % a);
+    return ans;
+}
+ constexpr i64 X = 701408733;
+constexpr i64 Y = 1134903170;
+ int g(int n) {
+    int ans = 0;
+    ans -= floor_sum(n / 2 + 1, Y, 2 * X, 0);
+    ans += floor_sum((n + 1) / 2, Y, 2 * X, X);
+    return ans;
+}
+ int get(int n) {
+    int t = (n + 1) * Y / (2 * Y + X);
+        int ans = 0;
+    ans += g(n - 1);
+    ans -= g(t);
+    if (n % 2 == 0) {
+        ans *= -1;
+    }
+    ans += int(n * X / Y) * ((n - t - 1) % 2 == 0 ? -1 : 1);
+    if ((n - t) % 2 == 1) {
+        ans += n;
+    }
+        return ans;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::cout << get(n) << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

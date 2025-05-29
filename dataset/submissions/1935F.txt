@@ -1,0 +1,126 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    std::vector<int> d(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+        if (u > v) {
+            std::swap(u, v);
+        }
+        d[u + 1]++;
+        d[v]--;
+    }
+    for (int i = 1; i < n; i++) {
+        d[i] += d[i - 1];
+    }
+    for (int i = 0; i < n; i++) {
+        d[i] = d[i] > 0;
+    }
+    d[0] = d[n - 1] = 1;
+        std::vector<int> minIn(n), minOut(n, n), maxIn(n), maxOut(n), p(n);
+    p[0] = -1;
+    auto dfs = [&](auto self, int x) -> void {
+        minIn[x] = maxIn[x] = x;
+        for (auto y : adj[x]) {
+            if (y == p[x]) {
+                continue;
+            }
+            p[y] = x;
+            self(self, y);
+            minIn[x] = std::min(minIn[x], minIn[y]);
+            maxIn[x] = std::max(maxIn[x], maxIn[y]);
+        }
+    };
+    dfs(dfs, 0);
+        auto dfs2 = [&](auto self, int x) -> void {
+        int mx[2] {}, mn[2] {};
+        mn[0] = mn[1] = n;
+        for (auto y : adj[x]) {
+            if (y == p[x]) {
+                continue;
+            }
+            int a = minIn[y], b = maxIn[y];
+            for (int t = 0; t < 2; t++) {
+                if (a < mn[t]) {
+                    std::swap(a, mn[t]);
+                }
+                if (b > mx[t]) {
+                    std::swap(b, mx[t]);
+                }
+            }
+        }
+        for (auto y : adj[x]) {
+            if (y == p[x]) {
+                continue;
+            }
+            int a = mx[mx[0] == maxIn[y]];
+            int b = mn[mn[0] == minIn[y]];
+            maxOut[y] = std::max({maxOut[x], x, a});
+            minOut[y] = std::min({minOut[x], x, b});
+            self(self, y);
+        }
+    };
+    dfs2(dfs2, 0);
+        for (int x = 0; x < n; x++) {
+        int res = adj[x].size() - d[x];
+        std::cout << res << " " << adj[x].size() - 1 << "\n";
+                std::vector<std::pair<int, int>> comp;
+        for (auto y : adj[x]) {
+            if (y == p[x]) {
+                comp.emplace_back(minOut[x], maxOut[x]);
+            } else {
+                comp.emplace_back(minIn[y], maxIn[y]);
+            }
+        }
+        int lst = -1;
+        std::sort(comp.begin(), comp.end());
+        for (auto [l, r] : comp) {
+            if (l >= x) {
+                break;
+            }
+            if (lst != -1) {
+                std::cout << l << " " << l + 1 << "\n";
+            }
+            lst = l;
+        }
+        std::sort(comp.begin(), comp.end(),
+            [&](auto a, auto b) {
+                return a.second > b.second;
+            });
+        int cl = 0;
+        lst = -1;
+        for (auto [l, r] : comp) {
+            if (r <= x) {
+                break;
+            }
+            if (lst != -1) {
+                if (!cl || l >= x) {
+                    std::cout << r + 1 << " " << r + 2 << "\n";
+                }
+            }
+            cl |= l < x;
+            lst = r;
+        }
+        if (!cl && x > 0 && x + 1 < n) {
+            std::cout << x << " " << x + 2 << "\n";
+        }
+        std::cout << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

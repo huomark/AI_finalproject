@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    i64 m;
+    int k;
+    std::cin >> n >> m >> k;
+        std::vector<i64> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        if (k > n) {
+        std::cout << m + 1 << " " << 0 << "\n";
+        return 0;
+    }
+        std::sort(a.begin(), a.end());
+        auto cand = a;
+    cand.push_back(0);
+        for (int v : {k - 1, k, k + 1}) {
+        for (int i = 0; i + v < n; i++) {
+            cand.push_back((a[i] + a[i + v]) / 2);
+        }
+    }
+        std::sort(cand.begin(), cand.end());
+        i64 val = 0;
+    i64 ans = 0;
+    i64 y = 0;
+        for (int i = -1, j = 0; auto x : cand) {
+        y = std::max(y, x - 10);
+        while (y < x + 10 && y <= m) {
+            while (i + 1 < n && a[i + 1] <= y) {
+                i++;
+            }
+            while (j < n && a[j] < y) {
+                j++;
+            }
+            if (i - j + 1 >= k) {
+                y++;
+                continue;
+            }
+            i64 lo = 0, hi = m;
+            if (i - k + 1 >= 0) {
+                lo = std::max(lo, (y + a[i - k + 1]) / 2 + 1);
+            }
+            if (j + k - 1 < n) {
+                hi = std::min(hi, (y + a[j + k - 1] - 1) / 2);
+            }
+            if (hi - lo + 1 > ans) {
+                ans = hi - lo + 1;
+                val = y;
+            }
+            y++;
+        }
+    }
+        std::cout << ans << " " << val << "\n";
+        return 0;
+}

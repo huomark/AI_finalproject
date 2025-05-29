@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ using T = i64;
+struct Point {
+    T x;
+    T y;
+    Point(T x = 0, T y = 0) : x(x), y(y) {}
+        Point &operator+=(const Point &p) {
+        x += p.x, y += p.y;
+        return *this;
+    }
+    Point &operator-=(const Point &p) {
+        x -= p.x, y -= p.y;
+        return *this;
+    }
+    Point &operator*=(const T &v) {
+        x *= v, y *= v;
+        return *this;
+    }
+    friend Point operator-(const Point &p) {
+        return Point(-p.x, -p.y);
+    }
+    friend Point operator+(Point lhs, const Point &rhs) {
+        return lhs += rhs;
+    }
+    friend Point operator-(Point lhs, const Point &rhs) {
+        return lhs -= rhs;
+    }
+    friend Point operator*(Point lhs, const T &rhs) {
+        return lhs *= rhs;
+    }
+};
+ T dot(const Point &a, const Point &b) {
+    return a.x * b.x + a.y * b.y;
+}
+ T cross(const Point &a, const Point &b) {
+    return a.x * b.y - a.y * b.x;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<Point> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i].x >> p[i].y;
+    }
+        std::vector<bool> ok(n, true);
+        if (n % 2 == 0) {
+        std::cout << "Alberto" << std::endl;
+    } else {
+        std::cout << "Beatrice" << std::endl;
+        int x;
+        std::cin >> x;
+        x--;
+        ok[x] = false;
+    }
+        while (true) {
+        std::vector<int> a;
+        for (int i = 0; i < n; i++) {
+            if (ok[i]) {
+                a.push_back(i);
+            }
+        }
+                if (a.size() == 2) {
+            break;
+        }
+                int t = -1;
+        i64 ans = 1E18;
+                for (int i = 0; i < a.size(); i++) {
+            int q = a[i];
+            int l = a[(i - 1 + a.size()) % a.size()];
+            int r = a[(i + 1 + a.size()) % a.size()];
+            i64 area = cross(p[r] - p[q], p[l] - p[q]);
+            if (area < ans) {
+                ans = area;
+                t = a[i];
+            }
+        }
+                std::cout << t + 1 << std::endl;
+        ok[t] = false;
+                int x;
+        std::cin >> x;
+        x--;
+        ok[x] = false;
+    }
+        return 0;
+}

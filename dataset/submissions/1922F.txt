@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, x;
+    std::cin >> n >> x;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        a[i]--;
+    }
+        std::vector dp(1, std::vector(n + 1, std::vector<int>(x)));
+    std::vector g(1, std::vector(n + 1, std::vector<int>(x)));
+        int ans = 0;
+    for (int i = 0; i <= n; i++) {
+        dp[0][i].assign(x, i);
+        g[0][i].assign(x, i);
+    }
+    for (int i = n - 1; i >= 0; i--) {
+        dp[0][i][a[i]] = dp[0][i + 1][a[i]];
+        for (int j = 0; j < x; j++) {
+            if (j != a[i]) {
+                g[0][i][j] = g[0][i + 1][j];
+            }
+        }
+    }
+        while (*std::max_element(dp[ans][0].begin(), dp[ans][0].end()) < n) {
+        ans++;
+        dp.emplace_back(n + 1, std::vector<int>(x));
+        g.emplace_back(n + 1, std::vector<int>(x));
+        for (int i = n; i >= 0; i--) {
+            for (int v = 0; v < x; v++) {
+                dp[ans][i][v] = std::max(dp[ans][i][v], g[ans - 1][i][v]);
+                for (int c = 0; c <= ans; c++) {
+                    dp[ans][i][v] = std::max(dp[ans][i][v], dp[ans - c][dp[c][i][v]][v]);
+                }
+            }
+            for (int c = 0; c <= ans; c++) {
+                std::array<int, 2> val{};
+                for (int v = 0; v < x; v++) {
+                    int res = dp[c][i][v];
+                    if (res > val[0]) {
+                        val[1] = val[0];
+                        val[0] = res;
+                    } else if (res > val[1]) {
+                        val[1] = res;
+                    }
+                }
+                for (int v = 0; v < x; v++) {
+                    int res = val[dp[c][i][v] == val[0]];
+                    g[ans][i][v] = std::max(g[ans][i][v], g[ans - c][res][v]);
+                }
+            }
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

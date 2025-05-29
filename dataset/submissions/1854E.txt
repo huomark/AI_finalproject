@@ -1,0 +1,138 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        i64 m;
+    std::cin >> m;
+        if (m > 20000000) {
+        std::vector<i64> a;
+        for (int i = 0; i < 10; i++) {
+            a.push_back(1);
+        }
+        for (int i = 0; i < 16; i++) {
+            a.push_back(2);
+        }
+        for (int i = 0; i < 10; i++) {
+            a.push_back(3);
+        }
+                std::vector<i64> f(61);
+        f[0] = 1;
+        for (int i = 0; i < a.size(); i++) {
+            for (int j = 60; j >= a[i]; j--) {
+                f[j] += f[j - a[i]];
+            }
+        }
+        m -= f[60];
+        int N = 20000000;
+        std::vector<int> g(N + 1, N);
+        g[0] = 0;
+        for (int i = 0; i < 20; i++) {
+            if (f[i] <= N) {
+                for (int j = f[i]; j <= N; j++) {
+                    g[j] = std::min(g[j], g[j - f[i]] + 1);
+                }
+            }
+        }
+        // for (int i = 0; i <= 60; i++) {
+        //     std::cerr << i << " " << f[i] << "\n";
+        // }
+        // std::cerr << "------\n";
+        // int mx = 0;
+        // for (int i = N; i; i--) {
+        //     if (g[i] > mx) {
+        //         mx = g[i];
+        //         std::cout << i << " " << g[i] << "\n";
+        //     }
+        // }
+                // mx = 0;
+        // for (int s = 0; s < (1 << 21); s++) {
+        //     i64 lo = 0, hi = 1E10;
+        //     for (int i = 0; i <= 20; i++) {
+        //         if (s >> i & 1) {
+        //             lo += f[i + 16];
+        //             lo = std::max(lo, 1LL * N);
+        //             hi += f[i + 16];
+        //         } else {
+        //             hi = std::min(hi, f[i + 16] - 1);
+        //         }
+        //     }
+        //     hi = std::min(hi, i64(1E10));
+        //     if (lo <= hi) {
+        //         mx = std::max(mx, __builtin_popcount(s));
+        //     }
+        // }
+        // std::cerr << mx << "\n";
+        for (int i = 36; i >= 0; i--) {
+            if (m > N && m - f[i] > 5E6) {
+                m -= f[i];
+                a.push_back(60 - i);
+                for (int j = 60; j >= a.back(); j--) {
+                    f[j] += f[j - a.back()];
+                }
+            }
+        }
+        for (int i = 19; i >= 0; i--) {
+            while (m >= f[i] && g[m - f[i]] == g[m] - 1) {
+                a.push_back(60 - i);
+                m -= f[i];
+            }
+        }
+        std::cout << a.size() << "\n";
+        for (int i = 0; i < a.size(); i++) {
+            std::cout << a[i] << " \n"[i == a.size() - 1];
+        }
+        f.assign(61, 0);
+        f[0] = 1;
+        for (int i = 0; i < a.size(); i++) {
+            for (int j = 60; j >= a[i]; j--) {
+                f[j] += f[j - a[i]];
+            }
+        }
+        std::cerr << f[60] << "\n";
+    } else {
+        std::vector<i64> a;
+        for (int i = 0; i < 10; i++) {
+            a.push_back(1);
+        }
+        for (int i = 0; i < 16; i++) {
+            a.push_back(2);
+        }
+                std::vector<i64> f(61);
+        f[0] = 1;
+        for (int i = 0; i < a.size(); i++) {
+            for (int j = 60; j >= a[i]; j--) {
+                f[j] += f[j - a[i]];
+            }
+        }
+        int N = 20000000;
+        std::vector<int> g(N + 1, N);
+        g[0] = 0;
+        for (int i = 0; i < 20; i++) {
+            if (f[i] <= N) {
+                for (int j = f[i]; j <= N; j++) {
+                    g[j] = std::min(g[j], g[j - f[i]] + 1);
+                }
+            }
+        }
+        for (int i = 19; i >= 0; i--) {
+            while (m >= f[i] && g[m - f[i]] == g[m] - 1) {
+                a.push_back(60 - i);
+                m -= f[i];
+            }
+        }
+        std::cout << a.size() << "\n";
+        for (int i = 0; i < a.size(); i++) {
+            std::cout << a[i] << " \n"[i == a.size() - 1];
+        }
+        f.assign(61, 0);
+        f[0] = 1;
+        for (int i = 0; i < a.size(); i++) {
+            for (int j = 60; j >= a[i]; j--) {
+                f[j] += f[j - a[i]];
+            }
+        }
+        std::cerr << f[60] << "\n";
+    }
+        return 0;
+}

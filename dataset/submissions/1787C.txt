@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ void solve() {
+    int n, s;
+    std::cin >> n >> s;
+        std::vector<int> a(n), x(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        if (a[i] <= s) x[i] = 0;
+        else x[i] = s;
+    }
+        x[0] = 0, x[n - 1] = a[n - 1];
+        std::array<i64, 2> dp{inf, inf};
+    dp[0] = 0;
+        for (int i = 1; i < n; i++) {
+        std::array<i64, 2> g{inf, inf};
+        for (int j = 0; j < 2; j++) {
+            for (int k = 0; k < 2; k++) {
+                g[k] = std::min(g[k], dp[j] + 1LL * (j ? x[i - 1] : a[i - 1] - x[i - 1]) * (k ? a[i] - x[i] : x[i]));
+            }
+        }
+        dp = g;
+    }
+        std::cout << dp[0] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

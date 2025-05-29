@@ -1,0 +1,231 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int dx[] = {0, 0, -1, 1};
+constexpr int dy[] = {-1, 1, 0, 0};
+struct DSU {
+    std::vector<int> f, siz;
+        DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+        void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+        siz.assign(n, 1);
+    }
+        int find(int x) {
+        while (x != f[x]) {
+            x = f[x] = f[f[x]];
+        }
+        return x;
+    }
+        bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+        bool merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) {
+            return false;
+        }
+        siz[x] += siz[y];
+        f[y] = x;
+        return true;
+    }
+        int size(int x) {
+        return siz[find(x)];
+    }
+};
+ struct HLD {
+    int n;
+    std::vector<int> siz, top, dep, parent, in, out, seq;
+    std::vector<std::vector<int>> adj;
+    int cur;
+        HLD() {}
+    HLD(int n) {
+        init(n);
+    }
+    void init(int n) {
+        this->n = n;
+        siz.resize(n);
+        top.resize(n);
+        dep.resize(n);
+        parent.resize(n);
+        in.resize(n);
+        out.resize(n);
+        seq.resize(n);
+        cur = 0;
+        adj.assign(n, {});
+    }
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    void work(int root = 0) {
+        top[root] = root;
+        dep[root] = 0;
+        parent[root] = -1;
+        dfs1(root);
+        dfs2(root);
+    }
+    void dfs1(int u) {
+        if (parent[u] != -1) {
+            adj[u].erase(std::find(adj[u].begin(), adj[u].end(), parent[u]));
+        }
+                siz[u] = 1;
+        for (auto &v : adj[u]) {
+            parent[v] = u;
+            dep[v] = dep[u] + 1;
+            dfs1(v);
+            siz[u] += siz[v];
+            if (siz[v] > siz[adj[u][0]]) {
+                std::swap(v, adj[u][0]);
+            }
+        }
+    }
+    void dfs2(int u) {
+        in[u] = cur++;
+        seq[in[u]] = u;
+        for (auto v : adj[u]) {
+            top[v] = v == adj[u][0] ? top[u] : v;
+            dfs2(v);
+        }
+        out[u] = cur;
+    }
+    int lca(int u, int v) {
+        while (top[u] != top[v]) {
+            if (dep[top[u]] > dep[top[v]]) {
+                u = parent[top[u]];
+            } else {
+                v = parent[top[v]];
+            }
+        }
+        return dep[u] < dep[v] ? u : v;
+    }
+        int dist(int u, int v) {
+        return dep[u] + dep[v] - 2 * dep[lca(u, v)];
+    }
+        int jump(int u, int k) {
+        if (dep[u] < k) {
+            return -1;
+        }
+                int d = dep[u] - k;
+                while (dep[top[u]] > d) {
+            u = parent[top[u]];
+        }
+                return seq[in[u] - dep[u] + d];
+    }
+        bool isAncester(int u, int v) {
+        return in[u] <= in[v] && in[v] < out[u];
+    }
+        int rootedParent(int u, int v) {
+        std::swap(u, v);
+        if (u == v) {
+            return u;
+        }
+        if (!isAncester(u, v)) {
+            return parent[u];
+        }
+        auto it = std::upper_bound(adj[u].begin(), adj[u].end(), v, [&](int x, int y) {
+            return in[x] < in[y];
+        }) - 1;
+        return *it;
+    }
+        int rootedSize(int u, int v) {
+        if (u == v) {
+            return n;
+        }
+        if (!isAncester(v, u)) {
+            return siz[v];
+        }
+        return n - siz[rootedParent(u, v)];
+    }
+        int rootedLca(int a, int b, int c) {
+        return lca(a, b) ^ lca(b, c) ^ lca(c, a);
+    }
+};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m, q;
+    std::cin >> n >> m >> q;
+        std::vector<std::string> s(n);
+    int x0 = -1, y0 = -1;
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+        for (int j = 0; j < m; j++) {
+            if (s[i][j] == '#' && x0 == -1) {
+                x0 = i;
+                y0 = j;
+            }
+        }
+    }
+        std::vector dis(n, std::vector<int>(m, -1));
+    std::queue<std::pair<int, int>> Q;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (s[i][j] == 'v') {
+                Q.emplace(i, j);
+                dis[i][j] = 0;
+            }
+        }
+    }
+        while (!Q.empty()) {
+        auto [x, y] = Q.front();
+        Q.pop();
+                for (int k = 0; k < 4; k++) {
+            int nx = x + dx[k];
+            int ny = y + dy[k];
+            if (0 <= nx && nx < n && 0 <= ny && ny < m && dis[nx][ny] == -1) {
+                dis[nx][ny] = dis[x][y] + 1;
+                Q.emplace(nx, ny);
+            }
+        }
+    }
+        std::vector<std::array<int, 3>> edges;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (s[i][j] != '#') {
+                if (i + 1 < n && s[i + 1][j] != '#') {
+                    edges.push_back({std::min(dis[i][j], dis[i + 1][j]), i * m + j, (i + 1) * m + j});
+                    edges.push_back({std::min(dis[i][j], dis[i + 1][j]), n * m + i * m + j, n * m + (i + 1) * m + j});
+                }
+                if (j + 1 < m && s[i][j + 1] != '#') {
+                    int t = 0;
+                    if (i < x0 && j == y0 - 1) {
+                        t = 1;
+                    }
+                    edges.push_back({std::min(dis[i][j], dis[i][j + 1]), i * m + j, t * n * m + i * m + j + 1});
+                    edges.push_back({std::min(dis[i][j], dis[i][j + 1]), n * m + i * m + j, (1 - t) * n * m + i * m + j + 1});
+                }
+            }
+        }
+    }
+    std::sort(edges.begin(), edges.end(), std::greater());
+        DSU dsu(4 * n * m);
+    int cur = 2 * n * m;
+    HLD t(4 * n * m);
+    std::vector<int> weight(4 * n * m);
+    for (auto [w, x, y] : edges) {
+        if (!dsu.same(x, y)) {
+            x = dsu.find(x);
+            y = dsu.find(y);
+            dsu.merge(cur, x);
+            dsu.merge(cur, y);
+            t.addEdge(cur, x);
+            t.addEdge(cur, y);
+            weight[cur] = w;
+            cur++;
+        }
+    }
+        t.work(cur - 1);
+    while (q--) {
+        int x, y;
+        std::cin >> x >> y;
+        x--, y--;
+        int u = x * m + y;
+        int ans = weight[t.lca(u, n * m + u)];
+        std::cout << ans << "\n";
+    }
+        return 0;
+}

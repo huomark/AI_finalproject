@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> x(n), y(n), t(n);
+    std::vector<double> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i] >> t[i] >> p[i];
+    }
+        std::vector<double> dp(n);
+    std::vector<int> ord(n);
+    std::iota(ord.begin(), ord.end(), 0);
+    std::sort(ord.begin(), ord.end(), [&](int i, int j) {
+        return t[i] < t[j];
+    });
+        double ans = 0;
+    for (int i = 0; i < n; i++) {
+        int u = ord[i];
+        dp[u] = p[u];
+        for (int j = 0; j < i; j++) {
+            int v = ord[j];
+            if (1LL * (x[u] - x[v]) * (x[u] - x[v]) + 1LL * (y[u] - y[v]) * (y[u] - y[v]) <= 1LL * (t[u] - t[v]) * (t[u] - t[v])) {
+                dp[u] = std::max(dp[u], dp[v] + p[u]);
+            }
+        }
+        ans = std::max(ans, dp[u]);
+    }
+        std::cout << std::fixed << std::setprecision(10);
+    std::cout << ans << "\n";
+        return 0;
+}

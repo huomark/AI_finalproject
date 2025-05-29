@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int inf = 1E9;
+ struct Info {
+    int min0 = inf;
+    int min1 = inf;
+};
+ Info operator+(Info a, Info b) {
+    Info c;
+    c.min0 = std::min(a.min0, b.min0);
+    if (a.min1 < b.min1) {
+        c.min1 = a.min1;
+        c.min0 = std::min(c.min0, b.min1);
+    } else {
+        c.min1 = b.min1;
+        c.min0 = std::min(c.min0, a.min1);
+    }
+    return c;
+}
+ Info toInfo(std::array<int, 2> a) {
+    return {a[0], a[1]};
+}
+ std::array<int, 2> fromSub(Info a) {
+    return {a.min0, a.min1 == inf ? 1 : a.min1 + 1};
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<std::array<int, 2>> dp(n), up(n, {inf, inf});
+    std::vector<int> parent(n, -1);
+        auto dfs1 = [&](auto self, int x) -> void {
+        Info info;
+        for (auto y : adj[x]) {
+            if (y == parent[x]) {
+                continue;
+            }
+            parent[y] = x;
+            self(self, y);
+            info = info + toInfo(dp[y]);
+        }
+        dp[x] = fromSub(info);
+    };
+    dfs1(dfs1, 0);
+        auto dfs2 = [&](auto self, int x) -> void {
+        std::vector<Info> pre;
+        for (auto y : adj[x]) {
+            if (y == parent[x]) {
+                pre.push_back(toInfo(up[x]));
+            } else {
+                pre.push_back(toInfo(dp[y]));
+            }
+        }
+        auto suf = pre;
+        for (int i = 1; i < pre.size(); i++) {
+            pre[i] = pre[i - 1] + pre[i];
+        }
+        for (int i = suf.size() - 1; i > 0; i--) {
+            suf[i - 1] = suf[i] + suf[i - 1];
+        }
+                for (int i = 0; i < adj[x].size(); i++) {
+            int y = adj[x][i];
+            if (y == parent[x]) {
+                continue;
+            }
+            Info info;
+            if (i > 0) {
+                info = info + pre[i - 1];
+            }
+            if (i + 1 < adj[x].size()) {
+                info = info + suf[i + 1];
+            }
+            up[y] = fromSub(info);
+            self(self, y);
+        }
+    };
+    dfs2(dfs2, 0);
+        int ans = 0;
+    for (int x = 0; x < n; x++) {
+        Info info;
+        for (auto y : adj[x]) {
+            if (y == parent[x]) {
+                info = info + toInfo(up[x]);
+            } else {
+                info = info + toInfo(dp[y]);
+            }
+        }
+        auto res = fromSub(info);
+        ans = std::max(ans, std::min(res[0], res[1]));
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

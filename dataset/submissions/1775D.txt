@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        int m = 0;
+    std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        m = std::max(m, a[i]);
+    }
+        std::vector<int> minp(m + 1), primes;
+    for (int i = 2; i <= m; i++) {
+        if (!minp[i]) {
+            minp[i] = i;
+            primes.push_back(i);
+        }
+        for (auto p : primes) {
+            if (i * p > m) break;
+            minp[i * p] = p;
+            if (p == minp[i]) break;
+        }
+    }
+        int s, t;
+    std::cin >> s >> t;
+    s--, t--;
+        std::vector<std::vector<int>> f(m + 1);
+    for (int i = 0; i < n; i++) {
+        for (int x = a[i]; x > 1; x /= minp[x]) {
+            f[minp[x]].push_back(i);
+        }
+    }
+        std::vector<int> dis(n + m + 1, -1), prev(n + m + 1);
+        std::queue<std::tuple<int, int, int>> q;
+    q.emplace(s, 0, -1);
+        while (!q.empty()) {
+        auto [u, d, p] = q.front();
+        q.pop();
+                if (dis[u] != -1) continue;
+                dis[u] = d;
+        prev[u] = p;
+                if (u < n) {
+            for (int x = a[u]; x > 1; x /= minp[x]) {
+                q.emplace(n + minp[x], d + 1, u);
+            }
+        } else {
+            for (auto x : f[u - n]) {
+                q.emplace(x, d + 1, u);
+            }
+        }
+    }
+        if (dis[t] == -1) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+        std::vector<int> ans;
+    for (int i = t; i != -1; i = prev[i]) {
+        if (i < n) ans.push_back(i);
+    }
+        std::reverse(ans.begin(), ans.end());
+    std::cout << ans.size() << "\n";
+    for (int i = 0; i < ans.size(); i++) {
+        std::cout << ans[i] + 1 << " \n"[i == ans.size() - 1];
+    }
+        return 0;
+}

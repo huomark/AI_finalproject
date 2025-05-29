@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::array<bool, 4> req{};
+    int n;
+    std::cin >> n;
+        while (n--) {
+        int x, y;
+        std::cin >> x >> y;
+                if (x > 0) {
+            req[0] = true;
+        }
+        if (x < 0) {
+            req[1] = true;
+        }
+        if (y > 0) {
+            req[2] = true;
+        }
+        if (y < 0) {
+            req[3] = true;
+        }
+    }
+        if (std::count(req.begin(), req.end(), true) == 4) {
+        std::cout << "NO\n";
+    } else {
+        std::cout << "YES\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

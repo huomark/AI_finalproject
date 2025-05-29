@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 n;
+    std::cin >> n;
+        for (int i = 2; i <= 60; i++) {
+        int d;
+        if (i == 2) {
+            d = std::sqrt(n);
+        } else if (i == 3) {
+            d = std::cbrt(n);
+        } else {
+            d = std::pow(n, 1.0 / i);
+        }
+        if (d == 1) {
+            continue;
+        }
+        i64 res = 0;
+        i64 p = 1;
+        for (int t = 0; t <= i; t++) {
+            if (t) {
+                p *= d;
+            }
+            res += p;
+        }
+        if (res == n) {
+            std::cout << "YES\n";
+            return;
+        }
+    }
+    std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::cout << std::fixed << std::setprecision(10);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

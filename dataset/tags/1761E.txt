@@ -1,0 +1,1 @@
+binary search, brute force, constructive algorithms, dsu, graphs, greedy, matrices, trees, two pointers

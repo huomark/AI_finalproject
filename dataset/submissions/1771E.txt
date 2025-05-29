@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<std::string> s(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+    }
+        std::vector up(n, std::vector<int>(m, -1)), upm(up);
+    std::vector dn(n, std::vector<int>(m, n)), dnm(dn);
+        for (int i = 1; i < n; i++) {
+        up[i] = up[i - 1];
+        upm[i] = upm[i - 1];
+        for (int j = 0; j < m; j++) {
+            if (s[i - 1][j] == '#') {
+                up[i][j] = upm[i][j] = i - 1;
+            }
+            if (s[i - 1][j] == 'm') {
+                upm[i][j] = i - 1;
+                up[i][j] = std::max(up[i][j], upm[i - 1][j]);
+            }
+        }
+    }
+    for (int i = n - 2; i >= 0; i--) {
+        dn[i] = dn[i + 1];
+        dnm[i] = dnm[i + 1];
+        for (int j = 0; j < m; j++) {
+            if (s[i + 1][j] == '#') {
+                dn[i][j] = dnm[i][j] = i + 1;
+            }
+            if (s[i + 1][j] == 'm') {
+                dnm[i][j] = i + 1;
+                dn[i][j] = std::min(dn[i][j], dnm[i + 1][j]);
+            }
+        }
+    }
+        int ans = 0;
+        auto upd = [&](int len, int *a) {
+        int u = std::min(a[0], a[1]) - 1;
+        int v = std::min(a[2], a[3]) - 1;
+        if (u && v) {
+            ans = std::max(ans, len + 2 * (u + v));
+        }
+    };
+        for (int i = 0; i < n; i++) {
+        for (int l = 0; l < m; l++) {
+            int cntm = 0;
+            for (int r = l; r < m; r++) {
+                if (s[i][r] == '#') {
+                    break;
+                }
+                if (s[i][r] == 'm') {
+                    cntm++;
+                }
+                if (cntm > 1) {
+                    break;
+                }
+                if (r - l < 2) {
+                    continue;
+                }
+                int a[4] = {i - upm[i][l], i - upm[i][r], dnm[i][l] - i, dnm[i][r] - i};
+                int b[4] = {i - up[i][l], i - up[i][r], dn[i][l] - i, dn[i][r] - i};
+                                upd(r - l + 1, a);
+                                if (cntm == 0) {
+                    for (int j = 0; j < 4; j++) {
+                        std::swap(a[j], b[j]);
+                        upd(r - l + 1, a);
+                        std::swap(a[j], b[j]);
+                    }
+                }
+            }
+        }
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

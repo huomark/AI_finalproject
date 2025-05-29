@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+ using u32 = unsigned;
+using i64 = long long;
+using u64 = unsigned long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> c(n, -1);
+        bool bipart = true;
+    for (int s = 0; s < n; s++) {
+        if (c[s] != -1) {
+            continue;
+        }
+        std::queue<int> q;
+        q.push(s);
+        c[s] = 1;
+        while (!q.empty()) {
+            int x = q.front();
+            q.pop();
+                        for (auto y : adj[x]) {
+                if (c[x] == c[y]) {
+                    bipart = false;
+                } else if (c[y] == -1) {
+                    c[y] = c[x] ^ 3;
+                    q.push(y);
+                }
+            }
+        }
+    }
+        if (bipart) {
+        std::cout << "Bob" << std::endl;
+        std::vector<int> vec[3];
+        for (int i = 0; i < n; i++) {
+            vec[c[i]].push_back(i);
+        }
+                for (int i = 0; i < n; i++) {
+            int a, b;
+            std::cin >> a >> b;
+                        bool vis[4] {};
+            vis[a] = true;
+            vis[b] = true;
+                        if (vis[1] && !vec[1].empty()) {
+                std::cout << vec[1].back() + 1 << " " << 1 << std::endl;
+                vec[1].pop_back();
+            } else if (vis[2] && !vec[2].empty()) {
+                std::cout << vec[2].back() + 1 << " " << 2 << std::endl;
+                vec[2].pop_back();
+            } else if (!vec[1].empty()) {
+                std::cout << vec[1].back() + 1 << " " << 3 << std::endl;
+                vec[1].pop_back();
+            } else {
+                std::cout << vec[2].back() + 1 << " " << 3 << std::endl;
+                vec[2].pop_back();
+            }
+        }
+    } else {
+        std::cout << "Alice" << std::endl;
+        for (int i = 0; i < n; i++) {
+            std::cout << 1 << " " << 2 << std::endl;
+            int x, y;
+            std::cin >> x >> y;
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

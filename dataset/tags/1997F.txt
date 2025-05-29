@@ -1,0 +1,1 @@
+brute force, combinatorics, dp, greedy, math

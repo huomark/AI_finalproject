@@ -1,0 +1,1 @@
+binary search, bitmasks, brute force, combinatorics, dp, math, two pointers

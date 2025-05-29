@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+ using u32 = unsigned;
+using i64 = long long;
+using u64 = unsigned long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::pair<int, i64>> stk;
+    i64 ans = 0;
+    for (int i = 0; i < n; i++) {
+        int a, b;
+        std::cin >> a >> b;
+                i64 len = 0;
+        while (!stk.empty() && (a > 0 || stk.back().first == b)) {
+            if (stk.back().first == b) {
+                len += stk.back().second;
+                stk.pop_back();
+            } else {
+                i64 t = std::min<i64>(a, stk.back().second);
+                a -= t;
+                len += t;
+                stk.back().second -= t;
+                if (stk.back().second == 0) {
+                    stk.pop_back();
+                }
+            }
+        }
+        ans += a;
+        len += a;
+        stk.emplace_back(b, len);
+        std::cout << ans << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

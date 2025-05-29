@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n), s(k);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < k; i++) {
+        std::cin >> s[i];
+    }
+        std::vector<int> order(k);
+    std::iota(order.begin(), order.end(), 0);
+    std::sort(order.begin(), order.end(), [&](int i, int j) {
+        return s[i] < s[j];
+    });
+        std::vector<std::vector<int>> ans(k);
+    for (int i = 0; i < k - 1; i++) {
+        int j = order[i];
+        int S = s[j];
+                std::vector dp(a.size() + 1, std::vector(S + 1, std::vector<bool>(S)));
+        dp[0][0][0] = true;
+        for (int x = 0; x < a.size(); x++) {
+            for (int y = 0; y <= S; y++) {
+                for (int z = 0; z < S; z++) {
+                    if (dp[x][y][z]) {
+                        dp[x + 1][y][z] = true;
+                        if (y < S) {
+                            dp[x + 1][y + 1][(z + a[x]) % S] = true;
+                        }
+                    }
+                }
+            }
+        }
+                assert(dp[a.size()][S][0]);
+                int y = S, z = 0;
+        for (int x = a.size() - 1; x >= 0; x--) {
+            if (!dp[x][y][z]) {
+                y -= 1;
+                z = (z - a[x] % S + S) % S;
+                ans[j].push_back(a[x]);
+                a.erase(a.begin() + x);
+            }
+        }
+    }
+        ans[order[k - 1]] = a;
+    int sum = std::accumulate(a.begin(), a.end(), 0) % s[order[k - 1]];
+    int v = s[order[k - 1]] - sum;
+    std::cout << v << "\n";
+    ans[order[k - 1]].push_back(v);
+    for (int i = 0; i < k; i++) {
+        for (int j = 0; j < ans[i].size(); j++) {
+            std::cout << ans[i][j] << " \n"[j == ans[i].size() - 1];
+        }
+    }
+        return 0;
+}

@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int N = 500;
+ using Matrix = std::array<std::bitset<N>, N>;
+ Matrix operator+(const Matrix &a, const Matrix &b) {
+    Matrix c{};
+    for (int i = 0; i < N; i++) {
+        c[i] = a[i] | b[i];
+    }
+    return c;
+}
+ Matrix operator*(const Matrix &a, const Matrix &b) {
+    Matrix c{};
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (a[i][j]) {
+                c[i] |= b[j];
+            }
+        }
+    }
+    return c;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        Matrix mat[60][2];
+        for (int i = 0; i < m; i++) {
+        int u, v, t;
+        std::cin >> u >> v >> t;
+        u--, v--;
+        mat[0][t][u][v] = 1;
+    }
+        i64 ans = 0;
+        constexpr i64 inf = 1E18;
+        for (int i = 1; i < 60; i++) {
+        mat[i][0] = mat[i - 1][0] * mat[i - 1][1];
+        mat[i][1] = mat[i - 1][1] * mat[i - 1][0];
+    }
+        int c = 0;
+    Matrix f{};
+    f[0][0] = 1;
+    for (int i = 59; i >= 0; i--) {
+        if ((f * mat[i][c])[0].any()) {
+            ans += 1LL << i;
+            f = f * mat[i][c];
+            c ^= 1;
+        }
+    }
+        if (ans > inf) {
+        ans = -1;
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        int k;
+    std::cin >> k;
+    std::vector<int> a(k);
+    for (int i = 0; i < k; i++) {
+        std::cin >> a[i];
+        a[i]--;
+    }
+        int lo = 0, hi = n;
+    while (lo < hi) {
+        int x = (lo + hi + 1) / 2;
+                std::vector<int> f(n, -1);
+        for (int i = 0; i < k; i++) {
+            f[a[i]] = x / k + (i < x % k);
+        }
+                std::vector<int> dp(n);
+                bool ok = true;
+        auto dfs = [&](auto self, int x, int p) -> void {
+            int neg = -f[x], max = 0;
+            for (auto y : adj[x]) {
+                if (y == p) {
+                    continue;
+                }
+                self(self, y, x);
+                if (dp[y] < 0) {
+                    if (neg <= 0) {
+                        ok = false;
+                    }
+                    neg = dp[y] + 1;
+                } else {
+                    max = std::max(max, dp[y]);
+                }
+            }
+                        if (neg <= 0) {
+                if (neg + max >= 0) {
+                    dp[x] = 0;
+                } else {
+                    dp[x] = neg;
+                }
+            } else {
+                dp[x] = max + 1;
+            }
+            // std::cerr << "dp[" << x << "] = " << dp[x] << "\n";
+        };
+        dfs(dfs, 0, -1);
+                // std::cerr << "x = " << x << "\n";
+        if (ok && dp[0] >= 0) {
+            lo = x;
+        } else {
+            hi = x - 1;
+        }
+    }
+    std::cout << lo << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

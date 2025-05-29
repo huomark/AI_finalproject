@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+    }
+        std::vector<int> c(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i];
+        c[i]--;
+    }
+        int d;
+    std::cin >> d;
+        std::vector<int> k(d), del(n);
+    for (int i = 0; i < d; i++) {
+        std::cin >> k[i];
+        k[i]--;
+        del[k[i]] = 1;
+    }
+        std::vector<std::vector<int>> adj(m);
+    std::vector<int> yx, xy(m, -1);
+    int ans = 0;
+    auto add = [&](int x) {
+        adj[c[x]].push_back(p[x]);
+        while (true) {
+            yx.resize(ans + 1, -1);
+            std::vector<int> p(m, -1);
+            std::vector<bool> vis(m);
+            std::queue<int> q;
+            bool ok = false;
+            for (int i = 0; i < m; i++) {
+                if (xy[i] == -1) {
+                    vis[i] = true;
+                    q.push(i);
+                }
+            }
+            while (!q.empty()) {
+                int x = q.front();
+                q.pop();
+                                for (auto y : adj[x]) {
+                    if (y <= ans) {
+                        if (yx[y] == -1) {
+                            while (y != -1) {
+                                int z = xy[x];
+                                xy[x] = y;
+                                yx[y] = x;
+                                y = z;
+                                x = p[x];
+                            }
+                            ok = true;
+                            break;
+                        } else if (!vis[yx[y]]) {
+                            p[yx[y]] = x;
+                            vis[yx[y]] = true;
+                            q.push(yx[y]);
+                        }
+                    }
+                }
+                if (ok) {
+                    break;
+                }
+            }
+            if (!ok) {
+                break;
+            }
+            ans++;
+        }
+    };
+    for (int i = 0; i < n; i++) {
+        if (!del[i]) {
+            add(i);
+        }
+    }
+    std::vector<int> out(d);
+    for (int i = d - 1; i >= 0; i--) {
+        out[i] = ans;
+        add(k[i]);
+    }
+    for (int i = 0; i < d; i++) {
+        std::cout << out[i] << "\n";
+    }
+        return 0;
+}

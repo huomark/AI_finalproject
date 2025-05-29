@@ -1,0 +1,1 @@
+constructive algorithms, data structures, dp, dsu, greedy, sortings

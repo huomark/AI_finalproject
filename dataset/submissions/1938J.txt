@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+ using ll = long long;
+using namespace std;
+#define For(i,l,r) for(int i=(int)(l);i<=(int)(r);i++)
+const int N=500005,inf=1e9+5;
+int n,m,A[N],B[N],lst[N],bj[N];
+#define PI pair<int,int>
+#define mp make_pair
+#define fi first
+#define se second
+#define pb push_back
+vector<PI> v[N];
+void di(int s,int dis[N]){
+    For(i,1,n)dis[i]=inf;
+    dis[s]=0;
+    lst[s]=-1;
+    priority_queue<PI,vector<PI>,greater<PI> > q;
+    q.push(mp(0,s));
+    while(q.size()){
+        auto t=q.top(); q.pop();
+        if(t.fi>dis[t.se])continue;
+        int p=t.se;
+        for(auto [x,w]:v[p]){
+            if(dis[x]>dis[p]+w){
+                dis[x]=dis[p]+w;
+                lst[x]=p;
+                q.push(mp(dis[x],x));
+            }
+        }
+    }
+}
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+     int t=1;
+    while(t--){
+        cin>>n>>m;
+        For(i,1,n)v[i].clear();
+        For(i,1,m){
+            int s,t,w;
+            cin>>s>>t>>w;
+            v[s].pb(mp(t,w));
+            v[t].pb(mp(s,w));
+        }
+        di(n,B);
+        di(1,A);
+        int ans=inf;
+        for(int i=n;i;i=lst[i])bj[i]=1;
+        For(i,1,n)for(auto [x,w]:v[i])if((lst[x]!=i||bj[x]==0)&&(lst[i]!=x||bj[i]==0)){
+            ans=min(ans,w+min(inf,A[i]+B[x])+A[n]);
+        }
+        if(ans==inf)ans=-1;
+        cout<<ans<<"\n";
+    }
+     return 0;
+}

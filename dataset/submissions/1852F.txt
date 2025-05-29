@@ -1,0 +1,205 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ struct Point {
+    i64 x;
+    int dir;
+};
+ int cur = 0;
+ bool operator<(Point a, Point b) {
+    auto posa = a.x + a.dir * cur;
+    auto posb = b.x + b.dir * cur;
+    if (posa != posb) {
+        return posa < posb;
+    }
+    return a.dir > b.dir;
+}
+std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+ struct Info {
+    int sum;
+    int mx;
+    Info(int x = 0) : sum{x}, mx{std::max(0, x)} {}
+};
+ Info operator+(Info a, Info b) {
+    Info c;
+    c.sum = a.sum + b.sum;
+    c.mx = std::max(a.mx, a.sum + b.mx);
+    return c;
+}
+ struct Node {
+    int w = rng();
+    Info info;
+    Info sum;
+    Point p;
+    Node *l = nullptr;
+    Node *r = nullptr;
+};
+ void pull(Node *t) {
+    t->sum = t->info;
+    if (t->l) {
+        t->sum = t->l->sum + t->sum;
+    }
+    if (t->r) {
+        t->sum = t->sum + t->r->sum;
+    }
+}
+ std::pair<Node *, Node *> split(Node *t, Point p) {
+    if (!t) {
+        return {t, t};
+    }
+    if (p < t->p) {
+        auto [l, r] = split(t->l, p);
+        t->l = r;
+        pull(t);
+        return {l, t};
+    } else {
+        auto [l, r] = split(t->r, p);
+        t->r = l;
+        pull(t);
+        return {t, r};
+    }
+}
+void insert(Node *&t, Node *x) {
+    if (!t) {
+        t = x;
+        return;
+    }
+    if (x->w < t->w) {
+        auto [l, r] = split(t, x->p);
+        t = x;
+        t->l = l;
+        t->r = r;
+        pull(t);
+        return;
+    }
+    if (x->p < t->p) {
+        insert(t->l, x);
+    } else {
+        insert(t->r, x);
+    }
+    pull(t);
+}
+void add(Node *&t, Point p, int x) {
+    if (p < t->p) {
+        add(t->l, p, x);
+    } else if (t->p < p) {
+        add(t->r, p, x);
+    } else {
+        t->info = t->info.sum + x;
+    }
+    pull(t);
+}
+ Node *merge(Node *a, Node *b) {
+    if (!a) {
+        return b;
+    }
+    if (!b) {
+        return a;
+    }
+        if (a->w < b->w) {
+        a->r = merge(a->r, b);
+        pull(a);
+        return a;
+    } else {
+        b->l = merge(a, b->l);
+        pull(b);
+        return b;
+    }
+}
+ void erase(Node *&t, Point p) {
+    if (!(t->p < p) && !(p < t->p)) {
+        t = merge(t->l, t->r);
+        return;
+    }
+    if (p < t->p) {
+        erase(t->l, p);
+    } else {
+        erase(t->r, p);
+    }
+    pull(t);
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> x(n), t(n), c(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> t[i] >> c[i];
+    }
+        int sumb = 0;
+        Node *tree = nullptr;
+        std::map<Point, int> s;
+    std::set<std::pair<i64, Point>> d;
+        auto check = [&](auto it) {
+        auto r = std::next(it);
+        if (it->first.dir > r->first.dir) {
+            d.emplace((r->first.x - it->first.x + 1) / 2, it->first);
+        }
+    };
+    auto check2 = [&](auto it) {
+        if (it != s.begin()) {
+            check(std::prev(it));
+        }
+        if (std::next(it) != s.end()) {
+            check(it);
+        }
+    };
+    for (int i = 0; i < n; i++) {
+        while (!d.empty() && d.begin()->first <= x[i]) {
+            auto [tm, p] = *d.begin();
+            d.erase(d.begin());
+            auto it = s.find(p);
+            if (it == s.end()) {
+                continue;
+            }
+            auto r = std::next(it);
+            if (r == s.end()) {
+                continue;
+            }
+            if (it->first.x + it->first.dir * x[i] >= r->first.x + r->first.dir * x[i]) {
+                if (it->second + r->second < 0) {
+                    it->second += r->second;
+                    add(tree, it->first, r->second);
+                    erase(tree, r->first);
+                    s.erase(r);
+                    check2(it);
+                } else {
+                    r->second += it->second;
+                    add(tree, r->first, it->second);
+                    erase(tree, it->first);
+                    s.erase(it);
+                    check2(r);
+                }
+            }
+        }
+        cur = x[i];
+        if (c[i] > 0) {
+            if (s.count({t[i] + cur, -1})) {
+                add(tree, {t[i] + cur, -1}, c[i]);
+            } else {
+                Node *v = new Node;
+                v->info = v->sum = c[i];
+                v->p = {t[i] + cur, -1};
+                insert(tree, v);
+            }
+            s[{t[i] + cur, -1}] += c[i];
+            auto it = s.find({t[i] + cur, -1});
+            check2(it);
+            sumb += c[i];
+        } else {
+            if (s.count({t[i] - cur, 1})) {
+                add(tree, {t[i] - cur, 1}, c[i]);
+            } else {
+                Node *v = new Node;
+                v->info = v->sum = c[i];
+                v->p = {t[i] - cur, 1};
+                insert(tree, v);
+            }
+            s[{t[i] - cur, 1}] += c[i];
+            auto it = s.find({t[i] - cur, 1});
+            check2(it);
+        }
+        std::cout << sumb - tree->sum.mx << "\n";
+    }
+        return 0;
+}

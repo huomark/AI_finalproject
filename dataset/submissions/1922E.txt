@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 X;
+    std::cin >> X;
+        int l = 0, r = 0;
+    std::vector<int> a;
+        auto rec = [&](auto self, i64 x) {
+        if (x == 1) {
+            return;
+        }
+        if (x % 2 == 1) {
+            self(self, x - 1);
+            a.push_back(--l);
+        } else {
+            self(self, x / 2);
+            a.push_back(++r);
+        }
+    };
+    rec(rec, X);
+        std::cout << a.size() << "\n";
+    for (auto x : a) {
+        std::cout << x << " \n"[x == a.back()];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

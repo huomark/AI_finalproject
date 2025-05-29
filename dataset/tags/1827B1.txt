@@ -1,0 +1,1 @@
+binary search, dp, dsu, greedy, trees, two pointers

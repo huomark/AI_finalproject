@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int b[6] = {1, 2, -2, -1, 1, -1};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+        if (n % 2 == 0) {
+        for (int i = 0; i < n; i++) {
+            a[i] = b[i % 6];
+        }
+    } else if (n <= 5) {
+        std::cout << "NO\n";
+        return 0;
+    } else if (n == 7) {
+        a = {-3, -3, 2, 1, -1, 1, -2};
+    } else {
+        a[0] = -3;
+        a[1] = -1;
+        a[2] = 2;
+        a[3] = -1;
+        a[4] = 1;
+        a[5] = 3;
+        a[6] = -2;
+        a[7] = -2;
+        a[8] = -1;
+        for (int i = 9; i < n; i++) {
+            a[i] = b[(i + 1) % 6];
+        }
+    }
+    std::cout << "YES\n";
+    for (int i = 0; i < n; i++) {
+        std::cout << a[i] << " \n"[i == n - 1];
+    }
+        return 0;
+}

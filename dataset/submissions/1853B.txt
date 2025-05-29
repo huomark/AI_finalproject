@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::vector<i64> f{1, 1};
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+    k--;
+        if (k - 1 >= 44 || f[k - 1] > n) {
+        std::cout << 0 << "\n";
+        return;
+    }
+        i64 a = f[k - 1], b = f[k];
+    i64 x = f[k + 1];
+    if (k % 2 == 0) {
+        x = -x;
+    }
+    x = n * x % b;
+    if (x < 0) {
+        x += b;
+    }
+    if (x * a > n) {
+        std::cout << 0 << "\n";
+        return;
+    }
+    std::cout << (n - x * a) / (a * b) + 1 << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        for (int i = 2; i < 50; i++) {
+        f.push_back(f[i - 2] + f[i - 1]);
+    }
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

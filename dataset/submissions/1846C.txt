@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m, h;
+    std::cin >> n >> m >> h;
+        std::vector t(n, std::vector<int>(m));
+        std::vector<std::pair<int, i64>> a(n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            std::cin >> t[i][j];
+        }
+        std::sort(t[i].begin(), t[i].end());
+        int c = 0;
+        i64 p = 0;
+        int sum = 0;
+        for (auto x : t[i]) {
+            if (sum + x <= h) {
+                sum += x;
+                p += sum;
+                c++;
+            }
+        }
+        a[i] = {c, -p};
+    }
+        int ans = 1;
+    for (int i = 1; i < n; i++) {
+        ans += (a[0] < a[i]);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

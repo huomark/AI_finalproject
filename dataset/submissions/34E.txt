@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, t;
+    std::cin >> n >> t;
+        std::vector<double> x(n), v(n), m(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> v[i] >> m[i];
+    }
+        std::vector<int> order(n);
+    std::iota(order.begin(), order.end(), 0);
+    std::sort(order.begin(), order.end(), [&](int i, int j) {
+        return x[i] < x[j];
+    });
+        std::priority_queue<std::pair<double, int>> h;
+        double cur = 0;
+    auto check = [&](int i) {
+        int a = order[i];
+        int b = order[i + 1];
+        if (v[a] > v[b]) {
+            h.emplace(-(cur + (x[b] - x[a]) / (v[a] - v[b])), i);
+        }
+    };
+        for (int i = 1; i < n; i++) {
+        check(i - 1);
+    }
+        while (!h.empty()) {
+        auto [p, i] = h.top();
+        h.pop();
+                p = -p;
+                if (p > t) {
+            break;
+        }
+                for (int i = 0; i < n; i++) {
+            x[i] += v[i] * (p - cur);
+        }
+        cur = p;
+                int a = order[i], b = order[i + 1];
+        if (std::abs(x[a] - x[b]) > 1E-6) {
+            continue;
+        }
+        std::tie(v[a], v[b]) = std::pair(((m[a] - m[b]) * v[a] + 2 * m[b] * v[b]) / (m[a] + m[b])
+            , ((m[b] - m[a]) * v[b] + 2 * m[a] * v[a]) / (m[a] + m[b]));
+        if (i) {
+            check(i - 1);
+        }
+        if (i + 2 < n) {
+            check(i + 1);
+        }
+    }
+        std::cout << std::fixed << std::setprecision(10);
+    for (int i = 0; i < n; i++) {
+        x[i] += v[i] * (t - cur);
+        std::cout << x[i] << "\n";
+    }
+        return 0;
+}

@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+     int n, m, k;
+    std::cin >> n >> m >> k;
+     std::vector<std::string> S(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> S[i];
+    }
+     std::vector<std::array<std::vector<int>, 26>> g(m);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (S[i][j] != '.') {
+                g[j][S[i][j] - 'A'].push_back(i);
+            }
+        }
+    }
+     for (int b = 0; b < n; b++) {
+        std::vector<int> f(b);
+        for (int j = 0; j < m; j++) {
+            if (S[b][j] != '.') {
+                for (auto a : g[j][S[b][j] - 'A']) {
+                    if (a >= b) {
+                        continue;
+                    }
+                    f[a]++;
+                }
+            }
+        }
+        for (int a = b - 1; a >= 0; a--) {
+            if (f[a] >= k) {
+                std::cout << a + 1 << " " << b + 1 << "\n";
+                return 0;
+            }
+        }
+    }
+    std::cout << -1 << "\n";
+     return 0;
+}

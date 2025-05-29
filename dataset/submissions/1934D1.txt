@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 n, m;
+    std::cin >> n >> m;
+        if ((m ^ n) < n) {
+        std::cout << 1 << "\n";
+        std::cout << n << " " << m << "\n";
+        return;
+    }
+        int i = 60;
+    while ((n >> i & 1) == (m >> i & 1)) {
+        i--;
+    }
+        int j = i - 1;
+    while (j >= 0 && (~n >> j & 1)) {
+        if (m >> j & 1) {
+            std::cout << -1 << "\n";
+            return;
+        }
+        j--;
+    }
+        i64 k = (n ^ (1LL << i)) | ((1LL << (j + 1)) - 1);
+    assert((k ^ n) < n);
+    assert(k < n);
+    assert((m ^ k) < k);
+    assert(m < k);
+    std::cout << 2 << "\n";
+    std::cout << n << " " << k << " " << m << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

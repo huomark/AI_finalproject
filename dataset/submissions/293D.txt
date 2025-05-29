@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int N = 1 << 21;
+ i64 ceilDiv(i64 n, i64 m) {
+    if (n >= 0) {
+        return (n + m - 1) / m;
+    } else {
+        return n / m;
+    }
+}
+ i64 floorDiv(i64 n, i64 m) {
+    if (n >= 0) {
+        return n / m;
+    } else {
+        return (n - m + 1) / m;
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> x(n), y(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i];
+    }
+        i64 area = 0;
+    for (int i = 0; i < n; i++) {
+        int j = (i + 1) % n;
+        area += 1LL * x[i] * y[j] - 1LL * x[j] * y[i];
+    }
+    if (area < 0) {
+        std::reverse(x.begin(), x.end());
+        std::reverse(y.begin(), y.end());
+    }
+        double ans = 0;
+    double tot = 0;
+        auto work = [&]() {
+        std::vector<int> l(N), r(N, N);
+        int minx = N, maxx = 0;
+        for (int i = 0; i < n; i++) {
+            minx = std::min(minx, x[i] + N / 2);
+            maxx = std::max(maxx, x[i] + N / 2);
+            int j = (i + 1) % n;
+            if (x[i] < x[j]) {
+                for (int X = x[i]; X <= x[j]; X++) {
+                    l[X + N / 2] = std::max<i64>(l[X + N / 2], y[i] + ceilDiv(1LL * (y[j] - y[i]) * (X - x[i]), x[j] - x[i]) + N / 2);
+                }
+            } else if (x[i] > x[j]) {
+                for (int X = x[j]; X <= x[i]; X++) {
+                    r[X + N / 2] = std::min<i64>(r[X + N / 2], y[j] + floorDiv(1LL * (y[i] - y[j]) * (X - x[j]), x[i] - x[j]) + N / 2);
+                }
+            }
+        }
+        double s0 = 0, s1 = 0, s2 = 0;
+        for (int x = minx; x <= maxx; x++) {
+            int cnt = r[x] - l[x] + 1;
+            s2 += s1 * 2 + s0;
+            s1 += s0;
+            ans += cnt * s2;
+            s0 += cnt;
+        }
+        tot = s0;
+    };
+        work();
+    std::reverse(x.begin(), x.end());
+    std::reverse(y.begin(), y.end());
+    for (int i = 0; i < n; i++) {
+        std::swap(x[i], y[i]);
+    }
+    work();
+        ans /= tot;
+    ans /= tot - 1;
+        std::cout << std::fixed << std::setprecision(10) << ans << "\n";
+        return 0;
+}

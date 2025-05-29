@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<std::vector<std::vector<int>>> ans;
+    ans.push_back({});
+    for (int i = 1; i <= n; i++) {
+        std::vector<std::vector<std::vector<int>>> res;
+        int t = 1;
+        for (auto p : ans) {
+            std::vector<std::vector<std::vector<int>>> a;
+            p.push_back({i});
+            a.push_back(p);
+            p.pop_back();
+            for (int j = p.size()-1; j >= 0; j--) {
+                p[j].push_back(i);
+                a.push_back(p);
+                p[j].pop_back();
+            }
+            if (t) {
+                std::reverse(a.begin(), a.end());
+            }
+            res.insert(res.end(), a.begin(), a.end());
+            t ^= 1;
+        }
+        ans = res;
+    }
+        std::cout << ans.size() << "\n";
+    for (auto p : ans) {
+        for (auto s : p) {
+            std::cout << "{";
+            for (auto x : s) {
+                std::cout << x << ",}"[x == s.back()];
+            }
+            std::cout << ",\n"[s == p.back()];
+        }
+    }
+        return 0;
+}

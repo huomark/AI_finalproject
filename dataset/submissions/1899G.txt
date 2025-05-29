@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, q;
+    std::cin >> n >> q;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> invp(n);
+    for (int i = 0; i < n; i++) {
+        int p;
+        std::cin >> p;
+        p--;
+        invp[p] = i;
+    }
+        std::vector<std::vector<std::array<int, 3>>> qry(n);
+    std::vector<int> ans(q);
+    for (int i = 0; i < q; i++) {
+        int l, r, x;
+        std::cin >> l >> r >> x;
+        x--, l--;
+        qry[x].push_back({l, r, i});
+    }
+        std::vector<std::set<int>> s(n);
+    auto dfs = [&](auto self, int x, int p) -> void {
+        s[x].insert(invp[x]);
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            self(self, y, x);
+            if (s[y].size() > s[x].size()) {
+                std::swap(s[x], s[y]);
+            }
+            s[x].merge(s[y]);
+        }
+        for (auto [l, r, i] : qry[x]) {
+            auto it = s[x].lower_bound(l);
+            if (it != s[x].end() && *it < r) {
+                ans[i] = 1;
+            }
+        }
+    };
+    dfs(dfs, 0, -1);
+        for (int i = 0; i < q; i++) {
+        if (ans[i]) {
+            std::cout << "YES\n";
+        } else {
+            std::cout << "NO\n";
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

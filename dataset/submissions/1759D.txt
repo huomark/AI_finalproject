@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        i64 ans = n, t = 0;
+        for (int i = 0; i <= 30; i++) {
+        i64 v = 1LL << i;
+        for (int j = 0; v <= m; j++, v *= 5) {
+            i64 x = n * (m / v * v);
+            int y = 0;
+            for (i64 z = x; z % 10 == 0; z /= 10) {
+                y++;
+            }
+            if (y > t || (y == t && x > ans)) {
+                ans = x;
+                t = y;
+            }
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

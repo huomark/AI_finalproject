@@ -1,0 +1,131 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, q;
+    std::cin >> n >> q;
+        std::vector<int> a(n), b(n), c(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i];
+    }
+        std::vector<int> da, db;
+    for (int x = 1; x * x <= a[0]; x++) {
+        if (a[0] % x == 0) {
+            da.push_back(x);
+            if (x * x != a[0]) {
+                da.push_back(a[0] / x);
+            }
+        }
+    }
+    for (int x = 1; x * x <= b[0]; x++) {
+        if (b[0] % x == 0) {
+            db.push_back(x);
+            if (x * x != b[0]) {
+                db.push_back(b[0] / x);
+            }
+        }
+    }
+    std::sort(da.begin(), da.end());
+    std::sort(db.begin(), db.end());
+            std::vector<std::pair<i64, int>> cand;
+        const int nda = da.size();
+    const int ndb = db.size();
+    std::vector<std::vector<int>> ta(nda), tb(ndb);
+    for (int i = 0; i < nda; i++) {
+        for (int j = 0; j <= i; j++) {
+            if (da[i] % da[j] == 0) {
+                ta[i].push_back(j);
+            }
+        }
+    }
+    for (int i = 0; i < ndb; i++) {
+        for (int j = 0; j <= i; j++) {
+            if (db[i] % db[j] == 0) {
+                tb[i].push_back(j);
+            }
+        }
+    }
+        for (int t = 0; t < 2; t++) {
+        const int nda = da.size();
+        const int ndb = db.size();
+        std::vector f(nda, std::vector<i64>(ndb));
+        std::vector fc(nda, std::vector<int>(ndb));
+        fc[nda - 1][ndb - 1]++;
+        f[nda - 1][ndb - 1] += t * c[0];
+        for (int i = 1; i < n; i++) {
+            int u0 = std::gcd(a[0], a[i]);
+            int v0 = std::gcd(b[0], b[i]);
+            int u1 = std::gcd(a[0], b[i]);
+            int v1 = std::gcd(b[0], a[i]);
+            int u = std::gcd(u0, u1);
+            int v = std::gcd(v0, v1);
+            u0 = std::lower_bound(da.begin(), da.end(), u0) - da.begin();
+            u1 = std::lower_bound(da.begin(), da.end(), u1) - da.begin();
+            u = std::lower_bound(da.begin(), da.end(), u) - da.begin();
+            v0 = std::lower_bound(db.begin(), db.end(), v0) - db.begin();
+            v1 = std::lower_bound(db.begin(), db.end(), v1) - db.begin();
+            v = std::lower_bound(db.begin(), db.end(), v) - db.begin();
+            fc[u0][v0]++;
+            fc[u1][v1]++;
+            fc[u][v]--;
+            f[u1][v1] += c[i];
+            f[u][v] -= c[i];
+        }
+                for (int i = 0; i < nda; i++) {
+            for (int j = 0; j < ndb; j++) {
+                i64 f0 = f[i][j];
+                int fc0 = fc[i][j];
+                f[i][j] = 0;
+                fc[i][j] = 0;
+                for (auto x : ta[i]) {
+                    f[x][j] += f0;
+                    fc[x][j] += fc0;
+                }
+            }
+        }
+        for (int i = 0; i < nda; i++) {
+            for (int j = 0; j < ndb; j++) {
+                i64 f0 = f[i][j];
+                int fc0 = fc[i][j];
+                f[i][j] = 0;
+                fc[i][j] = 0;
+                for (auto y : tb[j]) {
+                    f[i][y] += f0;
+                    fc[i][y] += fc0;
+                }
+            }
+        }
+        for (int i = 0; i < nda; i++) {
+            for (int j = 0; j < ndb; j++) {
+                if (fc[i][j] == n) {
+                    cand.emplace_back(f[i][j], da[i] + db[j]);
+                }
+            }
+        }
+        std::swap(da, db);
+        std::swap(a[0], b[0]);
+        std::swap(ta, tb);
+    }
+    std::sort(cand.begin(), cand.end());
+    int tot = 0;
+    for (int i = 0; i < cand.size(); i++) {
+        if (tot == 0 || cand[i].second > cand[tot - 1].second) {
+            cand[tot++] = cand[i];
+        }
+    }
+        cand.resize(tot);
+    while (q--) {
+        i64 d;
+        std::cin >> d;
+                auto it = std::lower_bound(cand.begin(), cand.end(), std::make_pair(d + 1, 0));
+        std::cout << (it - 1)->second << " \n"[q == 0];
+    }
+        return 0;
+}

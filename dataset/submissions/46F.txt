@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+struct DSU {
+    std::vector<int> f, siz;
+        DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+        void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+        siz.assign(n, 1);
+    }
+        int find(int x) {
+        while (x != f[x]) {
+            x = f[x] = f[f[x]];
+        }
+        return x;
+    }
+        bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+        bool merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) {
+            return false;
+        }
+        siz[x] += siz[y];
+        f[y] = x;
+        return true;
+    }
+        int size(int x) {
+        return siz[find(x)];
+    }
+};
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m, k;
+    std::cin >> n >> m >> k;
+        std::vector<std::vector<int>> adj(n);
+        std::vector<int> u(m), v(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> u[i] >> v[i];
+        u[i]--, v[i]--;
+        adj[u[i]].push_back(v[i]);
+        adj[v[i]].push_back(u[i]);
+        if (u[i] > v[i]) {
+            std::swap(u[i], v[i]);
+        }
+    }
+        auto get = [&]() {
+        DSU dsu(n);
+                std::vector<std::set<std::string>> people(n);
+        std::vector<std::set<int>> key(n);
+                std::function<void(int, int)> merge = [&](int x, int y) {
+            x = dsu.find(x);
+            y = dsu.find(y);
+            if (x > y) {
+                std::swap(x, y);
+            }
+            people[x].merge(people[y]);
+            key[x].merge(key[y]);
+                        dsu.merge(x, y);
+            for (auto z : key[x]) {
+                if (dsu.same(u[z], x) ^ dsu.same(v[z], x)) {
+                    merge(u[z], v[z]);
+                    break;
+                }
+            }
+        };
+                for (int i = 0; i < k; i++) {
+            std::string s;
+            std::cin >> s;
+            int x, e;
+            std::cin >> x >> e;
+            x--;
+            x = dsu.find(x);
+            people[x].insert(s);
+            while (e--) {
+                x = dsu.find(x);
+                int y;
+                std::cin >> y;
+                y--;
+                key[x].insert(y);
+                if (dsu.same(u[y], x) ^ dsu.same(v[y], x)) {
+                    merge(u[y], v[y]);
+                }
+            }
+        }
+                std::vector<int> bel(n);
+        for (int i = 0; i < n; i++) {
+            bel[i] = dsu.find(i);
+        }
+        return std::tuple(people, key, bel);
+    };
+        auto a = get();
+    auto b = get();
+        if (a == b) {
+        std::cout << "YES\n";
+    } else {
+        std::cout << "NO\n";
+    }
+        return 0;
+}

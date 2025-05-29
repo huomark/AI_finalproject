@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> p(n);
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(),
+        [&](int i, int j) {
+            return a[i] < a[j];
+        });
+        for (int i = 1; i < n; i++) {
+        if (a[p[i]] == a[p[i - 1]]) {
+            std::cout << -1 << "\n";
+            return 0;
+        }
+    }
+    std::vector<int> b(n);
+    for (int i = 0; i < n; i++) {
+        b[p[i]] = a[p[(i + 1) % n]];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << b[i] << " \n"[i == n - 1];
+    }
+        return 0;
+}

@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ int query(int x) {
+    std::cout << "? " << x + 1 << std::endl;
+    int ans;
+    std::cin >> ans;
+    return ans;
+}
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(k), b(k);
+    for (int i = 0; i < k; i++) {
+        a[i] = query(i);
+    }
+    for (int i = n - k; i < n; i++) {
+        b[i % k] = query(i);
+    }
+        std::vector<int> vec;
+    int tot = 0;
+    for (int i = 0; i < k; i++) {
+        if (a[i] != b[i]) {
+            vec.push_back(i);
+            tot += (n - 2 * k) / k;
+            if (i < n % k) {
+                tot++;
+            }
+        }
+    }
+    int lo = -1, hi = tot;
+        auto get = [&](int x) -> int {
+        if (x == -1) {
+            return k - 1;
+        }
+        if (x == tot) {
+            return n - k;
+        }
+        return x / vec.size() * k + vec[x % vec.size()] + k;
+    };
+        while (hi - lo > 1) {
+        int x = (lo + hi) / 2;
+        int i = get(x);
+        if (query(i) == a[i % k]) {
+            lo = x;
+        } else {
+            hi = x;
+        }
+    }
+        lo = get(lo);
+    hi = get(hi);
+        if (hi - lo > 1) {
+        std::cout << "! " << -1 << std::endl;
+    } else {
+        std::cout << "! " << hi << " " << n - hi << std::endl;
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

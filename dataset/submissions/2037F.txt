@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ constexpr int inf = 1E9;
+ void solve() {
+    int n, m, k;
+    std::cin >> n >> m >> k;
+        std::vector<int> h(n), x(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> h[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i];
+    }
+        auto check = [&](int c) {
+        std::vector<std::array<int, 2>> e;
+        for (int i = 0; i < n; i++) {
+            if (1LL * m * c < h[i]) {
+                continue;
+            }
+            int d = (h[i] + c - 1) / c;
+            int l = x[i] - m + d;
+            int r = x[i] + m - d;
+            e.push_back({l, 1});
+            e.push_back({r + 1, -1});
+        }
+        std::sort(e.begin(), e.end());
+        int s = 0;
+        for (auto [_, i] : e) {
+            s += i;
+            if (s >= k) {
+                return true;
+            }
+        }
+        return false;
+    };
+        int lo = 1, hi = inf + 1;
+    while (lo < hi) {
+        int c = (lo + hi) / 2;
+        if (check(c)) {
+            hi = c;
+        } else {
+            lo = c + 1;
+        }
+    }
+        int ans = lo;
+    if (ans > inf) {
+        ans = -1;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,15 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k, t;
+    std::cin >> n >> k >> t;
+        int c = n * k * t / 100;
+        for (int i = 0; i < n; i++) {
+        int v = std::min(c, k);
+        std::cout << v << " \n"[i == n-1];
+        c -= v;
+    }
+        return 0;
+}

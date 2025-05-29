@@ -1,0 +1,1 @@
+binary search, data structures, divide and conquer, dsu, math, trees, two pointers

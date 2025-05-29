@@ -1,0 +1,39 @@
+#include <iostream>
+#include <map>
+#include <cmath>
+ using namespace std;
+ int a, b, n;
+map<pair<int,int>, int> f;
+ int win(int a, int b) {
+    if (a > 1 && (b >= 30 || pow(a, b) >= n)) {
+        return 1;
+    }
+    if (a == 1 && (b >= 30 || pow(2, b) >= n)) {
+        return 0;
+    }
+    if (b == 1 && pow(a, 2) >= n) {
+        if ((n - a) % 2 == 0) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+    auto key = make_pair(a, b);
+    if (f.find(key) != f.end()) {
+        return f[key];
+    }
+    f[key] = max(-win(a + 1, b), -win(a, b + 1));
+    return f[key];
+}
+ int main() {
+    cin >> a >> b >> n;
+    int ans = win(a, b);
+    if (ans == 1) {
+        cout << "Masha" << endl;
+    } else if (ans == -1) {
+        cout << "Stas" << endl;
+    } else {
+        cout << "Missing" << endl;
+    }
+    return 0;
+}

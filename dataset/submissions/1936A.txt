@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ char ask(int a, int b, int c, int d) {
+    std::cout << "? " << a << " " << b << " " << c << " " << d << std::endl;
+    char res;
+    std::cin >> res;
+    return res;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        int max = 0;
+    for (int i = 1; i < n; i++) {
+        if (ask(i, i, max, max) == '>') {
+            max = i;
+        }
+    }
+        int y = 0;
+    for (int i = 1; i < n; i++) {
+        char res = ask(i, max, y, max);
+        if (res == '>' || (res == '=' && ask(i, i, y, y) == '<')) {
+            y = i;
+        }
+    }
+        std::cout << "! " << max << " " << y << std::endl;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

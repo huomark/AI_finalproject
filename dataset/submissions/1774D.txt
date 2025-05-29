@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        int tot = 0;
+    std::vector a(n, std::vector<int>(m));
+        std::vector<int> sum(n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            std::cin >> a[i][j];
+            tot += a[i][j];
+            sum[i] += a[i][j];
+        }
+    }
+        if (tot % n != 0) {
+        std::cout << -1 << "\n";
+        return;
+    }
+        std::vector<std::tuple<int, int, int>> ans;
+        for (int j = 0; j < m; j++) {
+        std::vector<int> zero, one;
+        for (int i = 0; i < n; i++) {
+            if (a[i][j] == 0 && sum[i] < tot / n) {
+                zero.push_back(i);
+            }
+            if (a[i][j] == 1 && sum[i] > tot / n) {
+                one.push_back(i);
+            }
+        }
+                for (int k = 0; k < std::min(zero.size(), one.size()); k++) {
+            int i0 = zero[k];
+            int i1 = one[k];
+                        a[i0][j] = 1;
+            a[i1][j] = 0;
+            sum[i0]++;
+            sum[i1]--;
+                        ans.emplace_back(i0, i1, j);
+        }
+    }
+        std::cout << ans.size() << "\n";
+    for (auto [x, y, z] : ans) {
+        std::cout << x + 1 << " " << y + 1 << " " << z + 1 << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

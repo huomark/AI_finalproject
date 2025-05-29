@@ -1,0 +1,116 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ struct Info {
+    i64 emp, Emp;
+    i64 cyc, Cyc;
+    i64 d01, D01;
+    i64 d02, D02;
+    i64 d03, D03;
+    i64 d12, D12;
+    i64 d13, D13;
+    i64 d23, D23;
+        Info() : emp(0), Emp(0), cyc(inf), Cyc(-inf), d01(0), D01(0), d02(0), D02(0)
+        , d03(0), D03(0), d12(0), D12(0), d13(0), D13(0), d23(0), D23(0) {
+    }
+};
+ Info merge(Info a0, Info a1, Info a2, Info a3) {
+    Info res;
+    res.emp = std::min(inf, a0.emp + a1.emp + a2.emp + a3.emp);
+    res.cyc = std::min({inf, a0.cyc + a1.emp + a2.emp + a3.emp, a0.emp + a1.cyc + a2.emp + a3.emp
+        , a0.emp + a1.emp + a2.cyc + a3.emp, a0.emp + a1.emp + a2.emp + a3.cyc
+        , a0.d13 + a1.d02 + a2.d13 + a3.d02 + 4});
+    res.d01 = std::min({inf, a0.d01 + a1.d01 + a2.emp + a3.emp + 1, a0.d03 + a1.d12 + a2.d13 + a3.d02 + 3});
+    res.d02 = std::min({inf, a0.d01 + a1.d02 + a2.d12 + a3.emp + 2, a0.d03 + a1.emp + a2.d23 + a3.d02 + 2});
+    res.d03 = std::min({inf, a0.d01 + a1.d02 + a2.d13 + a3.d23 + 3, a0.d03 + a1.emp + a2.emp + a3.d03 + 1});
+    res.d12 = std::min({inf, a0.emp + a1.d12 + a2.d12 + a3.emp + 1, a0.d13 + a1.d01 + a2.d23 + a3.d02 + 3});
+    res.d13 = std::min({inf, a0.emp + a1.d12 + a2.d13 + a3.d23 + 2, a0.d13 + a1.d01 + a2.emp + a3.d03 + 2});
+    res.d23 = std::min({inf, a0.emp + a1.emp + a2.d23 + a3.d23 + 1, a0.d13 + a1.d02 + a2.d12 + a3.d03 + 3});
+    res.Emp = std::max(-inf, a0.Emp + a1.Emp + a2.Emp + a3.Emp);
+    res.Cyc = std::max({-inf, a0.Cyc + a1.Emp + a2.Emp + a3.Emp, a0.Emp + a1.Cyc + a2.Emp + a3.Emp
+        , a0.Emp + a1.Emp + a2.Cyc + a3.Emp, a0.Emp + a1.Emp + a2.Emp + a3.Cyc
+        , a0.D13 + a1.D02 + a2.D13 + a3.D02 + 4});
+    res.D01 = std::max({-inf, a0.D01 + a1.D01 + a2.Emp + a3.Emp + 1, a0.D03 + a1.D12 + a2.D13 + a3.D02 + 3});
+    res.D02 = std::max({-inf, a0.D01 + a1.D02 + a2.D12 + a3.Emp + 2, a0.D03 + a1.Emp + a2.D23 + a3.D02 + 2});
+    res.D03 = std::max({-inf, a0.D01 + a1.D02 + a2.D13 + a3.D23 + 3, a0.D03 + a1.Emp + a2.Emp + a3.D03 + 1});
+    res.D12 = std::max({-inf, a0.Emp + a1.D12 + a2.D12 + a3.Emp + 1, a0.D13 + a1.D01 + a2.D23 + a3.D02 + 3});
+    res.D13 = std::max({-inf, a0.Emp + a1.D12 + a2.D13 + a3.D23 + 2, a0.D13 + a1.D01 + a2.Emp + a3.D03 + 2});
+    res.D23 = std::max({-inf, a0.Emp + a1.Emp + a2.D23 + a3.D23 + 1, a0.D13 + a1.D02 + a2.D12 + a3.D03 + 3});
+    return res;
+}
+ Info null[21];
+ constexpr int N = 20 * 100000;
+ int trie[N][4];
+Info info[N];
+ int cnt = 1;
+ void modify(int p, const std::string &t, int x, i64 val) {
+    int n = t.size();
+    if (x == n) {
+        info[p].emp = val;
+        info[p].Emp = -val;
+        return;
+    }
+    int v = t[x] - 'a';
+    if (!trie[p][v]) {
+        trie[p][v] = ++cnt;
+    }
+    modify(trie[p][v], t, x + 1, val);
+    info[p] = merge(trie[p][0] ? info[trie[p][0]] : null[n - x - 1], trie[p][1] ? info[trie[p][1]] : null[n - x - 1]
+        , trie[p][2] ? info[trie[p][2]] : null[n - x - 1], trie[p][3] ? info[trie[p][3]] : null[n - x - 1]);
+}
+ bool adjacent(std::string a, std::string b) {
+    int i = 0;
+    while (a[i] == b[i]) {
+        i++;
+    }
+    int x = std::abs(a[i] - b[i]);
+    if (x != 1 && x != 3) {
+        return false;
+    }
+    for (int j = i + 1; j < a.size(); j++) {
+        if (a[i] != b[j] || b[i] != a[j]) {
+            return false;
+        }
+    }
+    return true;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        for (int i = 1; i <= 20; i++) {
+        null[i] = merge(null[i - 1], null[i - 1], null[i - 1], null[i - 1]);
+    }
+        int n, q;
+    std::cin >> n >> q;
+        info[1] = null[n];
+        std::set<std::string> s;
+        while (q--) {
+        std::string t;
+        std::cin >> t;
+                if (s.count(t)) {
+            modify(1, t, 0, 0);
+            s.erase(t);
+        } else {
+            modify(1, t, 0, inf);
+            s.insert(t);
+        }
+                i64 ans = info[1].cyc;
+        i64 Ans = info[1].Cyc;
+                if (Ans < 0) {
+            std::cout << -1 << "\n";
+            continue;
+        }
+                if (s.size() <= 1) {
+            ans = 2;
+        }
+        if (s.size() == 2) {
+            auto a = *s.begin();
+            auto b = *s.rbegin();
+            if (adjacent(a, b)) {
+                ans = 2;
+            }
+        }
+                std::cout << ans << " " << Ans << "\n";
+    }
+        return 0;
+}

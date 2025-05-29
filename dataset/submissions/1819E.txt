@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+ bool query(int x, int y) {
+    for (int i = 0; i < 40; i++) {
+        std::cout << "? " << (rng() % 2 ? x : y) + 1 << std::endl;
+        int res;
+        std::cin >> res;
+        if (res == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> u(m), v(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> u[i] >> v[i];
+        u[i]--, v[i]--;
+    }
+        std::vector<bool> ok(m);
+    for (int i = 0; i < m; i++) {
+        std::cout << "- " << i + 1 << std::endl;
+        if (!query(u[i], v[i])) {
+            ok[i] = true;
+            std::cout << "+ " << i + 1 << std::endl;
+        }
+    }
+        std::vector<std::vector<std::pair<int, int>>> adj(n);
+    for (int i = 0; i < m; i++) {
+        if (ok[i]) {
+            adj[u[i]].emplace_back(v[i], i);
+            adj[v[i]].emplace_back(u[i], i);
+        }
+    }
+        std::vector<int> parent(n), dep(n), pe(n);
+    std::function<void(int)> dfs = [&](int x) {
+        for (auto [y, i] : adj[x]) {
+            if (y == parent[x]) {
+                continue;
+            }
+            pe[y] = i;
+            parent[y] = x;
+            dep[y] = dep[x] + 1;
+            dfs(y);
+        }
+    };
+    parent[0] = -1;
+    dfs(0);
+        for (int i = 0; i < m; i++) {
+        if (!ok[i]) {
+            if (dep[u[i]] < dep[v[i]]) {
+                std::swap(u[i], v[i]);
+            }
+            std::cout << "- " << pe[u[i]] + 1 << std::endl;
+            std::cout << "+ " << i + 1 << std::endl;
+                        if (query(u[i], v[i])) {
+                ok[i] = true;
+            }
+                        std::cout << "+ " << pe[u[i]] + 1 << std::endl;
+            std::cout << "- " << i + 1 << std::endl;
+        }
+    }
+        std::cout << "!";
+    for (int i = 0; i < m; i++) {
+        std::cout << " " << ok[i];
+    }
+    std::cout << std::endl;
+        int res;
+    std::cin >> res;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

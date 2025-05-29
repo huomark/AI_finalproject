@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> p(n);
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+        adj[p[i]].push_back(i);
+    }
+        std::vector<int> siz(n);
+    auto dfs1 = [&](auto self, int x) -> void {
+        siz[x] = 1;
+        for (auto y : adj[x]) {
+            self(self, y);
+            siz[x] += siz[y];
+        }
+    };
+    dfs1(dfs1, 0);
+        auto dfs = [&](auto self, int x) -> int {
+        int max = 0;
+        for (auto y : adj[x]) {
+            max = std::max(max, siz[y]);
+        }
+        if (max * 2 > siz[x] - 1) {
+            for (auto y : adj[x]) {
+                if (siz[y] == max) {
+                    int v = self(self, y);
+                    return v + std::min((siz[x] - 1 - 2 * v) / 2, siz[x] - 1 - max);
+                }
+            }
+        } else {
+            return (siz[x] - 1) / 2;
+        }
+    };
+    int ans = dfs(dfs, 0);
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

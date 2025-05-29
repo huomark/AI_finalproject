@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> x(n), y(n);
+    std::vector vis(n + 1, std::array<int, 2>{});
+    int cnt[2] {};
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i];
+        cnt[y[i]]++;
+        vis[x[i]][y[i]] = 1;
+    }
+        i64 ans = 0;
+    for (int i = 0; i < n; i++) {
+        if (vis[x[i]][1 - y[i]]) {
+            ans += cnt[y[i]] - 1;
+        }
+        if (x[i] > 0 && x[i] < n && vis[x[i] - 1][1 - y[i]] && vis[x[i] + 1][1 - y[i]]) {
+            ans++;
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

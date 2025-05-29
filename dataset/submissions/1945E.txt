@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, x;
+    std::cin >> n >> x;
+        std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+    }
+        int pos = std::find(p.begin(), p.end(), x) - p.begin();
+        int l = 0, r = n;
+    int vis = 0;
+    while (l + 1 < r) {
+        int m = (l + r) / 2;
+        if (p[m] == x) {
+            vis = 1;
+        }
+        if (p[m] <= x) {
+            l = m;
+        } else {
+            r = m;
+        }
+    }
+        if (p[l] == x) {
+        std::cout << 0 << "\n";
+        return;
+    }
+        if (!vis || p[l] <= x) {
+        std::cout << 1 << "\n";
+        std::cout << pos + 1 << " " << l + 1 << "\n";
+        return;
+    }
+        std::swap(p[l], p[pos]);
+    std::cout << 2 << "\n";
+    std::cout << pos + 1 << " " << l + 1 << "\n";
+    pos = l;
+        l = 0, r = n;
+    vis = 0;
+    while (l + 1 < r) {
+        int m = (l + r) / 2;
+        if (p[m] == x) {
+            vis = 1;
+        }
+        if (p[m] <= x) {
+            l = m;
+        } else {
+            r = m;
+        }
+    }
+        std::cout << pos + 1 << " " << l + 1 << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

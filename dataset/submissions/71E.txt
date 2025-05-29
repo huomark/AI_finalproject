@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::string elem[] = {
+    "", "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr","Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm","Md","No","Lr"
+};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        std::map<std::string, int> id;
+    for (int i = 1; i <= 100; i++) {
+        id[elem[i]] = i;
+    }
+        std::vector<int> a(n), b(k);
+    for (int i = 0; i < n; i++) {
+        std::string s;
+        std::cin >> s;
+        a[i] = id[s];
+    }
+    for (int i = 0; i < k; i++) {
+        std::string s;
+        std::cin >> s;
+        b[i] = id[s];
+    }
+        std::vector<std::pair<int, int>> dp(1 << n, {-1, -1});
+    std::vector<int> f(1 << n, -1);
+    dp[0] = {0, 0};
+        for (int s = 0; s < (1 << n); s++) {
+        if (dp[s].first == -1) {
+            continue;
+        }
+        auto [j, v] = dp[s];
+        for (int i = 0; i < n; i++) {
+            if (s >> i & 1) {
+                continue;
+            }
+            if (v + a[i] > b[j]) {
+                continue;
+            }
+            f[s | 1 << i] = i;
+            if (v + a[i] == b[j]) {
+                dp[s | 1 << i] = {j + 1, 0};
+            } else {
+                dp[s | 1 << i] = {j, v + a[i]};
+            }
+        }
+    }
+        if (dp.back().first == -1) {
+        std::cout << "NO\n";
+        return 0;
+    }
+        std::cout << "YES\n";
+    std::vector<int> t;
+    for (int i = (1 << n) - 1; i; i ^= 1 << f[i]) {
+        t.push_back(a[f[i]]);
+    }
+    std::reverse(t.begin(), t.end());
+        for (int i = 0, j = 0, v = 0; i < n; i++) {
+        if (v) {
+            std::cout << "+";
+        }
+        std::cout << elem[t[i]];
+        v += t[i];
+        if (v == b[j]) {
+            std::cout << "->" << elem[b[j]] << "\n";
+            v = 0;
+            j++;
+        }
+    }
+        return 0;
+}

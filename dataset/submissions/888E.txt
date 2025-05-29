@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        int ans = 0;
+        int n1 = n / 2;
+        std::vector<int> x, y;
+    auto dfs = [&](auto self, int i, int goal, int sum, auto &x) {
+        if (i == goal) {
+            x.push_back(sum);
+            return;
+        }
+        self(self, i + 1, goal, sum, x);
+        self(self, i + 1, goal, (sum + a[i]) % m, x);
+    };
+    dfs(dfs, 0, n1, 0, x);
+    dfs(dfs, n1, n, 0, y);
+        std::sort(x.begin(), x.end());
+    std::sort(y.begin(), y.end());
+        int i = y.size() - 1;
+    for (auto a : x) {
+        ans = std::max(ans, a + y.back() - m);
+        while (i >= 0 && a + y[i] >= m) {
+            i--;
+        }
+        if (i >= 0) {
+            ans = std::max(ans, a + y[i]);
+        }
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

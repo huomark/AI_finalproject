@@ -1,0 +1,171 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int xs, ys;
+    std::cin >> xs >> ys;
+    ys--;
+        int xt, yt;
+    std::cin >> xt >> yt;
+    yt--;
+        int n;
+    std::cin >> n;
+        std::vector<char> type(n);
+    std::vector<int> x(n), y(n);
+        std::set<std::pair<int, int>> piece;
+    std::vector<int> vx{xs, xt};
+        for (int i = 0; i < n; i++) {
+        std::cin >> type[i] >> x[i] >> y[i];
+        y[i]--;
+        piece.emplace(x[i], y[i]);
+        vx.push_back(x[i]);
+    }
+        auto valid = [&](int x, int y) {
+        return 0 <= y && y < 8;
+    };
+        std::set<std::pair<int, int>> ban;
+    for (int i = 0; i < n; i++) {
+        ban.emplace(x[i], y[i]);
+                if (type[i] == 'K') {
+            for (auto dx = -1; dx <= 1; dx++) {
+                for (auto dy = -1; dy <= 1; dy++) {
+                    if (valid(x[i] + dx, y[i] + dy)) {
+                        ban.emplace(x[i] + dx, y[i] + dy);
+                    }
+                }
+            }
+        } else if (type[i] == 'R') {
+            for (auto [dx, dy] : {std::pair(-1, 0), {1, 0}, {0, -1}, {0, 1}}) {
+                for (int d = 1; d <= 20; d++) {
+                    int nx = x[i] + dx * d;
+                    int ny = y[i] + dy * d;
+                    if (piece.contains({nx, ny}) || !valid(nx, ny)) break;
+                                        ban.emplace(nx, ny);
+                }
+            }
+        } else if (type[i] == 'B') {
+            for (auto dx : {-1, 1}) {
+                for (auto dy : {-1, 1}) {
+                    for (int d = 1; d <= 20; d++) {
+                        int nx = x[i] + dx * d;
+                        int ny = y[i] + dy * d;
+                        if (piece.contains({nx, ny}) || !valid(nx, ny)) break;
+                                                ban.emplace(nx, ny);
+                    }
+                }
+            }
+        } else if (type[i] == 'Q') {
+            for (auto dx : {-1, 0, 1}) {
+                for (auto dy : {-1, 0, 1}) {
+                    for (int d = 1; d <= 20; d++) {
+                        int nx = x[i] + dx * d;
+                        int ny = y[i] + dy * d;
+                        if (piece.contains({nx, ny}) || !valid(nx, ny)) break;
+                                                ban.emplace(nx, ny);
+                    }
+                }
+            }
+        } else {
+            for (auto [dx, dy] : {std::pair(-2, -1), {-2, 1}, {-1, -2}, {-1, 2}, {1, -2}, {1, 2}, {2, -1}, {2, 1}}) {
+                if (valid(x[i] + dx, y[i] + dy)) {
+                    ban.emplace(x[i] + dx, y[i] + dy);
+                }
+            }
+        }
+    }
+        std::map<std::pair<int, int>, int> dis;
+    std::priority_queue<std::tuple<int, int, int>> h;
+    h.emplace(0, xs, ys);
+        vx.push_back(-20);
+    vx.push_back(1E8 + 20);
+    std::sort(vx.begin(), vx.end());
+        std::vector<std::pair<int, int>> skip;
+    std::map<std::pair<int, int>, std::vector<std::tuple<int, int, int>>> adj;
+        for (int i = 0; i < vx.size() - 1; i++) {
+        std::array<int, 8> xl, xr;
+        std::array<char, 8> typel, typer;
+        xl.fill(-1);
+        xr.fill(1E9);
+        typel.fill('K');
+        typer.fill('K');
+                for (int j = 0; j < n; j++) {
+            if (x[j] <= vx[i]) {
+                if (x[j] > xl[y[j]]) {
+                    xl[y[j]] = x[j];
+                    typel[y[j]] = type[j];
+                }
+            } else {
+                if (x[j] < xr[y[j]]) {
+                    xr[y[j]] = x[j];
+                    typer[y[j]] = type[j];
+                }
+            }
+        }
+        if (vx[i + 1] - vx[i] > 30) {
+            skip.emplace_back(vx[i] + 10, vx[i + 1] - 10);
+                        int last = -1;
+            for (int y = 0; y <= 8; y++) {
+                if (y == 8 || typel[y] == 'Q' || typel[y] == 'R' || typer[y] == 'Q' || typer[y] == 'R') {
+                    for (int y1 = last + 1; y1 < y; y1++) {
+                        for (int y2 = last + 1; y2 < y; y2++) {
+                            int x1 = vx[i] + 9, x2 = vx[i + 1] - 9;
+                            adj[{x1, y1}].emplace_back(x2, y2, x2 - x1);
+                            adj[{x2, y2}].emplace_back(x1, y1, x2 - x1);
+                        }
+                    }
+                    last = y;
+                }
+            }
+            for (int y = 0; y < 8; y++) {
+                if (typel[y] == 'Q' || typel[y] == 'R' || typer[y] == 'Q' || typer[y] == 'R') {
+                    for (int x = vx[i]; x <= vx[i + 1]; x++) {
+                        if (x >= vx[i] + 10) {
+                            x = std::max(x, vx[i + 1] - 9);
+                        }
+                        ban.emplace(x, y);
+                    }
+                }
+            }
+        } else {
+            for (int y = 0; y < 8; y++) {
+                if (typel[y] == 'Q' || typel[y] == 'R' || typer[y] == 'Q' || typer[y] == 'R') {
+                    for (int x = vx[i]; x <= vx[i + 1]; x++) {
+                        ban.emplace(x, y);
+                    }
+                }
+            }
+        }
+    }
+        while (!h.empty()) {
+        auto [d, x, y] = h.top();
+        h.pop();
+                d = -d;
+        if (dis.contains({x, y})) continue;
+        dis[{x, y}] = d;
+                for (auto dx = -1; dx <= 1; dx++) {
+            for (auto dy = -1; dy <= 1; dy++) {
+                int nx = x + dx;
+                int ny = y + dy;
+                if (!valid(nx, ny) || ban.contains({nx, ny})) continue;
+                                if (nx < vx[0] || nx > vx.back()) continue;
+                int j = std::lower_bound(skip.begin(), skip.end(), std::pair(nx + 1, -1)) - skip.begin() - 1;
+                if (j >= 0 && skip[j].second >= nx) {
+                    continue;
+                }
+                                h.emplace(-d - 1, nx, ny);
+            }
+        }
+                if (adj.contains({x, y})) {
+            for (auto [nx, ny, w] : adj[{x, y}]) {
+                h.emplace(-d - w, nx, ny);
+            }
+        }
+    }
+        if (!dis.contains({xt, yt})) {
+        std::cout << -1 << "\n";
+    } else {
+        std::cout << dis[{xt, yt}] << "\n";
+    }
+        return 0;
+}

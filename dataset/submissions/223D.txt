@@ -1,0 +1,169 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> x(n), y(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i];
+    }
+        int s, t;
+    std::cin >> s >> t;
+    s--, t--;
+        std::vector<std::map<int, int>> segment(n);
+    int cur = n;
+        std::map<int, std::vector<int>> events;
+    for (int i = 0; i < n; i++) {
+        int a = i, b = (i + 1) % n;
+        if (x[a] == x[b]) {
+            continue;
+        }
+        events[x[a]].push_back(i);
+        events[x[b]].push_back(i);
+        segment[i][x[a]] = a;
+        segment[i][x[b]] = b;
+    }
+        std::vector<std::vector<std::pair<int, double>>> adj(n);
+        auto cmp = [&](int i, int j) {
+        if (i == j) {
+            return false;
+        }
+        int ai = i, bi = (i + 1) % n;
+        int aj = j, bj = (j + 1) % n;
+        if (x[ai] > x[bi]) {
+            std::swap(ai, bi);
+        }
+        if (x[aj] > x[bj]) {
+            std::swap(aj, bj);
+        }
+        int L = std::max(x[ai], x[aj]);
+        int R = std::min(x[bi], x[bj]);
+                double fiL = y[ai] + 1.0 * (y[bi] - y[ai]) / (x[bi] - x[ai]) * (L - x[ai]);
+        double fjL = y[aj] + 1.0 * (y[bj] - y[aj]) / (x[bj] - x[aj]) * (L - x[aj]);
+        if (fiL != fjL) {
+            // std::cerr << "L : " << L << "\n";
+            // std::cerr << "cmp " << i << " " << j << " " << fiL << " " << fjL << "\n";
+            return fiL < fjL;
+        }
+        if (L == R) {
+            return i < j;
+        }
+                double fiR = y[ai] + 1.0 * (y[bi] - y[ai]) / (x[bi] - x[ai]) * (R - x[ai]);
+        double fjR = y[aj] + 1.0 * (y[bj] - y[aj]) / (x[bj] - x[aj]) * (R - x[aj]);
+        return fiR < fjR;
+    };
+        std::set<int, decltype(cmp)> order(cmp);
+        auto getId = [&](int i, int x) {
+        int res;
+        if (!segment[i].count(x)) {
+            res = segment[i][x] = cur++;
+            adj.emplace_back();
+        } else {
+            res = segment[i][x];
+        }
+        return res;
+    };
+        auto addEdge = [&](int a, int b, double w) {
+        // std::cerr << "addEdge " << a << " " << b << " " << w << "\n";
+        adj[a].emplace_back(b, w);
+    };
+        for (auto [X, v] : events) {
+        // std::cerr << "X : " << X << "\n";
+        for (auto i : v) {
+            int a = i, b = (i + 1) % n;
+            if (X == std::min(x[a], x[b])) {
+                // std::cerr << "insert " << i << "\n";
+                order.insert(i);
+            }
+        }
+        // for (auto i : order) {
+        //     std::cerr << i << " ";
+        // }
+        // std::cerr << "\n";
+        for (auto i : v) {
+            int a = i, b = (i + 1) % n;
+            if (X == std::min(x[a], x[b])) {
+                auto it = order.find(i);
+                if (X == x[a]) {
+                    it++;
+                    assert(it != order.end());
+                    int j = *it;
+                    int aj = j, bj = (j + 1) % n;
+                    double fjX = y[aj] + 1.0 * (y[bj] - y[aj]) / (x[bj] - x[aj]) * (X - x[aj]);
+                    addEdge(getId(j, X), a, fjX - y[a]);
+                } else {
+                    assert(it != order.begin());
+                    it--;
+                    int j = *it;
+                    int aj = j, bj = (j + 1) % n;
+                    double fjX = y[aj] + 1.0 * (y[bj] - y[aj]) / (x[bj] - x[aj]) * (X - x[aj]);
+                    addEdge(b, getId(j, X), y[b] - fjX);
+                }
+            }
+        }
+        for (auto i : v) {
+            int a = i, b = (i + 1) % n;
+            if (X == std::max(x[a], x[b])) {
+                auto it = order.find(i);
+                if (X == x[b]) {
+                    it++;
+                    assert(it != order.end());
+                    int j = *it;
+                    int aj = j, bj = (j + 1) % n;
+                    double fjX = y[aj] + 1.0 * (y[bj] - y[aj]) / (x[bj] - x[aj]) * (X - x[aj]);
+                    addEdge(getId(j, X), b, fjX - y[b]);
+                } else {
+                    assert(it != order.begin());
+                    it--;
+                    int j = *it;
+                    int aj = j, bj = (j + 1) % n;
+                    double fjX = y[aj] + 1.0 * (y[bj] - y[aj]) / (x[bj] - x[aj]) * (X - x[aj]);
+                    addEdge(a, getId(j, X), y[a] - fjX);
+                }
+            }
+        }
+        for (auto i : v) {
+            int a = i, b = (i + 1) % n;
+            if (X == std::max(x[a], x[b])) {
+                order.erase(i);
+            }
+        }
+    }
+        for (int i = 0; i < n; i++) {
+        int a = i, b = (i + 1) % n;
+        double d = std::sqrt((x[a] - x[b]) * (x[a] - x[b]) + (y[a] - y[b]) * (y[a] - y[b]));
+        if (segment[i].empty()) {
+            addEdge(a, b, d);
+            addEdge(b, a, d);
+        } else {
+            int dx = std::abs(x[a] - x[b]);
+            for (auto it = segment[i].begin(); std::next(it) != segment[i].end(); it++) {
+                auto [x1, i1] = *it;
+                auto [x2, i2] = *std::next(it);
+                addEdge(i1, i2, d / dx * (x2 - x1));
+                addEdge(i2, i1, d / dx * (x2 - x1));
+            }
+        }
+    }
+        int N = adj.size();
+    std::vector dis(N, -1.0);
+    std::priority_queue<std::pair<double, int>, std::vector<std::pair<double, int>>, std::greater<>> q;
+    q.emplace(0.0, s);
+        while (!q.empty()) {
+        auto [d, x] = q.top();
+        q.pop();
+                if (dis[x] != -1) {
+            continue;
+        }
+                dis[x] = d;
+                for (auto [y, w] : adj[x]) {
+            q.emplace(d + w, y);
+        }
+    }
+        double ans = dis[t];
+    std::cout << std::fixed << std::setprecision(10);
+    std::cout << ans << "\n";
+        return 0;
+}

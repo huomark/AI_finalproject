@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m, k;
+    std::cin >> n >> m >> k;
+        std::vector<std::vector<std::pair<int, int>>> adj(n + m);
+    for (int i = 0; i < k; i++) {
+        int x1, y1, x2, y2;
+        std::cin >> x1 >> y1 >> x2 >> y2;
+        x1--, y1--, x2--, y2--;
+                if (y2 == y1 + 1) {
+            adj[x2].emplace_back(n + y2, 1);
+            adj[n + y2].emplace_back(x2, 1);
+        } else {
+            adj[x2].emplace_back(n + y1, 0);
+            adj[n + y1].emplace_back(x2, 0);
+        }
+    }
+        std::vector<int> col(n + m, -1);
+    for (int i = 0; i < n + m; i++) {
+        if (col[i] == -1) {
+            col[i] = 0;
+            std::queue<int> q;
+            q.push(i);
+                        while (!q.empty()) {
+                auto x = q.front();
+                q.pop();
+                                for (auto [y, w] : adj[x]) {
+                    if (col[y] == (w ^ col[x] ^ 1)) {
+                        std::cout << "NO\n";
+                        return;
+                    }
+                    if (col[y] == -1) {
+                        col[y] = w ^ col[x];
+                        q.push(y);
+                    }
+                }
+            }
+        }
+    }
+        std::cout << "YES\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

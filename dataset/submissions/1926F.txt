@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::string s[7];
+    for (int i = 0; i < 7; i++) {
+        std::cin >> s[i];
+    }
+        int ans = 0;
+    for (int p = 0; p < 2; p++) {
+        int res = 100;
+        auto dfs = [&](auto self, int x, int y, int z) {
+            if (x == 5) {
+                res = std::min(res, z);
+                return;
+            }
+            if (y == 5) {
+                return self(self, x + 1, 0, z);
+            }
+            if ((x + y) % 2 != p) {
+                return self(self, x, y + 1, z);
+            }
+            if (s[x][y] == 'B' && s[x + 1][y + 1] == 'B' && s[x + 2][y] == 'B' && s[x][y + 2] == 'B' && s[x + 2][y + 2] == 'B') {
+                s[x + 1][y + 1] = 'W';
+                self(self, x, y + 1, z + 1);
+                s[x + 1][y + 1] = 'B';
+                s[x + 2][y] = 'W';
+                self(self, x, y + 1, z + 1);
+                s[x + 2][y] = 'B';
+                s[x + 2][y + 2] = 'W';
+                self(self, x, y + 1, z + 1);
+                s[x + 2][y + 2] = 'B';
+            } else {
+                self(self, x, y + 1, z);
+            }
+        };
+        dfs(dfs, 0, 0, 0);
+        ans += res;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

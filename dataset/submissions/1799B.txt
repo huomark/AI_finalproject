@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        if (std::count(a.begin(), a.end(), a[0]) == n) {
+        std::cout << 0 << "\n";
+        return;
+    }
+        if (std::count(a.begin(), a.end(), 1) > 0) {
+        std::cout << -1 << "\n";
+        return;
+    }
+        std::vector<std::pair<int, int>> ans;
+    while (std::count(a.begin(), a.end(), a[0]) < n && std::count(a.begin(), a.end(), 2) == 0) {
+        int i = 1;
+        while (a[0] == a[i]) {
+            i++;
+        }
+        if (a[0] > a[i]) {
+            ans.emplace_back(1, i + 1);
+            a[0] = (a[0] + a[i] - 1) / a[i];
+        } else {
+            ans.emplace_back(i + 1, 1);
+            a[i] = (a[i] + a[0] - 1) / a[0];
+        }
+    }
+        if (std::count(a.begin(), a.end(), a[0]) < n) {
+        int i = std::find(a.begin(), a.end(), 2) - a.begin();
+        for (int j = 0; j < n; j++) {
+            while (a[j] != 2) {
+                ans.emplace_back(j + 1, i + 1);
+                a[j] = (a[j] + 1) / 2;
+            }
+        }
+    }
+        std::cout << ans.size() << "\n";
+    for (auto [x, y] : ans) {
+        std::cout << x << " " << y << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::string s = std::to_string(n);
+    std::vector<std::pair<int, int>> ans;
+    for (int a = 1; a <= 10000; a++) {
+        int len = a * s.size();
+        std::string t;
+        while (t.size() < 7) {
+            t += s;
+        }
+        for (int b = std::max(1, len - 7); b <= std::min(len - 1, 10000); b++) {
+            int res = n * a - b;
+            if (std::to_string(res) == t.substr(0, len - b)) {
+                ans.emplace_back(a, b);
+            }
+        }
+    }
+    std::cout << ans.size() << "\n";
+    for (auto [a, b] : ans) {
+        std::cout << a << " " << b << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

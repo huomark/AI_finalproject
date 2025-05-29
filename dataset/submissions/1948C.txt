@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::string s[2];
+    std::cin >> s[0] >> s[1];
+        std::vector vis(2, std::vector<int>(n));
+    auto dfs = [&](auto self, int x, int y) -> void {
+        if (vis[x][y]) {
+            return;
+        }
+        vis[x][y] = 1;
+        for (auto [nx, ny] : {std::make_pair(x, y - 1), {x, y + 1}, {!x, y}}) {
+            if (0 <= ny && ny < n) {
+                if (s[nx][ny] == '<') {
+                    ny--;
+                } else {
+                    ny++;
+                }
+                self(self, nx, ny);
+            }
+        }
+    };
+    dfs(dfs, 0, 0);
+        if (vis[1][n - 1]) {
+        std::cout << "YES\n";
+    } else {
+        std::cout << "NO\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

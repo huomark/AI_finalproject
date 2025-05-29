@@ -1,0 +1,169 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+template <typename T>
+struct Fenwick {
+    int n;
+    std::vector<T> a;
+        Fenwick(int n_ = 0) {
+        init(n_);
+    }
+        void init(int n_) {
+        n = n_;
+        a.assign(n, T{});
+    }
+        void add(int x, const T &v) {
+        for (int i = x + 1; i <= n; i += i & -i) {
+            a[i - 1] = a[i - 1] + v;
+        }
+    }
+        T sum(int x) {
+        T ans{};
+        for (int i = x; i > 0; i -= i & -i) {
+            ans = ans + a[i - 1];
+        }
+        return ans;
+    }
+        T rangeSum(int l, int r) {
+        return sum(r) - sum(l);
+    }
+        int select(const T &k) {
+        int x = 0;
+        T cur{};
+        for (int i = 1 << std::__lg(n); i; i /= 2) {
+            if (x + i <= n && cur + a[x + i - 1] <= k) {
+                x += i;
+                cur = cur + a[x - 1];
+            }
+        }
+        return x;
+    }
+};
+ i64 S1(i64 n) {
+    return n * (n + 1) / 2;
+}
+ i64 S2(i64 n) {
+    return (n - 1) * n * (2 * n - 1) / 6 - n * n * (n - 1) / 2;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m, q;
+    std::cin >> n >> m >> q;
+        i64 ans = 0;
+    for (int i = 0; i < std::min(n, m); i++) {
+        ans += 1LL * (n - i) * (m - i);
+    }
+        std::vector<i64> a(n), b(m);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < m; i++) {
+        std::cin >> b[i];
+    }
+        const int N = std::max(n, m);
+    std::set<int> S[2];
+    S[0] = {0, n};
+    S[1] = {0, m};
+        Fenwick<i64> fen[2][4];
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 4; j++) {
+            fen[i][j].init(N + 1);
+        }
+    }
+    fen[0][0].add(n, 1);
+    fen[0][1].add(n, n);
+    fen[0][2].add(n, S1(n));
+    fen[0][3].add(n, S2(n));
+    fen[1][0].add(m, 1);
+    fen[1][1].add(m, m);
+    fen[1][2].add(m, S1(m));
+    fen[1][3].add(m, S2(m));
+        auto add = [&](int t, int x, int coef) {
+        ans += coef * x * fen[!t][2].sum(x);
+        ans += coef * fen[!t][3].sum(x);
+        ans += coef * S1(x) * fen[!t][1].rangeSum(x, N + 1);
+        ans += coef * S2(x) * fen[!t][0].rangeSum(x, N + 1);
+        fen[t][0].add(x, coef);
+        fen[t][1].add(x, coef * x);
+        fen[t][2].add(x, coef * S1(x));
+        fen[t][3].add(x, coef * S2(x));
+    };
+        auto insert = [&](int t, int i) {
+        auto it = S[t].insert(i).first;
+        int l = *std::prev(it);
+        int r = *std::next(it);
+        add(t, r - l, -1);
+        add(t, i - l, 1);
+        add(t, r - i, 1);
+    };
+    auto erase = [&](int t, int i) {
+        auto it = S[t].find(i);
+        int l = *std::prev(it);
+        int r = *std::next(it);
+        add(t, r - l, 1);
+        add(t, i - l, -1);
+        add(t, r - i, -1);
+        S[t].erase(it);
+    };
+    for (int i = n - 1; i; i--) {
+        a[i] -= a[i - 1];
+        if (!a[i]) {
+            insert(0, i);
+        }
+    }
+    for (int i = m - 1; i; i--) {
+        b[i] -= b[i - 1];
+        if (!b[i]) {
+            insert(1, i);
+        }
+    }
+        std::cout << ans << "\n";
+    while (q--) {
+        int t, l, r, x;
+        std::cin >> t >> l >> r >> x;
+        l--;
+                if (x) {
+            if (t == 1) {
+                if (l) {
+                    if (!a[l]) {
+                        erase(0, l);
+                    }
+                    a[l] += x;
+                    if (!a[l]) {
+                        insert(0, l);
+                    }
+                }
+                if (r < n) {
+                    if (!a[r]) {
+                        erase(0, r);
+                    }
+                    a[r] -= x;
+                    if (!a[r]) {
+                        insert(0, r);
+                    }
+                }
+            } else {
+                if (l) {
+                    if (!b[l]) {
+                        erase(1, l);
+                    }
+                    b[l] += x;
+                    if (!b[l]) {
+                        insert(1, l);
+                    }
+                }
+                if (r < m) {
+                    if (!b[r]) {
+                        erase(1, r);
+                    }
+                    b[r] -= x;
+                    if (!b[r]) {
+                        insert(1, r);
+                    }
+                }
+            }
+        }
+        std::cout << ans << "\n";
+    }
+        return 0;
+}

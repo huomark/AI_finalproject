@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    i64 l, r;
+    std::cin >> l >> r;
+    l--;
+        if (r >= 3 * l) {
+        std::cout << r / 2 << "\n";
+        return;
+    }
+        i64 ans = 0;
+        for (i64 i = 1, j; i <= r; i = j + 1) {
+        j = r / (r / i);
+        if (i <= l) j = std::min(j, l / (l / i));
+        if (r / i >= l / i + 2) ans += j - i + 1;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

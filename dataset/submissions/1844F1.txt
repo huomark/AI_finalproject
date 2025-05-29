@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, c;
+    std::cin >> n >> c;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        if (c >= 0) {
+        std::sort(a.begin(), a.end());
+        for (int i = 0; i < n; i++) {
+            std::cout << a[i] << " \n"[i == n - 1];
+        }
+        return;
+    }
+        std::sort(a.begin(), a.end(), std::greater());
+        c = -c;
+        std::vector<int> ans;
+    for (int i = 1, j = 0; i <= n; i++) {
+        if (i == n || a[i - 1] - a[i] > c) {
+            std::set<std::pair<int, int>> s, v;
+            for (int k = j; k < i; k++) {
+                s.emplace(a[k], k);
+                v.emplace(a[k], k);
+            }
+            auto x = *s.rbegin();
+            ans.push_back(x.first);
+            s.extract(x);
+            int lst = x.first;
+            v.erase(v.begin());
+            while (!s.empty()) {
+                bool ok = false;
+                while (true) {
+                    auto a = v.lower_bound(std::pair(lst - c, 0));
+                    if (a == v.end()) {
+                        break;
+                    }
+                    auto x = *a;
+                    auto it = s.find(x);
+                    v.erase(a);
+                    assert(it != s.begin());
+                    if (it == s.end()) {
+                        continue;
+                    }
+                    auto r = std::next(it);
+                    if (r == s.end()) {
+                        continue;
+                    }
+                    auto l = std::prev(it);
+                    if (r->first - l->first > c) {
+                        continue;
+                    }
+                    ok = true;
+                    ans.push_back(it->first);
+                    lst = it->first;
+                    s.erase(it);
+                    break;
+                }
+                if (!ok) {
+                    auto x = *s.rbegin();
+                    ans.push_back(x.first);
+                    lst = x.first;
+                    s.extract(x);
+                }
+            }
+            j = i;
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << ans[i] << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

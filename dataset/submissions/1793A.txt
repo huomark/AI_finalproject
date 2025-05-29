@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int a, b;
+    std::cin >> a >> b;
+        int n, m;
+    std::cin >> n >> m;
+        b = std::min(b, a);
+        i64 ans = 1LL * b * n;
+        int t = n / (m + 1);
+    ans = std::min(ans, 1LL * t * m * a + 1LL * (n - t * (m + 1)) * b);
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

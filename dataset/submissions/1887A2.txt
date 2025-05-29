@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(n), b(n);
+    for (int i = 1; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+    }
+    a[0] = 1;
+    auto a0 = a;
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+        int ans = 0;
+    for (int i = 0, j = 0; i < n; i++) {
+        while (j < n && a[i] >= b[j]) {
+            j++;
+        }
+        ans = std::max(ans, j - i);
+    }
+        int x = *std::ranges::partition_point(std::ranges::iota_view(1, m + 1),
+        [&](int v) {
+            a = a0;
+            a[0] = v;
+            int res = 0;
+            std::sort(a.begin(), a.end());
+            for (int i = 0, j = 0; i < n; i++) {
+                while (j < n && a[i] >= b[j]) {
+                    j++;
+                }
+                res = std::max(res, j - i);
+            }
+            return res == ans;
+        });
+        i64 sum = 1LL * m * ans + (m - x + 1);
+    std::cout << sum << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

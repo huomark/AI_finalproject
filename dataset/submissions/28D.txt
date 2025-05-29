@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> dp(n);
+    int ans = 0;
+    int t = -1;
+    std::map<std::pair<int, int>, std::pair<int, int>> f;
+    std::vector<int> prev(n, -1);
+    for (int i = 0; i < n; i++) {
+        int v, c, l, r;
+        std::cin >> v >> c >> l >> r;
+                if (l == 0) {
+            dp[i] = v;
+        } else if (f.count({l, r + c})) {
+            dp[i] = v + f[{l, r + c}].first;
+            prev[i] = f[{l, r + c}].second;
+        } else {
+            dp[i] = -1E9 - 1;
+        }
+        if (dp[i] >= 0) {
+            f[{l + c, r}] = std::max(f[{l + c, r}], std::pair{dp[i], i});
+        }
+                if (dp[i] > ans && r == 0) {
+            ans = dp[i];
+            t = i;
+        }
+    }
+        std::vector<int> a;
+    for (int i = t; i != -1; i = prev[i]) {
+        a.push_back(i);
+    }
+    std::reverse(a.begin(), a.end());
+    std::cout << a.size() << "\n";
+    for (auto x : a) {
+        std::cout << x + 1 << " \n"[x == a.back()];
+    }
+        return 0;
+}

@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> a[i];
+    }
+        std::vector binom(n + 1, std::vector<double>(n + 1));
+    for (int i = 0; i <= n; i++) {
+        binom[i][0] = 1;
+        for (int j = 1; j <= i; j++) {
+            binom[i][j] = binom[i - 1][j] + binom[i - 1][j - 1];
+        }
+    }
+        std::vector dp(n + 1, std::vector<double>(n + 1));
+    dp[0][0] = 1;
+    for (int i = 0; i < m; i++) {
+        std::vector g(n + 1, std::vector<double>(n + 1));
+        for (int x = 0; x <= n; x++) {
+            for (int y = 0; y <= x; y++) {
+                for (int z = 0; x + z <= n; z++) {
+                    g[x + z][std::max(y, (z + a[i] - 1) / a[i])] += dp[x][y] * binom[x + z][x];
+                }
+            }
+        }
+        dp = g;
+    }
+        double ans = 0;
+    for (int i = 0; i <= n; i++) {
+        ans += dp[n][i] * i;
+    }
+    ans /= std::pow(m, n);
+    std::cout << std::fixed << std::setprecision(10);
+    std::cout << ans << "\n";
+        return 0;
+}

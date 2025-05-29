@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int inf = 1E9;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> cnt(n);
+    for (int i = 0; i < n; i++) {
+        int a;
+        std::cin >> a;
+        a--;
+        cnt[a]++;
+    }
+        std::vector<int> dp(n + 1, inf);
+    dp[0] = 0;
+    for (int a = 0; a < n; a++) {
+        if (cnt[a] == 0) {
+            continue;
+        }
+        std::vector ndp(n + 1, inf);
+        for (int i = 0; i <= a; i++) {
+            ndp[i + 1] = std::min(ndp[i + 1], dp[i] + 1);
+            if (i >= cnt[a]) {
+                ndp[i - cnt[a]] = std::min(ndp[i - cnt[a]], dp[i]);
+            }
+        }
+        dp = ndp;
+    }
+        std::cout << *std::min_element(dp.begin(), dp.end()) << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

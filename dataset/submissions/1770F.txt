@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+  constexpr int P = 998244353;
+using i64 = long long;
+// assume -P <= x < 2P
+int norm(int x) {
+    if (x < 0) {
+        x += P;
+    }
+    if (x >= P) {
+        x -= P;
+    }
+    return x;
+}
+template<class T>
+T power(T a, i64 b) {
+    T res = 1;
+    for (; b; b /= 2, a *= a) {
+        if (b % 2) {
+            res *= a;
+        }
+    }
+    return res;
+}
+struct Z {
+    int x;
+    Z(int x = 0) : x(norm(x)) {}
+    Z(i64 x) : x(norm(x % P)) {}
+    int val() const {
+        return x;
+    }
+    Z operator-() const {
+        return Z(norm(P - x));
+    }
+    Z inv() const {
+        assert(x != 0);
+        return power(*this, P - 2);
+    }
+    Z &operator*=(const Z &rhs) {
+        x = i64(x) * rhs.x % P;
+        return *this;
+    }
+    Z &operator+=(const Z &rhs) {
+        x = norm(x + rhs.x);
+        return *this;
+    }
+    Z &operator-=(const Z &rhs) {
+        x = norm(x - rhs.x);
+        return *this;
+    }
+    Z &operator/=(const Z &rhs) {
+        return *this *= rhs.inv();
+    }
+    friend Z operator*(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend Z operator+(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res += rhs;
+        return res;
+    }
+    friend Z operator-(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res -= rhs;
+        return res;
+    }
+    friend Z operator/(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream &operator>>(std::istream &is, Z &a) {
+        i64 v;
+        is >> v;
+        a = Z(v);
+        return is;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Z &a) {
+        return os << a.val();
+    }
+};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        i64 n, x;
+    int y;
+    std::cin >> n >> x >> y;
+        if (n % 2 == 0) {
+        std::cout << 0 << "\n";
+        return 0;
+    }
+        i64 ans = 0;
+    for (int s = y; ; s = (s - 1) & y) {
+        for (int i = 0; i < 20; i++) {
+            if (~s >> i & 1) continue;
+            i64 v = x - (1 << i);
+            if (v < 0) continue;
+            i64 t = n * s - (1 << i);
+            if ((t & v) == v) ans ^= 1 << i;
+        }
+        if (!s) break;
+    }
+        std::cout << ans << "\n";
+        return 0;
+}

@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> cold(k + 1), hot(k + 1), profit(k + 1);
+    i64 sum = 0;
+    for (int i = 1; i <= k; i++) {
+        std::cin >> cold[i];
+    }
+    for (int i = 1; i <= k; i++) {
+        std::cin >> hot[i];
+        profit[i] = cold[i] - hot[i];
+    }
+    for (int i = 0; i < n; i++) {
+        sum += cold[a[i]];
+    }
+        std::vector<i64> dp(k + 1, -inf);
+    dp[0] = 0;
+        i64 max = 0;
+    i64 add = 0;
+        for (int i = 1; i < n; i++) {
+        i64 val = std::max(max, dp[a[i]] + add + profit[a[i]]);
+                if (a[i] == a[i - 1]) {
+            max += profit[a[i]];
+            add += profit[a[i]];
+        }
+                dp[a[i - 1]] = std::max(dp[a[i - 1]], val - add);
+        max = std::max(max, val);
+    }
+        i64 ans = sum - max;
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

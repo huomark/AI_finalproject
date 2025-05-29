@@ -1,0 +1,1 @@
+binary search, bitmasks, brute force, constructive algorithms, implementation, interactive

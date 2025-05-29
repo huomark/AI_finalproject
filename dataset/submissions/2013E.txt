@@ -1,0 +1,44 @@
+// Tsinghua Bootcamp 2024 Day 4 M
+ #include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        int g = 0;
+    i64 ans = 0;
+    int cnt = n;
+    while (true) {
+        int m = a[0];
+        for (int i = 0; i < n; i++) {
+            int x = std::gcd(g, a[i]);
+            if (x < m) {
+                m = x;
+            }
+        }
+        if (m == g) {
+            break;
+        }
+        g = m;
+        cnt--;
+        ans += m;
+        for (int i = 0; i < n; i++) {
+            a[i] = std::gcd(a[i], g);
+        }
+    }
+    ans += 1LL * g * cnt;
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

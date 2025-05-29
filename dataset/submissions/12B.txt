@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::string get(int n) {
+    if (n == 0) {
+        return "0";
+    }
+        auto s = std::to_string(n);
+    int i = 0;
+    for (int j = 0; j < s.size(); j++) {
+        if (s[j] < s[i] && s[j] != '0') {
+            i = j;
+        }
+    }
+    std::swap(s[0], s[i]);
+    std::sort(s.begin() + 1, s.end());
+    return s;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::string m;
+    std::cin >> n >> m;
+        if (m != get(n)) {
+        std::cout << "WRONG_ANSWER\n";
+    } else {
+        std::cout << "OK\n";
+    }
+        return 0;
+}

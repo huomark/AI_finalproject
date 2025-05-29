@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> c(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i];
+    }
+        std::vector a(n, std::vector<int>(m));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            std::cin >> a[i][j];
+        }
+    }
+        std::vector p(m, std::vector<int>(n));
+    std::vector invp(m, std::vector<int>(n));
+    for (int j = 0; j < m; j++) {
+        std::iota(p[j].begin(), p[j].end(), 0);
+        std::sort(p[j].begin(), p[j].end(),
+            [&](int x, int y) {
+                return a[x][j] < a[y][j];
+            });
+        for (int i = 0; i < n; i++) {
+            invp[j][p[j][i]] = i;
+        }
+    }
+        std::vector<i64> dis(n * (m + 1), -1);
+    std::priority_queue<std::pair<i64, int>, std::vector<std::pair<i64, int>>, std::greater<>> q;
+    q.emplace(0LL, 0);
+        std::vector<int> il(m), ir(m, n);
+        while (!q.empty()) {
+        auto [d, x] = q.top();
+        q.pop();
+                if (dis[x] != -1) {
+            continue;
+        }
+                dis[x] = d;
+                if (x < n) {
+            for (int j = 0; j < m; j++) {
+                while (ir[j] > 0 && a[p[j][ir[j] - 1]][j] >= a[x][j]) {
+                    ir[j]--;
+                    int y = p[j][ir[j]];
+                    q.emplace(d + c[y], y);
+                }
+            }
+            for (int j = 0; j < m; j++) {
+                q.emplace(d, (j + 1) * n + x);
+            }
+        } else {
+            int j = x / n - 1;
+            x %= n;
+            q.emplace(d + c[x], x);
+            if (invp[j][x] > 0) {
+                int t = invp[j][x];
+                q.emplace(d + a[x][j] - a[p[j][t - 1]][j], (j + 1) * n + p[j][t - 1]);
+            }
+        }
+    }
+        std::cout << dis[n - 1] << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

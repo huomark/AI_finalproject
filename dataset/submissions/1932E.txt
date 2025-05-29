@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        std::reverse(s.begin(), s.end());
+    while (s.back() == '0') {
+        s.pop_back();
+        n--;
+    }
+    std::vector<int> f(n);
+    for (int i = 0; i < n; i++) {
+        f[i] = s[i] - '0';
+    }
+    for (int i = n - 2; i >= 0; i--) {
+        f[i] += f[i + 1];
+    }
+    for (int i = 0; i < n; i++) {
+        if (f[i] >= 10) {
+            if (i == n - 1) {
+                n++;
+                f.push_back(0);
+            }
+            f[i + 1] += f[i] / 10;
+            f[i] %= 10;
+        }
+    }
+    std::reverse(f.begin(), f.end());
+    for (int i = 0; i < n; i++) {
+        std::cout << f[i];
+    }
+    std::cout << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

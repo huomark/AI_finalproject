@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ void solve() {
+    int m;
+    std::cin >> m;
+        i64 ans = inf;
+        std::vector<std::vector<std::pair<i64, i64>>> a(m);
+    std::map<i64, std::vector<std::pair<i64, i64>>> occur;
+    i64 L = 0, R = 0;
+    std::vector<i64> l(m), r(m), cnt(m);
+    for (int i = 0; i < m; i++) {
+        int n;
+        std::cin >> n >> l[i] >> r[i];
+        a[i].resize(n);
+        for (int j = 0; j < n; j++) {
+            std::cin >> a[i][j].first;
+        }
+        for (int j = 0; j < n; j++) {
+            std::cin >> a[i][j].second;
+            cnt[i] += a[i][j].second;
+            occur[a[i][j].first].emplace_back(i, a[i][j].second);
+        }
+        L += l[i], R += r[i];
+    }
+        for (i64 N = L; N <= R && ans > 0; N++) {
+        i64 suml = L, sumr = R;
+        i64 must = 0;
+        if (occur.count(N)) {
+            for (auto [i, c] : occur[N]) {
+                sumr -= r[i];
+                if (cnt[i] - c >= l[i]) {
+                    sumr += std::min(cnt[i] - c, r[i]);
+                } else {
+                    sumr += l[i];
+                    must += l[i] - (cnt[i] - c);
+                }
+            }
+        }
+        ans = std::min(ans, must + std::max(0LL, N - sumr));
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

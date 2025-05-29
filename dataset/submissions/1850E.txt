@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    i64 c;
+    std::cin >> n >> c;
+        std::vector<int> s(n);
+    i64 sum = 0;
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+        c -= 1LL * s[i] * s[i];
+        sum += s[i];
+    }
+    c /= 4;
+        i64 lo = 0, hi = 1E9;
+    while (lo < hi) {
+        i64 x = (lo + hi) / 2;
+                if (__int128(n) * x * x + __int128(sum) * x < c) {
+            lo = x + 1;
+        } else {
+            hi = x;
+        }
+    }
+        std::cout << lo << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

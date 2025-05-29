@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int P = 998244353;
+ int power(int a, int b) {
+    int res = 1;
+    for (; b; b /= 2, a = 1LL * a * a % P) {
+        if (b % 2) {
+            res = 1LL * res * a % P;
+        }
+    }
+    return res;
+}
+ int binom[8][8];
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+     for (int i = 0; i <= 7; i++) {
+        binom[i][0] = 1;
+        for (int j = 1; j <= i; j++) {
+            binom[i][j] = binom[i - 1][j - 1] + binom[i - 1][j];
+        }
+    }
+        int r, c;
+    std::cin >> r >> c;
+    r /= 6, c /= 7;
+    std::swap(r, c);
+     int frow[7], fcol[8];
+    for (int x = 0; x <= 6; x++) {
+        int res = 0;
+        for (int y = 0; y <= x; y++) {
+            res = (res + power(binom[x][y], r)) % P;
+        }
+        frow[x] = res;
+    }
+    for (int x = 0; x <= 7; x++) {
+        int res = 0;
+        for (int y = 0; y <= x; y++) {
+            res = (res + power(binom[x][y], c)) % P;
+        }
+        fcol[x] = res;
+    }
+    for (int i = 1; i <= 6; i++) {
+        for (int j = 0; j < i; j++) {
+            frow[i] = (frow[i] + 1LL * (P - binom[i][j]) * frow[j]) % P;
+        }
+    }
+    for (int i = 1; i <= 7; i++) {
+        for (int j = 0; j < i; j++) {
+            fcol[i] = (fcol[i] + 1LL * (P - binom[i][j]) * fcol[j]) % P;
+        }
+    }
+     int dp[1 << 18][7] {};
+    dp[0][0] = 1;
+    for (int i = 0; i < 7; i++) {
+        for (int j = 0; j < 6; j++) {
+            int g[1 << 18][7] {};
+            for (int s = 0; s < (1 << 18); s++) {
+                for (int t = 0; t <= j; t++) {
+                    if (dp[s][t] == 0) {
+                        continue;
+                    }
+                    for (int x = 0; x < 2; x++) {
+                        int ns = s + (x << (3 * j));
+                        int nt = t + !x;
+                        g[ns][nt] = (g[ns][nt] + dp[s][t]) % P;
+                    }
+                }
+            }
+            std::swap(dp, g);
+        }
+        int g[1 << 18][7] {};
+        for (int s = 0; s < (1 << 18); s++) {
+            for (int t = 0; t <= 6; t++) {
+                if (dp[s][t] == 0) {
+                    continue;
+                }
+                g[s][0] = (g[s][0] + 1LL * dp[s][t] * frow[t]) % P;
+            }
+        }
+        std::swap(dp, g);
+    }
+    int ans = 0;
+    for (int s = 0; s < (1 << 18); s++) {
+        if (dp[s][0] == 0) {
+            continue;
+        }
+        int res = dp[s][0];
+        for (int i = 0; i < 6; i++) {
+            res = 1LL * res * fcol[s >> (3 * i) & 7] % P;
+        }
+        ans = (ans + res) % P;
+    }
+    std::cout << ans << "\n";
+     return 0;
+}

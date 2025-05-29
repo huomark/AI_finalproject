@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int inf = 1E9;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> c(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i];
+        c[i]--;
+    }
+        std::vector<int> cost(m);
+    for (int i = 0; i < m; i++) {
+        std::cin >> cost[i];
+    }
+        std::vector<i64> adj(m);
+    for (int i = 0; i < n - 1; i++) {
+        adj[c[i]] |= 1LL << c[i + 1];
+        adj[c[i + 1]] |= 1LL << c[i];
+    }
+    adj[c[0]] |= 1LL << c[0];
+    adj[c[n - 1]] |= 1LL << c[n - 1];
+        int m1 = m / 2;
+        std::vector<int> val(1 << m1, inf);
+    int ans = inf;
+        auto dfs = [&](auto dfs, int x, int a, int s) {
+        if (x == m1) {
+            val[((1 << m1) - 1) ^ a] = s;
+            return;
+        }
+        if (!(adj[x] & (a | 1 << x))) dfs(dfs, x + 1, a | 1 << x, s);
+        dfs(dfs, x + 1, a, s + cost[x]);
+    };
+    dfs(dfs, 0, 0, 0);
+        for (int i = 1; i < (1 << m1); i *= 2) {
+        for (int j = 0; j < (1 << m1); j += 2 * i) {
+            for (int k = 0; k < i; k++) {
+                val[j + k] = std::min(val[j + k], val[i + j + k]);
+            }
+        }
+    }
+        auto dfs2 = [&](auto dfs2, int x, int a, int s, int other) {
+        if (x == m) {
+            ans = std::min(ans, s + val[other]);
+            return;
+        }
+        if (!(adj[x] >> m1 & (a | 1 << (x - m1)))) {
+            dfs2(dfs2, x + 1, a | 1 << (x - m1), s, other | adj[x] & ((1 << m1) - 1));
+        }
+        dfs2(dfs2, x + 1, a, s + cost[x], other);
+    };
+    dfs2(dfs2, m1, 0, 0, 0);
+        std::cout << ans << "\n";
+        return 0;
+}

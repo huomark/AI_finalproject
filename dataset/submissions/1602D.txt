@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n + 1), b(n + 1);
+    for (int i = 1; i <= n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 1; i <= n; i++) {
+        std::cin >> b[i];
+    }
+        std::vector<int> dis(n + 1, -1);
+    std::queue<int> q;
+    dis[n] = 0;
+    q.push(n);
+        int L = n;
+    std::vector<int> prev(n + 1);
+    while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+                int y = x + b[x];
+        while (L > y - a[y]) {
+            L--;
+            prev[L] = x;
+            dis[L] = dis[x] + 1;
+            q.push(L);
+        }
+    }
+        std::cout << dis[0] << "\n";
+    if (dis[0] != -1) {
+        std::vector<int> a;
+        for (int i = 0; i != n; i = prev[i]) {
+            a.push_back(i);
+        }
+        std::reverse(a.begin(), a.end());
+        for (auto x : a) {
+            std::cout << x << " \n"[x == 0];
+        }
+    }
+        return 0;
+}

@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+ constexpr double Pi = std::numbers::pi;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<double> x(n), y(n);
+    std::cout << "? 1 0 0" << std::endl;
+    for (int i = 0; i < n; i++) {
+        double x;
+        std::cin >> x >> y[i];
+    }
+    std::cout << "? 0 1 0" << std::endl;
+    for (int i = 0; i < n; i++) {
+        double y;
+        std::cin >> x[i] >> y;
+    }
+        double ang;
+        double A, B;
+    std::vector<double> f;
+    while (true) {
+        ang = 1. * rng() / std::numeric_limits<unsigned>::max() * Pi * 2;
+        bool ok = true;
+        A = std::cos(ang);
+        B = std::sin(ang);
+        f.clear();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                f.push_back(x[i] * A + y[j] * B);
+            }
+        }
+        std::sort(f.begin(), f.end());
+        for (int i = 1; i < f.size(); i++) {
+            if (f[i] - f[i - 1] < 1E-3) {
+                ok = false;
+            }
+        }
+        if (ok) {
+            break;
+        }
+    }
+        std::cout << "? " << B << " " << -A << " " << 0 << std::endl;
+        std::cout << "!";
+    for (int i = 0; i < n; i++) {
+        double X, Y;
+        std::cin >> X >> Y;
+        double f = X * A + Y * B;
+        for (int u = 0; u < n; u++) {
+            for (int v = 0; v < n; v++) {
+                if (std::abs(f - (x[u] * A + y[v] * B)) < 5E-4) {
+                    std::cout << " " << x[u] << " " << y[v];
+                }
+            }
+        }
+    }
+    std::cout << std::endl;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::cout << std::fixed << std::setprecision(10);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

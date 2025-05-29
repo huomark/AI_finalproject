@@ -1,0 +1,19 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+        std::ifstream fin("input.txt");
+    std::ofstream fout("output.txt");
+        int x;
+    fin >> x;
+        for (int i = 0; i < 3; i++) {
+        int a, b;
+        fin >> a >> b;
+                if (x == a) {
+            x = b;
+        } else if (x == b) {
+            x = a;
+        }
+    }
+        fout << x << "\n";
+        return 0;
+}

@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector dis(n, std::vector<int>(n, 1E9));
+    for (int i = 0; i < n; i++) {
+        dis[i][i] = 0;
+    }
+    for (int i = 0; i < m; i++) {
+        int a, b, c;
+        std::cin >> a >> b >> c;
+        a--, b--;
+        dis[a][b] = dis[b][a] = c;
+    }
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                dis[i][j] = std::min(dis[i][j], dis[i][k] + dis[k][j]);
+            }
+        }
+    }
+        int g1, g2, s1, s2;
+    std::cin >> g1 >> g2 >> s1 >> s2;
+        for (int i = 0; i < n; i++) {
+        std::sort(dis[i].begin(), dis[i].end());
+    }
+        std::vector<std::pair<int, int>> a, b;
+    for (int i = 0; i < n; i++) {
+        a.emplace_back(dis[i][1], i);
+        b.emplace_back(dis[i][n - 1], i);
+    }
+    std::sort(a.begin(), a.end());
+    std::sort(b.begin(), b.end());
+        i64 ans = 0;
+    for (auto l : a) {
+        for (auto r : b) {
+            if (r < l) {
+                continue;
+            }
+            if (l.second == r.second) {
+                continue;
+            }
+                        std::vector dp(g2 + 1, std::vector<i64>(s2 + 1));
+            dp[0][0] = 1;
+            for (int i = 0; i < n; i++) {
+                bool x = false, y = false, z = false;
+                if (i == l.second) {
+                    x = true;
+                } else if (i == r.second) {
+                    z = true;
+                } else {
+                    for (auto d : dis[i]) {
+                        if (!d) {
+                            continue;
+                        }
+                        if (std::pair(d, i) < l) {
+                            x = true;
+                        } else if (std::pair(d, i) > r) {
+                            z = true;
+                        } else {
+                            y = true;
+                        }
+                    }
+                }
+                for (int j = g2; j >= 0; j--) {
+                    for (int k = s2; k >= 0; k--) {
+                        if (j < g2 && x) {
+                            dp[j + 1][k] += dp[j][k];
+                        }
+                        if (k < s2 && y) {
+                            dp[j][k + 1] += dp[j][k];
+                        }
+                        if (!z) {
+                            dp[j][k] = 0;
+                        }
+                    }
+                }
+            }
+            i64 res = 0;
+            for (int i = g1; i <= g2; i++) {
+                for (int j = s1; j <= s2; j++) {
+                    res += dp[i][j];
+                }
+            }
+                        ans += res;
+        }
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

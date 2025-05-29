@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> D(n), L(n), R(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> D[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> L[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> R[i];
+    }
+    int a0, b0;
+    std::cin >> a0 >> b0;
+        std::set<std::pair<i64, i64>> s;
+    s.emplace(a0, b0);
+        i64 sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum += D[i];
+                i64 l = L[i] - sum;
+        i64 r = R[i] - sum;
+                auto it = s.lower_bound({l, -inf});
+        if (it != s.end() && it->second >= r) {
+            i64 y = it->second;
+            i64 x = -inf;
+            while (it != s.end() && it->second >= r) {
+                x = it->first;
+                it = s.erase(it);
+            }
+            if (x > l) {
+                s.emplace(x, r);
+            }
+            if (y >= r) {
+                s.emplace(l, y);
+            }
+        }
+    }
+        i64 ans = 0;
+    for (auto [x, y] : s) {
+        ans = std::max(ans, x + y + 2 * sum);
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

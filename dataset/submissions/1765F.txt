@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        std::vector<std::array<int, 3>> a(n);
+    for (int i = 0; i < n; i++) {
+        int x, w, c;
+        std::cin >> x >> w >> c;
+        a[i] = {x, w, c};
+    }
+    std::sort(a.begin(), a.end());
+        std::vector<double> dp(n);
+    double ans = 0;
+    for (int i = 0; i < n; i++) {
+        auto [xi, wi, ci] = a[i];
+        dp[i] = -wi;
+        for (int j = 0; j < i; j++) {
+            auto [xj, wj, cj] = a[j];
+            if (xi != xj) {
+                dp[i] = std::max(dp[i], dp[j] - wi + (ci + cj) * .005 * (xi - xj) * k);
+            }
+        }
+        ans = std::max(ans, dp[i]);
+    }
+        std::cout << std::fixed << std::setprecision(10);
+    std::cout << ans << "\n";
+        return 0;
+}

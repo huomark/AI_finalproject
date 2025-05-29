@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<std::string> s(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+    }
+        int ans = 0;
+    for (int i = 0; i < n / 2; i++) {
+        for (int j = 0; j < n / 2; j++) {
+            int sum = s[i][j] + s[j][n - 1 - i] + s[n - 1 - i][n - 1 - j] + s[n - 1 - j][i];
+            int max = std::max({s[i][j], s[j][n - 1 - i], s[n - 1 - i][n - 1 - j], s[n - 1 - j][i]});
+            ans += max * 4 - sum;
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

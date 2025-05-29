@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> x(n + 1), y(n + 1);
+    for (int i = 0; i < n + 1; i++) {
+        std::cin >> x[i] >> y[i];
+    }
+        std::array<std::set<int>, 2> set{};
+    for (int i = 1; i <= n; i++) {
+        set[(x[i] + y[i]) % 2].insert(i);
+    }
+    int s = (x[0] + y[0]) % 2;
+    int t;
+    int res = n;
+    if (set[!s].size() <= set[s].size()) {
+        std::cout << "First" << std::endl;
+        t = s;
+    } else {
+        std::cout << "Second" << std::endl;
+        int x;
+        std::cin >> x;
+        set[0].erase(x);
+        set[1].erase(x);
+        res -= 1;
+        t = !s;
+    }
+        while (res > 0) {
+        res -= 1;
+        int x;
+        if (!set[!t].empty()) {
+            x = *set[!t].begin();
+        } else {
+            x = *set[t].begin();
+        }
+        std::cout << x << std::endl;
+        set[0].erase(x);
+        set[1].erase(x);
+        if (res > 0) {
+            res -= 1;
+            std::cin >> x;
+            set[0].erase(x);
+            set[1].erase(x);
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

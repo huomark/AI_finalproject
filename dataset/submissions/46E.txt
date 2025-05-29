@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector a(n, std::vector<int>(m));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            std::cin >> a[i][j];
+            if (j) {
+                a[i][j] += a[i][j-1];
+            }
+        }
+    }
+        std::vector<i64> dp(m);
+    for (int i = 0; i < n; i++) {
+        if (i % 2 == 0) {
+            for (int j = m-1; j; j--) {
+                dp[j] = dp[j-1] + a[i][j];
+            }
+            dp[0] = -1E18;
+            for (int j = m-1; j; j--) {
+                dp[j-1] = std::max(dp[j-1], dp[j]);
+            }
+        } else {
+            for (int j = 0; j < m-1; j++) {
+                dp[j] = dp[j+1] + a[i][j];
+            }
+            dp[m-1] = -1E18;
+            for (int j = 0; j < m-1; j++) {
+                dp[j+1] = std::max(dp[j+1], dp[j]);
+            }
+        }
+    }
+        std::cout << *std::max_element(dp.begin(), dp.end()) << "\n";
+        return 0;
+}

@@ -1,0 +1,1 @@
+brute force, constructive algorithms, greedy, implementation, math, number theory

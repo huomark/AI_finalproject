@@ -1,0 +1,1 @@
+bitmasks, brute force, hashing, math, number theory

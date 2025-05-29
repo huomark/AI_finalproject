@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, c, d;
+    std::cin >> n >> c >> d;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::sort(a.begin(), a.end());
+    i64 ans = 1LL * c * n + d;
+        int t = 0;
+    for (int i = 0; i < n; i++) {
+        if (i == 0 || a[i] != a[i - 1]) {
+            t += 1;
+        }
+        ans = std::min(ans, 1LL * c * n + 1LL * d * a[i] - 1LL * (c + d) * t);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

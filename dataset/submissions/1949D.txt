@@ -1,0 +1,102 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+struct DSU {
+    std::vector<int> f, siz;
+        DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+        void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+        siz.assign(n, 1);
+    }
+        int find(int x) {
+        while (x != f[x]) {
+            x = f[x] = f[f[x]];
+        }
+        return x;
+    }
+        bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+        bool merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) {
+            return false;
+        }
+        siz[x] += siz[y];
+        f[y] = x;
+        return true;
+    }
+        int size(int x) {
+        return siz[find(x)];
+    }
+};
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<std::string> s(n);
+    int cntS = 0, cntF = 0;
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+        cntS += std::count(s[i].begin(), s[i].end(), 'S');
+        cntF += std::count(s[i].begin(), s[i].end(), 'F');
+    }
+        cntS /= 2;
+    cntF /= 2;
+        char less = (cntS <= cntF) ? 'S' : 'F';
+    char more = 'S' ^ 'F' ^ less;
+        DSU dsu(n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (s[i][j] == more) {
+                dsu.merge(i, j);
+            }
+        }
+    }
+        std::vector<int> type(n);
+    int A = 0, B = 0;
+    int threshold = (n * 3 + 3) / 4;
+    std::vector<int> p;
+    for (int i = 0; i < n; i++) {
+        if (dsu.find(i) == i) {
+            p.push_back(i);
+        }
+    }
+    std::sort(p.begin(), p.end(),
+        [&](int i, int j) {
+            return dsu.size(i) > dsu.size(j);
+        });
+    for (auto i : p) {
+        if (A + dsu.size(i) - 1 <= threshold) {
+            type[i] = 0;
+            A += dsu.size(i);
+        } else {
+            type[i] = 1;
+            B += dsu.size(i);
+            assert(B * 2 + std::min(cntS, cntF) <= threshold);
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        type[i] = type[dsu.find(i)];
+    }
+        for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (s[i][j] == '?') {
+                if (type[i] == type[j]) {
+                    s[i][j] = more;
+                } else {
+                    s[i][j] = less;
+                }
+            }
+        }
+    }
+        for (int i = 0; i < n; i++) {
+        std::cout << s[i] << "\n";
+    }
+        return 0;
+}

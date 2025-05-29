@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+ void solve() {
+    int n, x;
+    std::cin >> n >> x;
+    x--;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        i64 sum = std::accumulate(a.begin(), a.end(), 0LL);
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--;
+        v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<i64> dp(n), cnt(n);
+    auto check = [&](i64 t) {
+        for (int i = 0; i < n; i++) {
+            cnt[i] = t / n + (i < t % n);
+        }
+        assert((t - sum) % 2 == 0);
+        auto dfs = [&](this auto &&self, int x, int p = -1) -> void {
+            dp[x] = std::abs(a[x]);
+            for (auto y : adj[x]) {
+                if (y == p) {
+                    continue;
+                }
+                self(y, x);
+                dp[x] += dp[y];
+            }
+            if (dp[x] <= cnt[x]) {
+                dp[x] = (cnt[x] - dp[x]) % 2;
+            } else {
+                dp[x] -= cnt[x];
+            }
+        };
+        dfs(x);
+        return dp[x] == 0;
+    };
+        std::vector<int> p;
+    for (int i = 0; i < n; i++) {
+        p.push_back(2 * i + (sum & 1));
+    }
+    std::shuffle(p.begin(), p.end(), rng);
+        i64 ans = 1E18 + (sum & 1);
+    for (auto r : p) {
+        i64 t = ans / (2 * n);
+        if (ans % (2 * n) < r) {
+            t--;
+        }
+        if (t < 0 || !check(t * (2 * n) + r)) {
+            continue;
+        }
+        i64 lo = 0, hi = t;
+        while (lo < hi) {
+            i64 x = (lo + hi) / 2;
+            if (check(x * 2 * n + r)) {
+                hi = x;
+            } else {
+                lo = x + 1;
+            }
+        }
+        ans = std::min(ans, lo * 2 * n + r);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

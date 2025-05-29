@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string s;
+    std::cin >> s;
+        int cnt[26] {};
+    for (auto c : s) {
+        cnt[c - 'a']++;
+    }
+        std::vector<int> odd;
+    for (int i = 0; i < 26; i++) {
+        if (cnt[i] & 1) {
+            odd.push_back(i);
+        }
+    }
+        for (int i = 0; i < odd.size()/2; i++) {
+        cnt[odd[i]]++;
+        cnt[odd[odd.size()-1 - i]]--;
+    }
+        s = "";
+    if (odd.size() & 1) {
+        int x = odd[odd.size() / 2];
+        s += 'a' + x;
+        cnt[x]--;
+    }
+        for (int i = 25; i >= 0; i--) {
+        s = std::string(cnt[i]/2, 'a' + i) + s + std::string(cnt[i]/2, 'a' + i);
+    }
+    std::cout << s << "\n";
+        return 0;
+}

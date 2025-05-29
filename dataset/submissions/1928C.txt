@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, x;
+    std::cin >> n >> x;
+        if ((n + x) % 2 != 0) {
+        std::cout << 0 << "\n";
+        return;
+    }
+        x--, n--;
+        int ans = 0;
+    int d = (n - x) / 2;
+    for (int k = 1; k * k <= d; k++) {
+        if (d % k != 0) {
+            continue;
+        }
+        ans += (x < k);
+        if (k * k != d) {
+            ans += (x < d / k);
+        }
+    }
+    int e = (n + x) / 2;
+    for (int k = 1; k * k <= e; k++) {
+        if (e % k != 0) {
+            continue;
+        }
+        ans += (x && x <= k);
+        if (k * k != e) {
+            ans += (x && x <= e / k);
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

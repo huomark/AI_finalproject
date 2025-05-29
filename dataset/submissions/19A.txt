@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<std::string> s(n);
+    std::map<std::string, int> id;
+    for (int i = 0; i < n; i++) {
+        std::cin >> s[i];
+        id[s[i]] = i;
+    }
+        std::vector<int> score(n), goal(n), miss(n);
+        for (int i = 0; i < n * (n - 1) / 2; i++) {
+        std::string a, b;
+        std::cin >> a >> b;
+                int x = a.find('-');
+        int u = id[a.substr(0, x)];
+        int v = id[a.substr(x + 1)];
+                x = b.find(':');
+        int p = std::stoi(b.substr(0, x));
+        int q = std::stoi(b.substr(x + 1));
+                goal[u] += p;
+        miss[u] += q;
+        goal[v] += q;
+        miss[v] += p;
+                if (p > q) {
+            score[u] += 3;
+        } else if (p < q) {
+            score[v] += 3;
+        } else {
+            score[u] += 1;
+            score[v] += 1;
+        }
+    }
+        std::vector<int> order(n);
+    std::iota(order.begin(), order.end(), 0);
+    std::sort(order.begin(), order.end(), [&](int i, int j) {
+        return std::tuple(score[i], goal[i] - miss[i], goal[i])
+            > std::tuple(score[j], goal[j] - miss[j], goal[j]);
+    });
+        std::vector<std::string> ans;
+    for (int i = 0; i < n / 2; i++) {
+        ans.push_back(s[order[i]]);
+    }
+    std::sort(ans.begin(), ans.end());
+    for (auto s : ans) {
+        std::cout << s << "\n";
+    }
+        return 0;
+}

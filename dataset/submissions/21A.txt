@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ bool valid(std::string s) {
+    if (s.size() < 1 || s.size() > 16) {
+        return false;
+    }
+    for (auto c : s) {
+        if (!std::isalpha(c) && !std::isdigit(c) && c != '_') {
+            return false;
+        }
+    }
+    return true;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string s;
+    std::cin >> s;
+        int a = s.find('@');
+    int b = s.find('/');
+        if (a == -1) {
+        std::cout << "NO\n";
+        return 0;
+    }
+        auto username = s.substr(0, a);
+    if (!valid(username)) {
+        std::cout << "NO\n";
+        return 0;
+    }
+        std::string hostname;
+    if (b == -1) {
+        hostname = s.substr(a + 1);
+    } else {
+        hostname = s.substr(a + 1, b - a - 1);
+    }
+    if (hostname.size() < 1 || hostname.size() > 32) {
+        std::cout << "NO\n";
+        return 0;
+    }
+        int i = 0;
+    while (true) {
+        int j = hostname.find('.', i);
+        std::string word;
+        if (j == -1) {
+            word = hostname.substr(i);
+        } else {
+            word = hostname.substr(i, j - i);
+        }
+        if (!valid(word)) {
+            std::cout << "NO\n";
+            return 0;
+        }
+        if (j == -1) {
+            break;
+        }
+        i = j + 1;
+    }
+        if (b != -1) {
+        auto resource = s.substr(b + 1);
+        if (!valid(resource)) {
+            std::cout << "NO\n";
+            return 0;
+        }
+    }
+        std::cout << "YES\n";
+        return 0;
+}

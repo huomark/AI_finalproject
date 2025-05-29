@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(m), b(m);
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < m; i++) {
+        std::cin >> a[i] >> b[i];
+        a[i]--, b[i]--;
+        adj[b[i]].push_back(a[i]);
+    }
+        std::vector<int> dis(n, -1);
+    std::vector<int> q;
+    q.push_back(0);
+    dis[0] = 0;
+        for (int i = 0; i < q.size(); i++) {
+        int x = q[i];
+        for (auto y : adj[x]) {
+            if (dis[y] == -1) {
+                dis[y] = dis[x] + 1;
+                q.push_back(y);
+            }
+        }
+    }
+        if (q.size() < n) {
+        std::cout << "INFINITE\n";
+        return;
+    }
+        std::vector<std::vector<int>> f(n);
+    for (auto x : q) {
+        for (int i = 0; i <= dis[x]; i++) {
+            f[i].push_back(x);
+        }
+    }
+    std::vector<int> ans;
+    for (auto &v : f) {
+        ans.insert(ans.end(), v.rbegin(), v.rend());
+    }
+    std::cout << "FINITE\n";
+    std::cout << ans.size() << "\n";
+    for (int i = 0; i < ans.size(); i++) {
+        std::cout << ans[i] + 1 << " \n"[i == ans.size() - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

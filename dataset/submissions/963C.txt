@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using i128 = __int128;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::map<i64, i64> cntw, cnth;
+    std::map<std::pair<i64, i64>, i64> cnt;
+    std::vector<i64> w(n), h(n), c(n);
+    i64 tot = 0;
+    for (int i = 0; i < n; i++) {
+        std::cin >> w[i] >> h[i] >> c[i];
+        cntw[w[i]] += c[i];
+        cnth[h[i]] += c[i];
+        cnt[{w[i], h[i]}] += c[i];
+        tot += c[i];
+    }
+        i64 gw = 0, gh = 0;
+    for (auto [w, c] : cntw) {
+        gw = std::gcd(gw, c);
+    }
+    for (auto [h, c] : cnth) {
+        gh = std::gcd(gh, c);
+    }
+        for (auto [p, c] : cnt) {
+        auto [w, h] = p;
+        if (i128(c) * tot != i128(cntw[w]) * cnth[h]) {
+            std::cout << 0 << "\n";
+            return 0;
+        }
+    }
+        std::map<i64, int> e;
+    i64 g = std::gcd(gw, tot);
+    gw /= g, tot /= g;
+    gh /= tot;
+        for (i64 x = 2; x * x <= gw; x++) {
+        while (gw % x == 0) {
+            e[x]++;
+            gw /= x;
+        }
+    }
+    if (gw > 1) {
+        e[gw]++;
+    }
+    for (i64 x = 2; x * x <= gh; x++) {
+        while (gh % x == 0) {
+            e[x]++;
+            gh /= x;
+        }
+    }
+    if (gh > 1) {
+        e[gh]++;
+    }
+        i64 ans = 1;
+    for (auto [_, x] : e) {
+        ans *= x + 1;
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

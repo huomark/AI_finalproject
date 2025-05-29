@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ bool query(int u, int k, std::set<int> s) {
+    std::cout << "? " << u + 1 << " " << k << " " << s.size();
+    for (auto x : s) {
+        std::cout << " " << x + 1;
+    }
+    std::cout << std::endl;
+    int res;
+    std::cin >> res;
+    return res;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::set<int> s;
+    for (int i = 0; i < 125; i++) {
+        int lo = 0, hi = n - 1;
+        int k = n + i;
+        while (lo < hi) {
+            int m = (lo + hi) / 2;
+            std::set<int> s;
+            for (int i = lo; i <= m; i++) {
+                s.insert(i);
+            }
+            if (query(0, k, s)) {
+                hi = m;
+            } else {
+                lo = m + 1;
+            }
+        }
+        s.insert(lo);
+    }
+        auto fin = [&]() {
+        for (int i = 0; i < n; i++) {
+            if (!s.count(i) && query(i, n, s)) {
+                s.insert(i);
+            }
+        }
+        std::cout << "! " << s.size();
+        for (auto x : s) {
+            std::cout << " " << x + 1;
+        }
+        std::cout << std::endl;
+        std::exit(0);
+    };
+        if (s.size() < 125) {
+        fin();
+    }
+    for (int i = 0; i < n; i++) {
+        if (!s.count(i) && query(i, 125, s)) {
+            s.insert(i);
+        }
+    }
+    if (s.size() < 250) {
+        fin();
+    }
+    for (int i = 0; i < n; i++) {
+        if (!s.count(i) && query(i, 250, s)) {
+            s.insert(i);
+        }
+    }
+    fin();
+        return 0;
+}

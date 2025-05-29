@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        constexpr int V = 8192;
+        std::vector dp(V + 1, std::bitset<V>{});
+    std::vector<std::vector<int>> f(V + 1);
+    for (int i = 0; i <= V; i++) {
+        dp[i][0] = 1;
+        f[i].push_back(0);
+    }
+        for (auto x : a) {
+        auto b = std::move(f[x]);
+        for (auto y : b) {
+            if (!dp[x][x ^ y]) {
+                for (int j = x; j <= V && !dp[j][x ^ y]; j++) {
+                    dp[j][x ^ y] = 1;
+                    f[j].push_back(x ^ y);
+                }
+            }
+        }
+    }
+        std::vector<int> ans;
+    for (int i = 0; i < V; i++) {
+        if (dp[V][i]) {
+            ans.push_back(i);
+        }
+    }
+    std::cout << ans.size() << "\n";
+    for (auto x : ans) {
+        std::cout << x << " \n"[x == ans.back()];
+    }
+        return 0;
+}

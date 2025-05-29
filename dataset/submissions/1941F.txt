@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m, k;
+    std::cin >> n >> m >> k;
+        std::vector<i64> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<i64> d(m), f(k);
+    for (int i = 0; i < m; i++) {
+        std::cin >> d[i];
+        d[i] *= 2;
+    }
+    for (int i = 0; i < k; i++) {
+        std::cin >> f[i];
+        f[i] *= 2;
+    }
+    std::sort(d.begin(), d.end());
+    std::sort(f.begin(), f.end());
+        i64 gap = 0;
+    for (int i = 1; i < n; i++) {
+        gap = std::max(gap, a[i] - a[i - 1]);
+    }
+        i64 ans = gap;
+    for (int i = 1; i < n; i++) {
+        if (a[i] - a[i - 1] == gap) {
+            i64 sec = 0;
+            for (int j = 1; j < n; j++) {
+                if (j != i) {
+                    sec = std::max(sec, a[j] - a[j - 1]);
+                }
+            }
+            i64 goal = a[i] + a[i - 1];
+            i64 res = goal;
+            for (int x = m - 1, y = 0; x >= 0; x--) {
+                while (y < k && d[x] + f[y] < goal) {
+                    y++;
+                }
+                if (y < k) {
+                    res = std::min(res, d[x] + f[y] - goal);
+                }
+                if (y > 0) {
+                    res = std::min(res, goal - (d[x] + f[y - 1]));
+                }
+            }
+            res = std::max(sec, (a[i] - a[i - 1] + res) / 2);
+            ans = std::min(ans, res);
+            break;
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

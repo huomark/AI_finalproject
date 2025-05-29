@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, q;
+    std::cin >> n >> q;
+        std::vector<int> need(n);
+        std::vector<std::pair<int, int>> edges(n - 1);
+    for (int i = 0; i < n - 1; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        edges[i] = {u, v};
+        need[u] ^= 1;
+        need[v] ^= 1;
+    }
+        std::vector<std::vector<std::pair<int, int>>> adj(n);
+        for (int i = 0; i < q; i++) {
+        int a, b, c;
+        std::cin >> a >> b >> c;
+        a--, b--;
+        adj[a].emplace_back(b, c);
+        adj[b].emplace_back(a, c);
+    }
+        std::vector<int> val(n, -1), belong(n), siz(n);
+        int ans = 0;
+    for (int i = 0; i < n; i++) {
+        if (val[i] != -1) {
+            continue;
+        }
+                std::queue<int> q;
+        q.push(i);
+        val[i] = 0;
+                while (!q.empty()) {
+            int x = q.front();
+            q.pop();
+                        if (need[x] == 1) {
+                ans ^= val[x];
+                siz[i]++;
+            }
+            belong[x] = i;
+                        for (auto [y, w] : adj[x]) {
+                if (val[y] == -1) {
+                    val[y] = val[x] ^ w;
+                    q.push(y);
+                }
+                if (val[y] != (val[x] ^ w)) {
+                    std::cout << "No\n";
+                    return 0;
+                }
+            }
+        }
+    }
+        for (int i = 0; i < n; i++) {
+        if (siz[i] % 2 == 1) {
+            for (int j = 0; j < n; j++) {
+                if (belong[j] == i) {
+                    val[j] ^= ans;
+                }
+            }
+            break;
+        }
+    }
+        std::cout << "Yes\n";
+    for (int i = 0; i < n - 1; i++) {
+        auto [u, v] = edges[i];
+        std::cout << (val[u] ^ val[v]) << " \n"[i == n - 2];
+    }
+        return 0;
+}

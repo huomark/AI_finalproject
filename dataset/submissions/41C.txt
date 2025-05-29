@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string s;
+    std::cin >> s;
+        std::string ans;
+        int n = s.size();
+    for (int i = 1; i+2 < n; i++) {
+        if (s.substr(i, 2) == "at") {
+            std::string t;
+            for (int j = 0; j < i; ) {
+                if (j && j+3 <= i && s.substr(j, 3) == "dot") {
+                    t += '.';
+                    j += 3;
+                } else {
+                    t += s[j];
+                    j++;
+                }
+            }
+            t += '@';
+            for (int j = i+2; j < n; ) {
+                if (j+3 < n && s.substr(j, 3) == "dot") {
+                    t += '.';
+                    j += 3;
+                } else {
+                    t += s[j];
+                    j++;
+                }
+            }
+            if (ans.empty() || t.size() < ans.size() || (t.size() == ans.size() && t < ans)) {
+                ans = t;
+            }
+        }
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

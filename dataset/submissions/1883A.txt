@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int pos = 1;
+    std::string s;
+    std::cin >> s;
+    int ans = 0;
+    for (auto c : s) {
+        int x = c - '0';
+        if (x == 0) {
+            x = 10;
+        }
+        ans += std::abs(pos - x);
+        pos = x;
+    }
+    std::cout << ans + 4 << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

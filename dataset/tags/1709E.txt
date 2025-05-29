@@ -1,0 +1,1 @@
+bitmasks, data structures, dfs and similar, dsu, greedy, trees

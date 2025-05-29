@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ struct SEQ {
+    std::list<std::array<int, 2>> x;
+    int sum;
+    int cnt;
+};
+ void merge(SEQ &a, SEQ &b, int x) {
+    int c = 0;
+    x = std::max(x, b.x.front()[0]);
+    while (!a.x.empty() && a.x.back()[0] <= x) {
+        c ^= a.x.back()[1];
+        a.sum ^= a.x.back()[0] & a.x.back()[1];
+        a.x.pop_back();
+    }
+    b.x.push_front({x, c});
+    b.sum ^= x & c;
+    a.x.splice(a.x.end(), b.x);
+    a.cnt ^= b.cnt;
+    a.sum ^= b.sum;
+}
+ struct DSU {
+    std::vector<int> f, siz;
+    DSU(int n) : f(n), siz(n, 1) { std::iota(f.begin(), f.end(), 0); }
+    int leader(int x) {
+        while (x != f[x]) x = f[x] = f[f[x]];
+        return x;
+    }
+    bool same(int x, int y) { return leader(x) == leader(y); }
+    bool merge(int x, int y) {
+        x = leader(x);
+        y = leader(y);
+        if (x == y) return false;
+        siz[x] += siz[y];
+        f[y] = x;
+        return true;
+    }
+    int size(int x) { return siz[leader(x)]; }
+};
+ const int dx[] = {1, 0, -1, 0};
+const int dy[] = {0, -1, 0, 1};
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector a(n + 2, std::vector<int>(m + 2));
+        std::vector<std::array<int, 2>> p;
+        const int N = 4 * (n + 2) * (m + 2);
+    DSU dsu(N);
+        std::vector<SEQ> s(N);
+    for (int i = 0; i < N; i++) {
+        s[i].x.push_back({1, 1});
+        s[i].cnt = s[i].sum = 1;
+    }
+        for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            std::cin >> a[i][j];
+            p.push_back({i, j});
+        }
+    }
+        std::sort(p.begin(), p.end(), [&](auto i, auto j) {
+        return a[i[0]][i[1]] < a[j[0]][j[1]];
+    });
+        auto get = [&](int x, int y, int d) {
+        return 4 * (x * (m + 2) + y) + d;
+    };
+        std::vector ans(n + 2, std::vector<int>(m + 2));
+    for (auto [x, y] : p) {
+        int res = 0;
+        for (int i = 0; i < 4; i++) {
+            int u = get(x, y, i);
+            u = dsu.leader(u);
+            res ^= s[u].sum ^ (s[u].cnt & a[x][y]);
+        }
+        ans[x][y] = res;
+        for (int i = 0; i < 4; i++) {
+            int ni = (i + res) & 3;
+            if (!dsu.same(get(x, y, i), get(x + dx[ni], y + dy[ni], ni))) {
+                int u = dsu.leader(get(x, y, i));
+                int v = dsu.leader(get(x + dx[ni], y + dy[ni], ni));
+                merge(s[u], s[v], a[x][y]);
+                dsu.merge(u, v);
+            }
+        }
+    }
+        for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            std::cout << ans[i][j];
+        }
+        std::cout << "\n";
+    }
+        return 0;
+}

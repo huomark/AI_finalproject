@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int N;
+    std::cin >> N;
+        std::vector<int> A(N);
+    for (int i = 0; i < N; i++) {
+        std::cin >> A[i];
+    }
+        std::sort(A.begin(), A.end());
+        std::string S;
+    std::cin >> S;
+        std::vector<std::pair<int, char>> ans;
+    ans.reserve(N);
+        int l = 0, r = N - 1;
+    for (int i = N - 2; i >= 0; i--) {
+        if ((S[i] == S[N - 1]) == ((N - 1 - r) % 2 == 0)) {
+            ans.emplace_back(A[l], S[N - 1] ^ ((N - 1 - l) % 2 ? 'L' ^ 'R' : 0));
+            l++;
+        } else {
+            ans.emplace_back(A[r], S[N - 1] ^ ((N - 1 - r) % 2 ? 'L' ^ 'R' : 0));
+            r--;
+        }
+    }
+    ans.emplace_back(A[l], S[N - 1] ^ ((N - 1 - l) % 2 ? 'L' ^ 'R' : 0));
+    std::reverse(ans.begin(), ans.end());
+        for (auto [a, b] : ans) {
+        std::cout << a << " " << b << "\n";
+    }
+        return 0;
+}

@@ -1,0 +1,21 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, a, b;
+    std::cin >> n >> a >> b;
+        i64 ans = 0;
+    std::map<i64, int> cnt;
+    std::map<std::pair<int, i64>, int> cnt2;
+    for (int i = 0; i < n; i++) {
+        i64 x, vx, vy;
+        std::cin >> x >> vx >> vy;
+        vy -= a * vx;
+        ans += cnt[vy]++;
+        ans -= cnt2[{vx, vy}]++;
+    }
+    ans *= 2;
+    std::cout << ans << "\n";
+        return 0;
+}

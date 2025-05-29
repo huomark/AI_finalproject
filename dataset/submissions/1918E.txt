@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ char ask(int x) {
+    std::cout << "? " << x + 1 << std::endl;
+    char res;
+    std::cin >> res;
+    return res;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        int min = 0, max = 0;
+    while (ask(0) != '=')
+        ;
+    for (int i = 1; i < n; i++) {
+        if (ask(i) == '>') {
+            ask(min);
+        } else {
+            while (ask(i) != '=')
+                ;
+            min = i;
+        }
+    }
+    while (ask(0) != '=')
+        ;
+    for (int i = 1; i < n; i++) {
+        if (ask(i) == '<') {
+            ask(max);
+        } else {
+            while (ask(i) != '=')
+                ;
+            max = i;
+        }
+    }
+        std::vector<int> l(n), r(n, n - 1);
+    r[min] = 0;
+    l[max] = n - 1;
+        int t = 0;
+    while (true) {
+        std::vector<std::vector<int>> qry(n);
+        bool finish = true;
+        for (int i = 0; i < n; i++) {
+            if (l[i] < r[i]) {
+                qry[(l[i] + r[i]) / 2].push_back(i);
+                finish = false;
+            }
+        }
+        if (finish) {
+            break;
+        }
+                auto work = [&](int x) {
+            for (auto i : qry[x]) {
+                char res = ask(i);
+                if (res == '=') {
+                    l[i] = r[i] = x;
+                } else if (res == '>') {
+                    l[i] = x + 1;
+                    ask(min);
+                } else {
+                    r[i] = x - 1;
+                    ask(max);
+                }
+            }
+        };
+                if (t % 2 == 0) {
+            for (int i = n - 1; i >= 0; i--) {
+                work(i);
+                ask(min);
+            }
+        } else {
+            for (int i = 0; i < n; i++) {
+                work(i);
+                ask(max);
+            }
+        }
+        t++;
+    }
+        std::cout << "!";
+    for (int i = 0; i < n; i++) {
+        std::cout << " " << l[i] + 1;
+    }
+    std::cout << std::endl;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

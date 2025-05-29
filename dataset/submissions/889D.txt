@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<i64> x(n), y(n);
+    i64 gx = 0, gy = 0;
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i] >> y[i];
+        gx += x[i];
+        gy += y[i];
+        x[i] *= n;
+        y[i] *= n;
+    }
+        std::vector<bool> good(n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (x[i] + x[j] == 2 * gx && y[i] + y[j] == 2 * gy) {
+                good[i] = good[j] = true;
+            }
+        }
+    }
+        std::vector<int> p;
+    for (int i = 0; i < n; i++) {
+        if (!good[i]) {
+            p.push_back(i);
+        }
+    }
+        if (p.empty()) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+        std::set<std::array<i64, 2>> s;
+        for (int i = 0; i < p.size(); i++) {
+        i64 vx = y[p[0]] + y[p[i]] - 2 * gy;
+        i64 vy = 2 * gx - x[p[0]] - x[p[i]];
+        std::vector<i64> a(n);
+        for (int i = 0; i < n; i++) {
+            a[i] = vx * (x[i] - gx) + vy * (y[i] - gy);
+        }
+        std::sort(a.begin(), a.end());
+        bool ok = true;
+        for (int i = 0; i < n; i++) {
+            if (a[i] + a[n - 1 - i] != 0) {
+                ok = false;
+            }
+        }
+        if (ok) {
+            i64 g = std::gcd(vx, vy);
+            vx /= g, vy /= g;
+            if (vx < 0 || (vx == 0 && vy < 0)) {
+                vx *= -1, vy *= -1;
+            }
+            s.insert({vx, vy});
+        }
+    }
+        int ans = s.size();
+    std::cout << ans << "\n";
+        return 0;
+}

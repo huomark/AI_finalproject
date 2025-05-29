@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int luckiness(int x) {
+    auto s = std::to_string(x);
+    auto [pmin, pmax] = std::minmax_element(s.begin(), s.end());
+    return *pmax - *pmin;
+}
+ void solve() {
+    int l, r;
+    std::cin >> l >> r;
+        int ans = l;
+    for (int i = l; i <= std::min(r, l + 100); i++) {
+        if (luckiness(i) > luckiness(ans)) {
+            ans = i;
+        }
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

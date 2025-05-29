@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        int k = 1;
+    while (k <= n) {
+        k *= 2;
+    }
+        std::vector pre(n + 1, std::vector<int>(k));
+    pre[0][0] = 1;
+        std::vector<int> mex(n);
+    std::vector<int> cnt(n + 1);
+    std::vector<int> res(k);
+    for (int i = 1; i <= n; i++) {
+        std::vector<int> nmex(n);
+        cnt.assign(n + 1, 0);
+        int t = 0;
+        for (int j = i - 1; j >= 0; j--) {
+            cnt[a[j]]++;
+            while (cnt[t]) {
+                t++;
+            }
+            nmex[j] = t;
+        }
+        for (int j = i - 1; j >= 0; j--) {
+            bool p1 = j < i - 1 && (j == i - 2 || mex[j] > mex[j + 1]);
+            bool p2 = (j == i - 1 || nmex[j] > nmex[j + 1]);
+            if (p1 != p2 || (mex[j] != nmex[j])) {
+                if (p1) {
+                    for (int v = 0; v < k; v++) {
+                        if (pre[j][v]) {
+                            res[v ^ mex[j]]--;
+                        }
+                    }
+                }
+                if (p2) {
+                    for (int v = 0; v < k; v++) {
+                        if (pre[j][v]) {
+                            res[v ^ nmex[j]]++;
+                        }
+                    }
+                }
+            }
+        }
+        for (int v = 0; v < k; v++) {
+            pre[i][v] = pre[i - 1][v] || res[v];
+        }
+        mex = std::move(nmex);
+    }
+        int ans = k - 1;
+    while (!pre[n][ans]) {
+        ans--;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

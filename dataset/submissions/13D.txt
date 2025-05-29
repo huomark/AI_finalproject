@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+template<class T>
+struct Point {
+    T x;
+    T y;
+    Point(T x_ = 0, T y_ = 0) : x(x_), y(y_) {}
+        Point &operator+=(Point p) & {
+        x += p.x;
+        y += p.y;
+        return *this;
+    }
+    Point &operator-=(Point p) & {
+        x -= p.x;
+        y -= p.y;
+        return *this;
+    }
+    Point &operator*=(T v) & {
+        x *= v;
+        y *= v;
+        return *this;
+    }
+    Point operator-() const {
+        return Point(-x, -y);
+    }
+    friend Point operator+(Point a, Point b) {
+        return a += b;
+    }
+    friend Point operator-(Point a, Point b) {
+        return a -= b;
+    }
+    friend Point operator*(Point a, T b) {
+        return a *= b;
+    }
+    friend Point operator*(T a, Point b) {
+        return b *= a;
+    }
+    friend bool operator==(Point a, Point b) {
+        return a.x == b.x && a.y == b.y;
+    }
+    friend std::istream &operator>>(std::istream &is, Point &p) {
+        return is >> p.x >> p.y;
+    }
+    friend std::ostream &operator<<(std::ostream &os, Point &p) {
+        return os << "(" << p.x << ", " << p.y << ")";
+    }
+};
+ template<class T>
+T dot(Point<T> a, Point<T> b) {
+    return a.x * b.x + a.y * b.y;
+}
+ template<class T>
+T cross(Point<T> a, Point<T> b) {
+    return a.x * b.y - a.y * b.x;
+}
+ template<class T>
+int sgn(Point<T> a) {
+    return a.y > 0 || (a.y == 0 && a.x > 0) ? 1 : -1;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int N, M;
+    std::cin >> N >> M;
+        std::vector<Point<i64>> p(N + M);
+        for (int i = 0; i < N + M; i++) {
+        std::cin >> p[i].x >> p[i].y;
+    }
+        int ans = 0;
+    for (int i = 0; i < N; i++) {
+        std::vector<int> a(N + M - i - 1);
+        std::iota(a.begin(), a.end(), i + 1);
+                std::sort(a.begin(), a.end(), [&](int x, int y) {
+            if (sgn(p[x] - p[i]) != sgn(p[y] - p[i])) {
+                return sgn(p[x] - p[i]) == 1;
+            }
+            return cross(p[x] - p[i], p[y] - p[i]) > 0;
+        });
+                for (int j = 0; j < a.size(); j++) {
+            if (a[j] < N) {
+                int u = a[j];
+                int q = -1;
+                for (int k = 1; k < a.size(); k++) {
+                    int v = a[(j + k) % a.size()];
+                    if (cross(p[u] - p[i], p[v] - p[i]) < 0) {
+                        break;
+                    }
+                    if (q == -1 || cross(p[q] - p[u], p[v] - p[u]) > 0) {
+                        if (v < N) {
+                            ans += 1;
+                        } else {
+                            q = v;
+                        }
+                    }
+                }
+            }
+        }
+    }
+        std::cout << ans << "\n";
+        return 0;
+}

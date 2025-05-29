@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        int t;
+    if (n % 3 == 0) {
+        std::cout << s.substr(0, 3);
+        t = 3;
+    } else if (n % 3 == 1) {
+        std::cout << s.substr(0, 2) << '-' << s.substr(2, 2);
+        t = 4;
+    } else {
+        std::cout << s.substr(0, 2);
+        t = 2;
+    }
+    while (t < n) {
+        std::cout << '-' << s.substr(t, 3);
+        t += 3;
+    }
+    std::cout << "\n";
+        return 0;
+}

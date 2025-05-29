@@ -1,0 +1,135 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        std::string s;
+    std::cin >> s;
+        int n = s.size();
+        const int logn = std::__lg(n + 1);
+        std::vector nxt(logn, std::vector<int>(n));
+    for (int i = 0; i < logn; i++) {
+        for (int j = n - 1; j >= 0; j--) {
+            int k = j + (2 << i);
+            nxt[i][j] = k < n && s[j] == s[k] ? nxt[i][k] : k;
+        }
+    }
+        i64 ans = -1E18;
+    i64 res = n;
+    std::vector<std::array<i64, 26>> val(n);
+    std::vector<i64> d(n);
+    for (int i = n - 1; i >= 0; i--) {
+        for (int j = 2; i + (1 << j) - 1 <= n; j++) {
+            int bad = -1;
+            int badk = -1;
+            char badch;
+            bool ok = true;
+            int L = i, R = i + (1 << j) - 1;
+            bool vis[26] {};
+            for (int k = 0; k < j - 2; k++) {
+                int a = i + (1 << k) - 1;
+                char ch = s[a];
+                if (nxt[k][a] < R) {
+                    if (bad != -1) {
+                        ok = false;
+                        break;
+                    }
+                    bad = nxt[k][a];
+                    badk = k;
+                    if (bad + (2 << k) < R && (s[bad + (2 << k)] != ch || nxt[k][bad + (2 << k)] < R)) {
+                        if (nxt[k][a + (2 << k)] >= R) {
+                            bad = a;
+                            ch = s[a + (2 << k)];
+                        } else {
+                            ok = false;
+                            break;
+                        }
+                    }
+                }
+                if (vis[ch - 'a']) {
+                    ok = false;
+                }
+                vis[ch - 'a'] = true;
+                if (badk == k) {
+                    badch = ch;
+                }
+            }
+            if (!ok) {
+                continue;
+            }
+            // std::cerr << L << " " << R << " " << s.substr(L, R - L) << " " << bad << "\n";
+            int pl = L - 1 + (R - L + 1) / 4;
+            int pr = L - 1 + (R - L + 1) / 4 * 3;
+            int pm = (L - 1 + R) / 2;
+            char sl = s[pl];
+            char sr = s[pr];
+            char sm = s[pm];
+            if (sl != sr && bad != -1) {
+                continue;
+            }
+            if (sl == sr && vis[sl - 'a']) {
+                continue;
+            }
+            int chg = 0;
+            if (sl != sr) {
+                chg++;
+            } else {
+                vis[sl - 'a'] = true;
+            }
+            if (vis[sm - 'a']) {
+                chg++;
+            }
+            if (bad != -1) {
+                chg++;
+            }
+            if (chg > 1) {
+                continue;
+            }
+            i64 cost = 1LL * (R - L) * (R - L);
+            if (sl != sr) {
+                vis[sm - 'a'] = true;
+                if (!vis[sl - 'a']) {
+                    val[pr][sl - 'a'] += cost;
+                    // std::cerr << "R ";
+                }
+                if (!vis[sr - 'a']) {
+                    val[pl][sr - 'a'] += cost;
+                    // std::cerr << "L ";
+                }
+            } else if (bad != -1) {
+                val[bad][badch - 'a'] += cost;
+                // std::cerr << "B ";
+            } else if (vis[sm - 'a']) {
+                for (int x = 0; x < 26; x++) {
+                    if (!vis[x]) {
+                        val[pm][x] += cost;
+                    }
+                }
+                // std::cerr << "M ";
+            } else {
+                res += cost;
+                assert(chg == 0);
+                d[L] -= cost;
+                if (R < n) {
+                    d[R] += cost;
+                }
+                for (int x = 0; x < 26; x++) {
+                    if (!vis[x]) {
+                        val[pm][x] += cost;
+                    }
+                }
+            }
+            // std::cerr << L << " " << R << " " << s.substr(L, R - L) << " " << bad << "\n";
+        }
+    }
+    for (int i = 1; i < n; i++) {
+        d[i] += d[i - 1];
+    }
+    for (int i = 0; i < n; i++) {
+        for (int x = 0; x < 26; x++) {
+            ans = std::max(ans, res + val[i][x] + d[i]);
+        }
+    }
+        std::cout << ans << "\n";
+        return 0;
+}

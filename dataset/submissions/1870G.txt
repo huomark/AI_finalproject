@@ -1,0 +1,114 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int B = 400;
+struct DSU {
+    std::vector<int> f;
+        DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+        void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+    }
+        int find(int x) {
+        while (x != f[x]) {
+            x = f[x] = f[f[x]];
+        }
+        return x;
+    }
+        bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+        bool merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) {
+            return false;
+        }
+        f[y] = x;
+        return true;
+    }
+};
+ DSU dsu[B];
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> ans(n);
+    std::vector<int> cnt(n + 1);
+    std::vector<int> pre(n + 1);
+    int nb = (n + B) / B;
+    std::vector<int> pb(nb);
+        auto get = [&](int n) {
+        if (n < 0) {
+            return 0;
+        }
+        return pre[n] + (n < B ? 0 : pb[n / B - 1]);
+    };
+        for (int i = 1; i < B; i++) {
+        dsu[i].init(n + 1);
+    }
+        auto check = [&](int t) {
+        if (t > n) {
+            return false;
+        }
+        int need = 1;
+        int c0 = get(n) - get(t - 1);
+        for (int i = t - 1; i > 0; i--) {
+            if (need >= B) {
+                if (cnt[i] >= need) {
+                    c0 += cnt[i] - need;
+                } else {
+                    need = 2 * need - cnt[i];
+                }
+            } else {
+                int j = dsu[need].find(i);
+                c0 += get(i) - get(j) - (i - j) * need;
+                if (j) {
+                    need = 2 * need - cnt[j];
+                }
+                i = j;
+            }
+            if (need > n) {
+                return false;
+            }
+        }
+        return need <= c0 + cnt[0];
+    };
+    for (int i = 0, t = 1; i < n; i++) {
+        int x = std::min(n, a[i]);
+        int b = x / B;
+        cnt[x]++;
+        if (x && cnt[x] < B) {
+            dsu[cnt[x]].merge(x - 1, x);
+        }
+        for (int j = x; j <= std::min(n, b * B + B - 1); j++) {
+            pre[j]++;
+        }
+        for (int j = b; j < nb; j++) {
+            pb[j]++;
+        }
+        while (check(t)) {
+            t++;
+        }
+        ans[i] = t - 1;
+    }
+    ans[0] = std::max(1, a[0]);
+    for (int i = 0; i < n; i++) {
+        std::cout << ans[i] << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

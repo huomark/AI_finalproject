@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+template<class Info,
+    class Merge = std::plus<Info>>
+struct SegmentTree {
+    const int n;
+    const Merge merge;
+    std::vector<Info> info;
+    SegmentTree(int n) : n(n), merge(Merge()), info(4 << std::__lg(n)) {}
+    SegmentTree(std::vector<Info> init) : SegmentTree(init.size()) {
+        std::function<void(int, int, int)> build = [&](int p, int l, int r) {
+            if (r - l == 1) {
+                info[p] = init[l];
+                info[p].pos = info[p].sum < 0 ? r : l;
+                return;
+            }
+            int m = (l + r) / 2;
+            build(2 * p, l, m);
+            build(2 * p + 1, m, r);
+            pull(p);
+        };
+        build(1, 0, n);
+    }
+    void pull(int p) {
+        info[p] = merge(info[2 * p], info[2 * p + 1]);
+    }
+    void modify(int p, int l, int r, int x, const Info &v) {
+        if (r - l == 1) {
+            info[p] = v;
+            info[p].pos = info[p].sum < 0 ? r : l;
+            return;
+        }
+        int m = (l + r) / 2;
+        if (x < m) {
+            modify(2 * p, l, m, x, v);
+        } else {
+            modify(2 * p + 1, m, r, x, v);
+        }
+        pull(p);
+    }
+    void modify(int p, const Info &v) {
+        modify(1, 0, n, p, v);
+    }
+    Info rangeQuery(int p, int l, int r, int x, int y) {
+        if (l >= y || r <= x) {
+            return Info();
+        }
+        if (l >= x && r <= y) {
+            return info[p];
+        }
+        int m = (l + r) / 2;
+        return merge(rangeQuery(2 * p, l, m, x, y), rangeQuery(2 * p + 1, m, r, x, y));
+    }
+    Info rangeQuery(int l, int r) {
+        return rangeQuery(1, 0, n, l, r);
+    }
+};
+ struct Info {
+    int sum;
+    int pre;
+    int pos;
+    Info(int x = 0) : sum(x), pre(std::min(0, x)) {}
+};
+ Info operator+(const Info &a, const Info &b) {
+    Info c;
+    c.sum = a.sum + b.sum;
+    c.pre = std::min(a.pre, a.sum + b.pre);
+    c.pos = c.pre == a.sum + b.pre ? b.pos : a.pos;
+    return c;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> b(n / 2);
+    for (int i = 0; i < n / 2; i++) {
+        std::cin >> b[i];
+    }
+        if (std::set(b.begin(), b.end()).size() != b.size()) {
+        std::cout << -1 << "\n";
+        return;
+    }
+        std::vector<int> a(n, 1);
+    for (auto x : b) {
+        a[x - 1] = -1;
+    }
+    SegmentTree<Info> seg(std::vector<Info>(a.begin(), a.end()));
+        if (seg.rangeQuery(0, n).pre < 0) {
+        std::cout << -1 << "\n";
+        return;
+    }
+        for (int i = 0; i < n / 2; i++) {
+        int x = seg.rangeQuery(0, b[i] - 1).pos;
+        seg.modify(x, 0);
+        seg.modify(b[i] - 1, 0);
+        std::cout << x + 1 << " " << b[i] << " \n"[i == n / 2 - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

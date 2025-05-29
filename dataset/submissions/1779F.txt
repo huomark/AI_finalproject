@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> p(n);
+    p[0] = -1;
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+        adj[p[i]].push_back(i);
+    }
+        std::vector<std::array<int, 32>> dp(n), pre(n);
+    std::vector<int> siz(n);
+        auto dfs1 = [&](auto dfs1, int x) -> void {
+        siz[x] = 1;
+        for (auto y : adj[x]) {
+            dfs1(dfs1, y);
+            siz[x] += siz[y];
+        }
+        dp[x][a[x]] = 1;
+                for (auto y : adj[x]) {
+            std::array<int, 32> g{};
+            for (int i = 0; i < 32; i++) {
+                for (int j = 0; j < 32; j++) {
+                    g[i ^ j] |= dp[x][i] & dp[y][j];
+                }
+            }
+            pre[y] = dp[x];
+            dp[x] = g;
+        }
+        if (siz[x] % 2 == 0) dp[x][0] = 1;
+    };
+    dfs1(dfs1, 0);
+        if (!dp[0][0]) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+        std::vector<int> ans;
+    auto dfs2 = [&](auto dfs2, int x, int val) -> void {
+        if (val == 0 && siz[x] % 2 == 0) {
+            ans.push_back(x);
+            return;
+        }
+        int d = adj[x].size();
+        assert(dp[x][val]);
+        for (int k = d - 1; k >= 0; k--) {
+            int y = adj[x][k];
+            int i = 0;
+            while (!dp[y][i] || !pre[y][val ^ i]) i++;
+            val ^= i;
+                        dfs2(dfs2, y, i);
+        }
+        assert(val == a[x]);
+    };
+    dfs2(dfs2, 0, 0);
+    ans.push_back(0);
+        std::cout << ans.size() << "\n";
+    for (int i = 0; i < ans.size(); i++) {
+        std::cout << ans[i] + 1 << " \n"[i == ans.size() - 1];
+    }
+        return 0;
+}

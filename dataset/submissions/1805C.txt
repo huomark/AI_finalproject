@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        std::vector<int> k(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> k[i];
+    }
+        std::sort(k.begin(), k.end());
+        for (int i = 0; i < m; i++) {
+        int a, b, c;
+        std::cin >> a >> b >> c;
+                bool ok = true;
+        int j = std::lower_bound(k.begin(), k.end(), b) - k.begin();
+        for (auto i : {j - 1, j}) {
+            if (i < 0 || i >= n) {
+                continue;
+            }
+            int x = k[i];
+            i64 v = 1LL * (b - x) * (b - x) - 4LL * a * c;
+            if (v < 0) {
+                ok = false;
+                std::cout << "YES\n";
+                std::cout << x << "\n";
+                break;
+            }
+        }
+                if (ok) {
+            std::cout << "NO\n";
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

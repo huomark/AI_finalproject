@@ -1,0 +1,81 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ using u64 = unsigned long long;
+ struct Node {
+    Node *l;
+    Node *r;
+    u64 h;
+    Node() : l{}, r{}, h{} {}
+};
+ Node *add(Node *t, int l, int r, int x, u64 h) {
+    Node *nt = new Node();
+    if (t) {
+        *nt = *t;
+    }
+    nt->h ^= h;
+    if (r - l > 1) {
+        int m = (l + r) / 2;
+        if (x < m) {
+            nt->l = add(nt->l, l, m, x, h);
+        } else {
+            nt->r = add(nt->r, m, r, x, h);
+        }
+    }
+    return nt;
+}
+ int query(Node *t1, Node *t2, int l, int r) {
+    if ((t1 ? t1->h : 0) == (t2 ? t2->h : 0)) {
+        return -1;
+    }
+    if (r - l == 1) {
+        return l;
+    }
+    int m = (l + r) / 2;
+    if ((t1 && t1->l ? t1->l->h : 0) != (t2 && t2->l ? t2->l->h : 0)) {
+        return query(t1 ? t1->l : nullptr, t2 ? t2->l : nullptr, l, m);
+    } else {
+        return query(t1 ? t1->r : nullptr, t2 ? t2->r : nullptr, m, r);
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        auto v = a;
+    std::sort(v.begin(), v.end());
+    v.erase(std::unique(v.begin(), v.end()), v.end());
+        const int m = v.size();
+        std::mt19937_64 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+    std::vector<u64> h(m);
+        for (int i = 0; i < m; i++) {
+        h[i] = rng();
+    }
+        std::vector<Node *> tree(n + 1);
+    for (int i = 0; i < n; i++) {
+        int x = std::lower_bound(v.begin(), v.end(), a[i]) - v.begin();
+        tree[i + 1] = add(tree[i], 0, m, x, h[x]);
+    }
+        int ans = 0;
+        int q;
+    std::cin >> q;
+    for (int i = 0; i < q; i++) {
+        int l, r;
+        std::cin >> l >> r;
+        l ^= ans;
+        r ^= ans;
+        l--;
+                ans = query(tree[l], tree[r], 0, m);
+        if (ans == -1) {
+            ans = 0;
+        } else {
+            ans = v[ans];
+        }
+        std::cout << ans << "\n";
+    }
+        return 0;
+}

@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> p(n), a(n);
+    std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i] >> a[i];
+                if (i > 0) {
+            adj[p[i] - 1].push_back(i);
+        }
+    }
+        std::vector<std::array<i64, 2>> dp(n);
+    std::function<void(int)> dfs = [&](int x) {
+        std::array<i64, 2> g{0, -i64(1E18)};
+        for (auto y : adj[x]) {
+            dfs(y);
+            std::array<i64, 2> ng{-i64(1E18), -i64(1E18)};
+            for (int i = 0; i < 2; i++) {
+                ng[i] = std::max(ng[i], g[i] + dp[y][0]);
+                ng[i ^ 1] = std::max(ng[i ^ 1], g[i] + dp[y][1]);
+                ng[i ^ 1] = std::max(ng[i ^ 1], g[i] + dp[y][0] + a[y]);
+            }
+            g = ng;
+        }
+        dp[x] = g;
+    };
+    dfs(0);
+        i64 ans = std::max(dp[0][0] + a[0], dp[0][1]);
+    std::cout << ans << "\n";
+        return 0;
+}

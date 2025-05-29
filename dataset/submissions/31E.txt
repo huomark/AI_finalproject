@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 2E18;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        std::vector dp(2 * n + 1, std::vector(n + 1, -inf));
+    dp[2 * n][0] = 1;
+    std::vector<i64> pw(n);
+    pw[0] = 1;
+    for (int i = 1; i < n; i++) {
+        pw[i] = pw[i - 1] * 10;
+    }
+        for (int i = 2 * n - 1; i >= 0; i--) {
+        for (int j = 0; j <= n; j++) {
+            int k = 2 * n - 1 - i - j;
+            if (k < 0) {
+                continue;
+            }
+            if (j < n) {
+                dp[i][j + 1] = std::max(dp[i][j + 1], dp[i + 1][j] + (s[i] - '0') * pw[j]);
+            }
+            if (k < n) {
+                dp[i][j] = std::max(dp[i][j], dp[i + 1][j] + (s[i] - '0') * pw[k]);
+            }
+        }
+    }
+        std::string ans;
+    int j = n;
+    for (int i = 0; i < 2 * n; i++) {
+        if (j && dp[i][j] == dp[i + 1][j - 1] + (s[i] - '0') * pw[j - 1]) {
+            j--;
+            ans += 'H';
+        } else {
+            ans += 'M';
+        }
+    }
+    std::cout << ans << "\n";
+        return 0;
+}

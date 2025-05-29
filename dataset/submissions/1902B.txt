@@ -1,0 +1,22 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    i64 P;
+    int l, t;
+    std::cin >> n >> P >> l >> t;
+        int task = (n - 1) / 7 + 1;
+    int ans = std::max((P - 1) / (l + 2LL * t) + 1, (P - 1LL * t * task - 1) / l + 1);
+    ans = n - ans;
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

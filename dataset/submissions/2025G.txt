@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int q;
+    std::cin >> q;
+        const int B = std::sqrt(q);
+        std::vector<int> t(q), v(q);
+    for (int i = 0; i < q; i++) {
+        std::cin >> t[i] >> v[i];
+    }
+        auto vs = v;
+    std::sort(vs.begin(), vs.end());
+    std::vector<int> ord(q);
+    std::iota(ord.begin(), ord.end(), 0);
+    std::sort(ord.begin(), ord.end(),
+        [&](int i, int j) {
+            return v[i] < v[j];
+        });
+        std::vector<int> d(q);
+    d[0] = vs[0];
+    for (int i = 1; i < q; i++) {
+        d[i] = vs[i] - vs[i - 1];
+    }
+        i64 sum = 0;
+        for (int i = 0; i < q; i++) {
+        v[ord[i]] = i;
+    }
+        std::vector<int> u(q);
+        int nb = (q + B - 1) / B;
+    std::vector<int> ad(nb);
+    std::vector<int> mx(nb), len(nb);
+    for (int i = 0; i < q; i++) {
+        len[i / B] += d[i];
+    }
+    std::vector f(nb, std::vector<i64>(B));
+    for (int b = 0; b < nb; b++) {
+        for (int i = 0; i < B; i++) {
+            f[b][i] = 1LL * i * len[b];
+        }
+    }
+        auto build = [&](int b) {
+        int l = b * B, r = std::min(q, l + B);
+        mx[b] = -1E9;
+        for (int i = l; i < r; i++) {
+            u[i] += ad[b];
+            mx[b] = std::max(mx[b], u[i]);
+        }
+        ad[b] = 0;
+        std::fill(f[b].begin(), f[b].end(), 0);
+        for (int i = l; i < r; i++) {
+            int v = mx[b] - u[i];
+            if (v + 1 < B) {
+                f[b][v + 1] += d[i];
+            }
+        }
+        for (int i = 1; i < B; i++) {
+            f[b][i] += f[b][i - 1];
+        }
+        for (int i = 1; i < B; i++) {
+            f[b][i] += f[b][i - 1];
+        }
+    };
+        i64 res = 0;
+    auto calc = [&](int b, int c) {
+        if (mx[b] > 0) {
+            if (mx[b] < B) {
+                res += c * f[b][mx[b]];
+            } else {
+                res += c * (f[b][B - 1] + 1LL * len[b] * (mx[b] - B + 1));
+            }
+        }
+    };
+    auto add = [&](int b, int c) {
+        ad[b] += c;
+        mx[b] += c;
+    };
+        for (int i = 0; i < q; i++) {
+        if (t[i] == 1) {
+            sum += vs[v[i]];
+        }
+        int b = v[i] / B;
+        int c = t[i] == 1 ? 1 : -1;
+        for (int j = 0; j < b; j++) {
+            calc(j, -1);
+            add(j, c);
+            calc(j, 1);
+        }
+        calc(b, -1);
+        for (int j = b * B; j <= v[i]; j++) {
+            u[j] += c;
+        }
+        build(b);
+        calc(b, 1);
+                std::cout << 2 * sum - res << "\n";
+    }
+        return 0;
+}

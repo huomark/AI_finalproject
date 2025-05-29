@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int x1 = 1E9, x2 = -1E9, y1 = 1E9, y2 = -1E9;
+        std::set<std::pair<std::pair<int, int>, std::pair<int, int>>> s;
+    for (int i = 0; i < 4; i++) {
+        std::pair<int, int> a, b;
+                std::cin >> a.first >> a.second >> b.first >> b.second;
+                if (a > b) {
+            std::swap(a, b);
+        }
+                s.emplace(a, b);
+        x1 = std::min(x1, a.first);
+        x1 = std::min(x1, b.first);
+        x2 = std::max(x2, a.first);
+        x2 = std::max(x2, b.first);
+        y1 = std::min(y1, a.second);
+        y1 = std::min(y1, b.second);
+        y2 = std::max(y2, a.second);
+        y2 = std::max(y2, b.second);
+    }
+        if (x1 == x2 || y1 == y2) {
+        std::cout << "NO\n";
+        return 0;
+    }
+        if (!s.count({{x1, y1}, {x1, y2}})) {
+        std::cout << "NO\n";
+        return 0;
+    }
+    if (!s.count({{x1, y1}, {x2, y1}})) {
+        std::cout << "NO\n";
+        return 0;
+    }
+    if (!s.count({{x2, y1}, {x2, y2}})) {
+        std::cout << "NO\n";
+        return 0;
+    }
+    if (!s.count({{x1, y2}, {x2, y2}})) {
+        std::cout << "NO\n";
+        return 0;
+    }
+        std::cout << "YES\n";
+        return 0;
+}

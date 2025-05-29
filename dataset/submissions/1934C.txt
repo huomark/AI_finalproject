@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int ask(int x, int y) {
+    std::cout << "? " << x << " " << y << std::endl;
+    int res;
+    std::cin >> res;
+    return res;
+}
+ void solve() {
+    int n, m;
+    std::cin >> n >> m;
+        int a = ask(1, 1);
+    int b = ask(n, 1);
+    int c = ask(1, m);
+        int x1 = (a - b + n + 1) / 2;
+    int y1 = (a + b - n + 3) / 2;
+        int x2 = (a + c - m + 3) / 2;
+    int y2 = (a - c + m + 1) / 2;
+        if (1 <= x1 && x1 <= n && 1 <= y1 && y1 <= m && ask(x1, y1) == 0) {
+        std::cout << "! " << x1 << " " << y1 << std::endl;
+    } else {
+        std::cout << "! " << x2 << " " << y2 << std::endl;
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

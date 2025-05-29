@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m, k;
+    std::cin >> n >> m >> k;
+        std::vector s(k + 1, std::vector<std::string>(n));
+    std::vector<int> f(k + 1);
+    for (int i = 0; i <= k; i++) {
+        for (int j = 0; j < n; j++) {
+            std::cin >> s[i][j];
+        }
+                for (int x = 1; x < n - 1; x++) {
+            for (int y = 1; y < m - 1; y++) {
+                if (s[i][x][y] != s[i][x - 1][y] && s[i][x][y] != s[i][x + 1][y] && s[i][x][y] != s[i][x][y - 1] && s[i][x][y] != s[i][x][y + 1]) {
+                    f[i]++;
+                }
+            }
+        }
+    }
+        std::vector<int> order(k + 1);
+    std::iota(order.begin(), order.end(), 0);
+    std::sort(order.begin(), order.end(), [&](int i, int j) {
+        return f[i] > f[j];
+    });
+        std::cout << order[0] + 1 << "\n";
+    std::vector<std::vector<int>> ans;
+    auto cur = s[order[0]];
+        for (int i = 1; i <= k; i++) {
+        int j = order[i];
+        for (int x = 0; x < n; x++) {
+            for (int y = 0; y < m; y++) {
+                if (cur[x][y] != s[j][x][y]) {
+                    ans.push_back({1, x + 1, y + 1});
+                    cur[x][y] ^= 1;
+                }
+            }
+        }
+        ans.push_back({2, j + 1});
+    }
+        std::cout << ans.size() << "\n";
+    for (auto v : ans) {
+        for (int i = 0; i < v.size(); i++) {
+            std::cout << v[i] << " \n"[i == v.size() - 1];
+        }
+    }
+        return 0;
+}

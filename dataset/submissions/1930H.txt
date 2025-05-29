@@ -1,0 +1,187 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ struct HLD {
+    int n;
+    std::vector<int> siz, top, dep, parent, in, out, seq;
+    std::vector<std::vector<int>> adj;
+    int cur;
+        HLD() {}
+    HLD(int n) {
+        init(n);
+    }
+    void init(int n) {
+        this->n = n;
+        siz.resize(n);
+        top.resize(n);
+        dep.resize(n);
+        parent.resize(n);
+        in.resize(n);
+        out.resize(n);
+        seq.resize(n);
+        cur = 0;
+        adj.assign(n, {});
+    }
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    void work(int root = 0) {
+        top[root] = root;
+        dep[root] = 0;
+        parent[root] = -1;
+        dfs1(root);
+        dfs2(root);
+    }
+    void dfs1(int u) {
+        if (parent[u] != -1) {
+            adj[u].erase(std::find(adj[u].begin(), adj[u].end(), parent[u]));
+        }
+                siz[u] = 1;
+        for (auto &v : adj[u]) {
+            parent[v] = u;
+            dep[v] = dep[u] + 1;
+            dfs1(v);
+            siz[u] += siz[v];
+            if (siz[v] > siz[adj[u][0]]) {
+                std::swap(v, adj[u][0]);
+            }
+        }
+    }
+    void dfs2(int u) {
+        in[u] = cur++;
+        seq[in[u]] = u;
+        for (auto v : adj[u]) {
+            top[v] = v == adj[u][0] ? top[u] : v;
+            dfs2(v);
+        }
+        out[u] = cur;
+    }
+    int lca(int u, int v) {
+        while (top[u] != top[v]) {
+            if (dep[top[u]] > dep[top[v]]) {
+                u = parent[top[u]];
+            } else {
+                v = parent[top[v]];
+            }
+        }
+        return dep[u] < dep[v] ? u : v;
+    }
+        int dist(int u, int v) {
+        return dep[u] + dep[v] - 2 * dep[lca(u, v)];
+    }
+        int jump(int u, int k) {
+        if (dep[u] < k) {
+            return -1;
+        }
+                int d = dep[u] - k;
+                while (dep[top[u]] > d) {
+            u = parent[top[u]];
+        }
+                return seq[in[u] - dep[u] + d];
+    }
+        bool isAncester(int u, int v) {
+        return in[u] <= in[v] && in[v] < out[u];
+    }
+        int rootedParent(int u, int v) {
+        std::swap(u, v);
+        if (u == v) {
+            return u;
+        }
+        if (!isAncester(u, v)) {
+            return parent[u];
+        }
+        auto it = std::upper_bound(adj[u].begin(), adj[u].end(), v, [&](int x, int y) {
+            return in[x] < in[y];
+        }) - 1;
+        return *it;
+    }
+        int rootedSize(int u, int v) {
+        if (u == v) {
+            return n;
+        }
+        if (!isAncester(v, u)) {
+            return siz[v];
+        }
+        return n - siz[rootedParent(u, v)];
+    }
+        int rootedLca(int a, int b, int c) {
+        return lca(a, b) ^ lca(b, c) ^ lca(c, a);
+    }
+};
+ int n;
+int ask(int t, int l, int r) {
+    if (l >= r) {
+        return n;
+    }
+    std::cout << "? " << t << " " << l + 1 << " " << r << std::endl;
+    int ans;
+    std::cin >> ans;
+    return ans;
+}
+void solve() {
+    int q;
+    std::cin >> n >> q;
+        HLD t(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        t.addEdge(u, v);
+    }
+        t.work();
+        auto p1 = t.seq;
+    std::vector<int> p2;
+    auto dfs = [&](auto self, int x) -> void {
+        p2.push_back(x);
+        auto a = t.adj[x];
+        std::reverse(a.begin(), a.end());
+        for (auto y : a) {
+            self(self, y);
+        }
+    };
+    dfs(dfs, 0);
+        std::vector<int> invp1(n), invp2(n);
+    for (int i = 0; i < n; i++) {
+        invp1[p1[i]] = i;
+        invp2[p2[i]] = i;
+    }
+        for (int i = 0; i < n; i++) {
+        std::cout << p1[i] + 1 << " \n"[i == n - 1];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << p2[i] + 1 << " \n"[i == n - 1];
+    }
+    std::cout.flush();
+        while (q--) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        int l = t.lca(u, v);
+        int ans = n;
+        if (invp1[u] > invp1[v]) {
+            std::swap(u, v);
+        }
+        if (invp2[u] < invp2[v]) {
+            u = v;
+        }
+        ans = std::min(ans, ask(1, invp1[v] + 1, n));
+        ans = std::min(ans, ask(2, invp2[u] + 1, n));
+        int a = t.rootedParent(u, l);
+        int b = t.rootedParent(v, l);
+        ans = std::min(ans, ask(1, invp1[u] + 1, invp1[b]));
+        ans = std::min(ans, ask(2, invp2[v] + 1, invp2[a]));
+        ans = std::min(ans, ask(1, 0, invp1[l]));
+        std::cout << "! " << ans << std::endl;
+        std::cin >> ans;
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

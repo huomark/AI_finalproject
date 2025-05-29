@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    std::string s;
+    std::cin >> s;
+        int m;
+    std::cin >> m;
+        std::string l, r;
+    std::cin >> l >> r;
+        int p = 0;
+    for (int i = 0; i < m; i++) {
+        int q = p;
+        for (char x = l[i]; x <= r[i]; x++) {
+            if (s.find(x, p) == -1) {
+                std::cout << "YES\n";
+                return;
+            }
+            q = std::max(q, int(s.find(x, p)) + 1);
+        }
+        p = q;
+    }
+        std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

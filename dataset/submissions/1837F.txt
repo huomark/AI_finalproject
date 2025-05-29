@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::multiset<int> pl, pr;
+    std::multiset<int> sl, sr;
+    i64 sp = 0, ss = 0;
+    for (int i = 0; i < n; i++) {
+        sr.insert(a[i]);
+    }
+    i64 ans = 1E18;
+    for (int i = 0; i <= n; i++) {
+        if (i) {
+            if (sr.contains(a[i - 1])) {
+                pr.insert(sr.extract(a[i - 1]));
+            } else {
+                ss -= a[i - 1];
+                pr.insert(sl.extract(a[i - 1]));
+            }
+        }
+        while (!pl.empty() && !pr.empty() && *pl.rbegin() > *pr.begin()) {
+            int x = *pl.rbegin();
+            int y = *pr.begin();
+            pr.insert(pl.extract(x));
+            pl.insert(pr.extract(y));
+            sp += y - x;
+        }
+        while (!sl.empty() && !sr.empty() && *sl.rbegin() > *sr.begin()) {
+            int x = *sl.rbegin();
+            int y = *sr.begin();
+            sr.insert(sl.extract(x));
+            sl.insert(sr.extract(y));
+            ss += y - x;
+        }
+        while (pl.size() + sl.size() < k) {
+            if (!pr.empty()) {
+                int x = *pr.begin();
+                pl.insert(pr.extract(x));
+                sp += x;
+            } else {
+                int x = *sr.begin();
+                sl.insert(sr.extract(x));
+                ss += x;
+            }
+        }
+        ans = std::min(ans, std::max(sp, ss));
+        while (sp < ss && !pr.empty() && !sl.empty()) {
+            int x = *pr.begin();
+            pl.insert(pr.extract(x));
+            sp += x;
+            int y = *sl.rbegin();
+            sr.insert(sl.extract(y));
+            ss -= y;
+            ans = std::min(ans, std::max(sp, ss));
+        }
+        while (ss < sp && !sr.empty() && !pl.empty()) {
+            int x = *sr.begin();
+            sl.insert(sr.extract(x));
+            ss += x;
+            int y = *pl.rbegin();
+            pr.insert(pl.extract(y));
+            sp -= y;
+            ans = std::min(ans, std::max(sp, ss));
+        }
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

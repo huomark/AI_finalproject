@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int h, w, xa, ya, xb, yb;
+    std::cin >> h >> w >> xa >> ya >> xb >> yb;
+        if (std::abs(ya - yb) > xb - xa) {
+        std::cout << "Draw\n";
+    } else if ((xb - xa) % 2 == 1) {
+        int step = (xb - xa + 1) / 2;
+        if (std::abs(ya - yb) <= 1 || (ya < yb ? w - ya : ya - 1) <= step) {
+            std::cout << "Alice\n";
+        } else {
+            std::cout << "Draw\n";
+        }
+    } else {
+        int step = (xb - xa) / 2;
+        if (ya == yb || (ya < yb ? yb - 1 : w - yb) <= step) {
+            std::cout << "Bob\n";
+        } else {
+            std::cout << "Draw\n";
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

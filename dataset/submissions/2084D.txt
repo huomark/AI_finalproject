@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ void solve() {
+    int n, m, k;
+    std::cin >> n >> m >> k;
+        if (n <= (m + 1) * k) {
+        for (int i = 0; i < n; i++) {
+            std::cout << i % k << " \n"[i == n - 1];
+        }
+    } else {
+        int ans = n / (m + 1);
+        for (int i = 0; i < n; i++) {
+            std::cout << i % ans << " \n"[i == n - 1];
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,177 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+template<class T>
+constexpr T power(T a, i64 b) {
+    T res {1};
+    for (; b; b /= 2, a *= a) {
+        if (b % 2) {
+            res *= a;
+        }
+    }
+    return res;
+}
+ constexpr i64 mul(i64 a, i64 b, i64 p) {
+    i64 res = a * b - i64(1.L * a * b / p) * p;
+    res %= p;
+    if (res < 0) {
+        res += p;
+    }
+    return res;
+}
+ template<i64 P>
+struct MInt {
+    i64 x;
+    constexpr MInt() : x {0} {}
+    constexpr MInt(i64 x) : x {norm(x % getMod())} {}
+        static i64 Mod;
+    constexpr static i64 getMod() {
+        if (P > 0) {
+            return P;
+        } else {
+            return Mod;
+        }
+    }
+    constexpr static void setMod(i64 Mod_) {
+        Mod = Mod_;
+    }
+    constexpr i64 norm(i64 x) const {
+        if (x < 0) {
+            x += getMod();
+        }
+        if (x >= getMod()) {
+            x -= getMod();
+        }
+        return x;
+    }
+    constexpr i64 val() const {
+        return x;
+    }
+    constexpr MInt operator-() const {
+        MInt res;
+        res.x = norm(getMod() - x);
+        return res;
+    }
+    constexpr MInt inv() const {
+        return power(*this, getMod() - 2);
+    }
+    constexpr MInt &operator*=(MInt rhs) & {
+        if (getMod() < (1ULL << 31)) {
+            x = x * rhs.x % int(getMod());
+        } else {
+            x = mul(x, rhs.x, getMod());
+        }
+        return *this;
+    }
+    constexpr MInt &operator+=(MInt rhs) & {
+        x = norm(x + rhs.x);
+        return *this;
+    }
+    constexpr MInt &operator-=(MInt rhs) & {
+        x = norm(x - rhs.x);
+        return *this;
+    }
+    constexpr MInt &operator/=(MInt rhs) & {
+        return *this *= rhs.inv();
+    }
+    friend constexpr MInt operator*(MInt lhs, MInt rhs) {
+        MInt res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend constexpr MInt operator+(MInt lhs, MInt rhs) {
+        MInt res = lhs;
+        res += rhs;
+        return res;
+    }
+    friend constexpr MInt operator-(MInt lhs, MInt rhs) {
+        MInt res = lhs;
+        res -= rhs;
+        return res;
+    }
+    friend constexpr MInt operator/(MInt lhs, MInt rhs) {
+        MInt res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend constexpr std::istream &operator>>(std::istream &is, MInt &a) {
+        i64 v;
+        is >> v;
+        a = MInt(v);
+        return is;
+    }
+    friend constexpr std::ostream &operator<<(std::ostream &os, const MInt &a) {
+        return os << a.val();
+    }
+    friend constexpr bool operator==(MInt lhs, MInt rhs) {
+        return lhs.val() == rhs.val();
+    }
+    friend constexpr bool operator!=(MInt lhs, MInt rhs) {
+        return lhs.val() != rhs.val();
+    }
+    friend constexpr bool operator<(MInt lhs, MInt rhs) {
+        return lhs.val() < rhs.val();
+    }
+};
+ template<>
+i64 MInt<0>::Mod = 998244353;
+ constexpr int P = 1000000007;
+using Z = MInt<P>;
+ struct Info {
+    i64 len = 0;
+    i64 l = 0;
+    i64 r = 0;
+    Z ans = 0;
+};
+ Info operator+(const Info &a, const Info &b) {
+    if (a.len == 0) {
+        return b;
+    }
+    if (b.len == 0) {
+        return a;
+    }
+    Info c;
+    c.len = a.len + b.len;
+    c.l = a.len == a.l ? a.len + b.l : a.l;
+    c.r = b.len == b.r ? a.r + b.len : b.r;
+    c.ans = a.ans + b.ans + Z(a.r) * b.l;
+    return c;
+}
+ Info f[61][61];
+ Info get(int n, int k) {
+    if (k >= 0) {
+        return f[n][k];
+    }
+    return { 1LL << n, 0, 0, 0 };
+}
+ void solve() {
+    i64 n;
+    int k;
+    std::cin >> n >> k;
+        Info s;
+    int c = 0;
+    for (int i = 59; i >= 0; i--) {
+        if (n >> i & 1) {
+            s = s + get(i, k - c);
+            c++;
+        }
+    }
+    std::cout << s.ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        for (int i = 0; i <= 60; i++) {
+        f[0][i] = {1, 1, 1, 1};
+    }
+    for (int i = 1; i <= 60; i++) {
+        for (int j = 0; j <= 60; j++) {
+            f[i][j] = get(i - 1, j) + get(i - 1, j - 1);
+        }
+    }
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,24 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::string s;
+    std::cin >> s;
+        int cnt = std::count(s.begin(), s.end(), '1');
+    if (cnt % 2 == 1 || (cnt == 2 && s.find("11") != -1)) {
+        std::cout << "NO\n";
+    } else {
+        std::cout << "YES\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

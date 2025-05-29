@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr i64 inf = 1E18;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<int> stk[2];
+    std::vector<std::array<int, 2>> left(n, {-1, -1}), right(n, {n, n});
+        for (int i = 0; i < n; i++) {
+        for (int j = 1; j >= 0; j--) {
+            std::vector<int> tmp;
+            while (!stk[j].empty() && a[i] < a[stk[j].back()]) {
+                if (j == 0) {
+                    tmp.push_back(stk[j].back());
+                }
+                right[stk[j].back()][j] = i;
+                stk[j].pop_back();
+            }
+            if (j == 0) {
+                stk[1].insert(stk[1].end(), tmp.rbegin(), tmp.rend());
+            }
+        }
+        stk[0].push_back(i);
+    }
+    for (int i = 0; i <= 1; i++) {
+        stk[i].clear();
+    }
+    for (int i = n - 1; i >= 0; i--) {
+        for (int j = 1; j >= 0; j--) {
+            std::vector<int> tmp;
+            while (!stk[j].empty() && a[i] < a[stk[j].back()]) {
+                if (j == 0) {
+                    tmp.push_back(stk[j].back());
+                }
+                left[stk[j].back()][j] = i;
+                stk[j].pop_back();
+            }
+            if (j == 0) {
+                stk[1].insert(stk[1].end(), tmp.rbegin(), tmp.rend());
+            }
+        }
+        stk[0].push_back(i);
+    }
+        std::vector<i64> f(n), g(n);
+    for (int i = 0; i < n; i++) {
+        int l = left[i][0], r = right[i][0];
+        g[0] += 1LL * (i - l) * (r - i) * a[i];
+        f[i] -= 1LL * (i - l) * (r - i) * a[i];
+        g[l + 1] -= 1LL * (r - i) * a[i];
+        g[i] += 1LL * (r - i) * a[i];
+        if (i + 1 < n) {
+            g[i + 1] -= 1LL * (i - l) * a[i];
+        }
+        if (r < n) {
+            g[r] += 1LL * (i - l) * a[i];
+        }
+        if (l >= 0) {
+            f[l] += 1LL * (l - left[i][1] - 1) * (r - i) * a[i];
+        }
+        if (r < n) {
+            f[r] += 1LL * (right[i][1] - r - 1) * (i - l) * a[i];
+        }
+    }
+    for (int i = 1; i < n; i++) {
+        g[i] += g[i - 1];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cout << f[i] + g[i] << " \n"[i == n - 1];
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

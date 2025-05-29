@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> c(n), r(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> c[i] >> r[i];
+    }
+        std::vector<int> ord(n);
+    std::iota(ord.begin(), ord.end(), 0);
+    std::sort(ord.begin(), ord.end(), [&](int i, int j) {
+        return r[i] < r[j];
+    });
+        std::vector<int> dp(n);
+    std::vector<std::vector<int>> sub(n);
+        std::vector<int> g(n), lst(n);
+        for (auto i : ord) {
+        std::vector<std::tuple<int, int, int>> e;
+        for (auto j : ord) {
+            if (c[j] - r[j] >= c[i] - r[i] && c[j] + r[j] <= c[i] + r[i]) {
+                e.emplace_back(c[j] - r[j], 1, j);
+                e.emplace_back(c[j] + r[j], -1, j);
+            }
+        }
+                std::sort(e.begin(), e.end());
+                int v = 0;
+        int u = -1;
+        for (auto [x, t, j] : e) {
+            if (t == 1) {
+                g[j] = v + dp[j];
+                lst[j] = u;
+            } else if (g[j] > v) {
+                v = g[j];
+                u = j;
+            }
+        }
+        dp[i] = v + 1;
+        while (u != -1) {
+            sub[i].push_back(u);
+            u = lst[u];
+        }
+    }
+        std::vector<std::tuple<int, int, int>> e;
+    for (auto j : ord) {
+        e.emplace_back(c[j] - r[j], 1, j);
+        e.emplace_back(c[j] + r[j], -1, j);
+    }
+        std::sort(e.begin(), e.end());
+        int v = 0;
+    int u = -1;
+    for (auto [x, t, j] : e) {
+        if (t == 1) {
+            g[j] = v + dp[j];
+            lst[j] = u;
+        } else if (g[j] > v) {
+            v = g[j];
+            u = j;
+        }
+    }
+    int ans = v;
+    std::cout << ans << "\n";
+        std::queue<int> q;
+    while (u != -1) {
+        q.push(u);
+        u = lst[u];
+    }
+    while (!q.empty()) {
+        int x = q.front();
+        q.pop();
+        std::cout << x + 1 << " ";
+                for (auto y : sub[x]) {
+            q.push(y);
+        }
+    }
+    std::cout << "\n";
+        return 0;
+}

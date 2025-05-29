@@ -1,0 +1,20 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n), b(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+    }
+        i64 vol = std::accumulate(a.begin(), a.end(), 0LL);
+        std::nth_element(b.begin(), b.begin() + 1, b.end(), std::greater());
+    int cap = b[0] + b[1];
+    std::cout << (vol <= cap ? "YES" : "NO") << "\n";
+        return 0;
+}

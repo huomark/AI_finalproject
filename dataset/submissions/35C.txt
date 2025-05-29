@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+    #ifdef ONLINE_JUDGE
+    std::ifstream fin("input.txt");
+    std::ofstream fout("output.txt");
+#else
+    #define fin std::cin
+    #define fout std::cout
+#endif
+ int main() {
+        int n, m, k;
+    fin >> n >> m >> k;
+        std::vector<int> x(k), y(k);
+    for (int i = 0; i < k; i++) {
+        fin >> x[i] >> y[i];
+    }
+        int X = 1, Y = 1, ans = 0;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            int d = 1E9;
+            for (int l = 0; l < k; l++) {
+                d = std::min(d, std::abs(i - x[l]) + std::abs(j - y[l]));
+            }
+            if (d > ans) {
+                X = i;
+                Y = j;
+                ans = d;
+            }
+        }
+    }
+    fout << X << " " << Y << "\n";
+        return 0;
+}

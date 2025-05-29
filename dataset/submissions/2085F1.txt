@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ using i128 = __int128;
+using u128 = unsigned __int128;
+ namespace ranges = std::ranges;
+namespace views = std::views;
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        a[i]--;
+    }
+        i64 ans = 1E18;
+        std::vector<i64> d0(n), d1(n);
+    std::vector<std::vector<int>> vec(k);
+    for (int i = 0; i < n; i++) {
+        vec[a[i]].push_back(i);
+    }
+        for (int x = 0; x < k; x++) {
+        auto &v = vec[x];
+        d0[0] += v[0];
+        d1[0] -= 1;
+        d0[v[0]] -= v[0];
+        d1[v[0]] += 1;
+                for (int i = 0; i + 1 < v.size(); i++) {
+            int m = (v[i] + v[i + 1] + 1) / 2;
+            d0[v[i]] -= v[i];
+            d1[v[i]] += 1;
+            d0[m] += v[i];
+            d1[m] -= 1;
+                        d0[m] += v[i + 1];
+            d1[m] -= 1;
+            d0[v[i + 1]] -= v[i + 1];
+            d1[v[i + 1]] += 1;
+        }
+                d0[v.back()] -= v.back();
+        d1[v.back()] += 1;
+    }
+        for (int i = 1; i < n; i++) {
+        d0[i] += d0[i - 1];
+        d1[i] += d1[i - 1];
+    }
+        for (int i = 0; i < n; i++) {
+        ans = std::min(ans, d0[i] + d1[i] * i);
+    }
+        int l = (k - 1) / 2;
+    int r = k / 2;
+    ans -= 1LL * l * (l + 1) / 2;
+    ans -= 1LL * r * (r + 1) / 2;
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,124 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+struct DSU {
+    std::vector<int> f, siz;
+        DSU() {}
+    DSU(int n) {
+        init(n);
+    }
+        void init(int n) {
+        f.resize(n);
+        std::iota(f.begin(), f.end(), 0);
+        siz.assign(n, 1);
+    }
+        int find(int x) {
+        while (x != f[x]) {
+            x = f[x] = f[f[x]];
+        }
+        return x;
+    }
+        bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+        bool merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) {
+            return false;
+        }
+        siz[x] += siz[y];
+        f[y] = x;
+        return true;
+    }
+        int size(int x) {
+        return siz[find(x)];
+    }
+};
+ std::mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a[4];
+    for (int i = 0; i < n; i++) {
+        int t, s;
+        std::cin >> t >> s;
+        a[t].push_back(s);
+    }
+    for (int t = 1; t <= 3; t++) {
+        std::sort(a[t].begin(), a[t].end());
+    }
+        int ans = 2 * n + 3;
+        std::vector<int> p(n + 1);
+    std::iota(p.begin(), p.end(), 1);
+    std::shuffle(p.begin(), p.end(), rng);
+        auto check = [&](int sum, int t2) {
+        int t1 = sum - t2;
+        if (t1 < 1) {
+            return false;
+        }
+        DSU d1(t1), d2(t2);
+        for (auto s : a[1]) {
+            int x = std::max(0, t1 - 1 - s);
+            x = d1.find(x);
+            if (x == t1 - 1) {
+                return false;
+            }
+            d1.merge(x + 1, x);
+        }
+        for (auto s : a[3]) {
+            if (s > t2) {
+                int x = std::max(0, t1 - 1 - (s - t2));
+                x = d1.find(x);
+                if (x < t1 - 1) {
+                    d1.merge(x + 1, x);
+                    continue;
+                }
+            }
+            int x = std::max(0, t1 - 1 - s);
+            x = d1.find(x);
+            if (x == t1 - 1) {
+                return false;
+            }
+            d1.merge(x + 1, x);
+            x = std::max(0, t2 - 1 - s);
+            x = d2.find(x);
+            if (x == t2 - 1) {
+                return false;
+            }
+            d2.merge(x + 1, x);
+        }
+        for (auto s : a[2]) {
+            if (s > t2) {
+                int x = std::max(0, t1 - 1 - (s - t2));
+                x = d1.find(x);
+                if (x < t1 - 1) {
+                    d1.merge(x + 1, x);
+                    continue;
+                }
+            }
+            int x = std::max(0, t2 - 1 - s);
+            x = d2.find(x);
+            if (x == t2 - 1) {
+                return false;
+            }
+            d2.merge(x + 1, x);
+        }
+        return true;
+    };
+        for (auto t2 : p) {
+        if (!check(ans - 1, t2)) {
+            continue;
+        }
+        ans = *std::ranges::partition_point(std::ranges::iota_view(1, ans),
+            [&](int s) {
+                return !check(s, t2);
+            });
+    }
+        if (ans > 2 * n + 2) {
+        ans = -1;
+    }
+        std::cout << ans << "\n";
+        return 0;
+}

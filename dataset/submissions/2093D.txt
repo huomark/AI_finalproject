@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+using u128 = unsigned __int128;
+ void solve() {
+    int n, q;
+    std::cin >> n >> q;
+        for (int i = 0; i < q; i++) {
+        std::string op;
+        std::cin >> op;
+                if (op == "->") {
+            int x, y;
+            std::cin >> x >> y;
+            x--;
+            y--;
+                        i64 d = 0;
+            for (int i = 0; i < n; i++) {
+                int xi = x >> i & 1;
+                int yi = y >> i & 1;
+                i64 di = (xi * 2) ^ (yi * 3);
+                d |= di << (2 * i);
+            }
+            std::cout << d + 1 << "\n";
+        } else {
+            i64 d;
+            std::cin >> d;
+            d--;
+                        int x = 0, y = 0;
+            for (int i = 0; i < n; i++) {
+                int di = d >> (2 * i) & 3;
+                int xi = (di & 1) ^ (di >> 1);
+                int yi = di & 1;
+                x |= xi << i;
+                y |= yi << i;
+            }
+            std::cout << x + 1 << " " << y + 1 << "\n";
+        }
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

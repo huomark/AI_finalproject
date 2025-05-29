@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        int min = *std::min_element(a.begin(), a.end());
+    int max = *std::max_element(a.begin(), a.end());
+        std::vector<int> ans;
+    while (min < max) {
+        int x = min % 2;
+        ans.push_back(x);
+        min = (min + x) / 2;
+        max = (max + x) / 2;
+    }
+        std::cout << ans.size() << "\n";
+    if (ans.size() <= n) {
+        for (auto x : ans) {
+            std::cout << x << " ";
+        }
+        std::cout << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

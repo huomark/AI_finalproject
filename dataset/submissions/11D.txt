@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector g(n, std::vector<bool>(n));
+    for (int i = 0; i < m; i++) {
+        int x, y;
+        std::cin >> x >> y;
+        x--, y--;
+        g[x][y] = g[y][x] = true;
+    }
+        i64 ans = 0;
+    for (int N = 3; N <= n; N++) {
+        std::vector dp(1 << N, std::vector(N, 0LL));
+        dp[1 << (N - 1)][N - 1] = 1;
+        for (int s = (1 << (N - 1)); s < (1 << N); s++) {
+            for (int i = 0; i < N; i++) {
+                if (__builtin_popcount(s) >= 3 && g[N - 1][i]) {
+                    ans += dp[s][i];
+                }
+                if (dp[s][i]) {
+                    for (int j = 0; j < N; j++) {
+                        if (g[i][j] && (~s >> j & 1)) {
+                            dp[s | 1 << j][j] += dp[s][i];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ans /= 2;
+    std::cout << ans << "\n";
+        return 0;
+}

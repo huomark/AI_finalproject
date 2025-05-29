@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> p(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> p[i];
+        p[i]--;
+    }
+        std::vector<std::array<int, 2>> out;
+        std::vector<int> first(n), second(n);
+    std::iota(first.begin(), first.end(), 0);
+    std::vector<int> invp(n);
+    for (int i = 0; i < n; i++) {
+        invp[p[i]] = i;
+    }
+    for (int i = 0; i < n; i++) {
+        int j = i;
+        while (p[p[j]] != j) {
+            std::swap(invp[p[j]], invp[p[p[p[j]]]]);
+            std::swap(first[j], first[p[p[j]]]);
+            std::swap(p[j], p[p[p[j]]]);
+            j = invp[j];
+        }
+    }
+    second = p;
+    auto work = [&](auto f, int t) {
+        std::vector<std::vector<int>> vec(n);
+        for (int i = 0; i < n; i++) {
+            if (f[i] != i) {
+                int x = i, y = f[i];
+                if (t == 1) {
+                    x = n - 1 - x;
+                    y = n - 1 - y;
+                }
+                if (x > y) {
+                    std::swap(x, y);
+                }
+                int turn = 0, pos = 0;
+                if ((y - x) % 2 == 1) {
+                    turn = (y - x + 1) / 2;
+                } else {
+                    turn = (2 * n - y - x) / 2;
+                }
+                if (x % 2 == 1) {
+                    turn = n + 1 - turn;
+                }
+                pos = turn;
+                if (x % 2 == 0) {
+                    pos += x;
+                } else {
+                    pos -= x + 1;
+                }
+                vec[turn - 1].push_back(pos - 1);
+                std::swap(f[i], f[f[i]]);
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            int l = i % 2;
+            int r = n;
+            if ((r - l) % 2) {
+                r--;
+            }
+            if (l < r) {
+                out.push_back({l, r});
+            }
+            for (auto j : vec[i]) {
+                out.push_back({j, j + 2});
+            }
+        }
+    };
+        work(first, 0);
+    work(second, 1);
+        std::cout << out.size() << "\n";
+    for (auto [l, r] : out) {
+        std::cout << l + 1 << " " << r << "\n";
+    }
+        return 0;
+}

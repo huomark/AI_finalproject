@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> deg(n);
+    for (int i = 0; i < n; i++) {
+        std::string s(n, '1');
+        s[i] = '0';
+        std::cout << "? " << i + 1 << " " << s << std::endl;
+        std::cin >> deg[i];
+    }
+        std::vector<int> p(n);
+    std::iota(p.begin(), p.end(), 0);
+    std::sort(p.begin(), p.end(), [&](int i, int j) {
+        return deg[i] < deg[j];
+    });
+        int sum = 0;
+    int beg = 0;
+    for (int i = 0; i < n - 1; i++) {
+        sum += deg[p[i]];
+        if (sum == i * (i + 1) / 2) beg = i + 1;
+    }
+        std::string s(n, '0');
+    for (int i = beg; i < n; i++) {
+        s[p[i]] = '1';
+    }
+    std::cout << "! " << s << std::endl;
+        return 0;
+}

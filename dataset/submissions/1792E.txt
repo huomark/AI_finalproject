@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n, m1, m2;
+    std::cin >> n >> m1 >> m2;
+        std::map<int, int> r;
+    for (auto x : {m1, m2}) {
+        for (int i = 2; i * i <= x; i++) {
+            while (x % i == 0) {
+                r[i]++;
+                x /= i;
+            }
+        }
+        if (x > 1) r[x]++;
+    }
+        std::vector<std::pair<int, int>> p(r.begin(), r.end());
+        std::vector<int> f;
+    std::vector<i64> val;
+        auto dfs = [&](auto self, int i, i64 d, int index) {
+        if (i == p.size()) {
+            if (index >= f.size()) {
+                f.resize(index + 1);
+                val.resize(index + 1);
+            }
+            val[index] = d;
+            if (d <= n) f[index] = d;
+            int v = 1;
+            for (int j = i - 1; j >= 0; j--) {
+                if (index / v % (p[j].second + 1) > 0) {
+                    f[index] = std::max(f[index], f[index - v]);
+                }
+                v *= (p[j].second + 1);
+            }
+            return;
+        }
+        for (int j = 0; j <= p[i].second; j++) {
+            if (j > 0) d *= p[i].first;
+            self(self, i + 1, d, index * (p[i].second + 1) + j);
+                    }
+    };
+    dfs(dfs, 0, 1, 0);
+        int cnt = 0, xors = 0;
+    for (int i = 0; i < f.size(); i++) {
+        if (val[i] / f[i] <= n) {
+            cnt++;
+            xors ^= val[i] / f[i];
+        }
+    }
+    std::cout << cnt << " " << xors << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

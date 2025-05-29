@@ -1,0 +1,152 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> p(n);
+    p[0] = -1;
+    std::mt19937 rng;
+    std::vector<int> d(n);
+    for (int i = 2; i <= n; i++) {
+        std::cin >> p[i - 1];
+        p[i - 1]--;
+                if (i == 4 && p[2] == 1 && p[3] == 1) {
+            std::cout << 2 << "\n";
+        } else {
+            std::cout << i % 2 << "\n";
+        }
+        // int x;
+        // do {
+        //     x = rng() % (i - 1);
+        // } while (d[x] >= 2);
+        // p[i - 1] = x;
+        // d[x]++;
+    }
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        adj[p[i]].push_back(i);
+        adj[i].push_back(p[i]);
+    }
+        std::vector<int> vis(n), color(n), bal(n), siz(n), deg(n), val(n);
+        auto dfs = [&](auto dfs, int x, int p) -> void {
+        siz[x] = 1;
+        deg[x] = (p != -1);
+        val[x] = 0;
+        bal[x] = 1;
+        for (auto y : adj[x]) {
+            if (y == p || vis[y]) continue;
+            deg[x]++;
+            color[y] = color[x] ^ 1;
+            dfs(dfs, y, x);
+            bal[x] -= bal[y];
+            siz[x] += siz[y];
+            val[x] = std::max(val[x], siz[y]);
+        }
+    };
+        int cnt = 0;
+    auto dfs1 = [&](auto dfs1, int x, int p) -> void {
+        vis[x] = ++cnt;
+        for (auto y : adj[x]) {
+            if (y == p || vis[y]) continue;
+            dfs1(dfs1, y, x);
+        }
+    };
+        auto find = [&](auto find, int x, int p, int s) -> int {
+        val[x] = std::max(val[x], s - siz[x]);
+        int res = deg[x] == 3 ? x : -1;
+        for (auto y : adj[x]) {
+            if (y == p || vis[y]) continue;
+            int v = find(find, y, x, s);
+            if (v != -1 && (res == -1 || val[v] < val[res])) res = v;
+        }
+        return res;
+    };
+        auto invert = [&](auto invert, int x, int p, int s) -> void {
+        color[x] ^= 1;
+        for (auto y : adj[x]) {
+            if (y == p || vis[y] <= s) continue;
+            invert(invert, y, x, s);
+        }
+    };
+        auto work = [&](auto work, int x) -> int {
+        dfs(dfs, x, -1);
+        int r = find(find, x, -1, siz[x]);
+        if (r == -1) {
+            dfs1(dfs1, x, -1);
+            return x;
+        }
+        // std::cerr << "work " << r + 1 << "\n";
+        dfs(dfs, r, -1);
+        bal[r] = 1;
+        vis[r] = ++cnt;
+                std::vector<std::pair<int, int>> ch;
+        int ok = 0;
+        for (auto y : adj[r]) {
+            int v = work(work, y);
+            if (siz[v] == 1) {
+                if (color[v] == color[r]) color[v] ^= 1;
+                bal[r] -= bal[v];
+                ok = 1;
+                continue;
+            }
+            if (bal[v] == -2) {
+                assert(siz[v] == 4);
+                color[y] ^= 1;
+                bal[v] = 0;
+                if (color[r] == color[y]) {
+                    invert(invert, v, -1, vis[r]);
+                }
+                ok = 1;
+                continue;
+            }
+            ch.emplace_back(v, y);
+        }
+        for (auto [v, y] : ch) {
+            if (bal[r] == 0 || bal[v] == 0) {
+                if (color[y] == color[r]) {
+                    invert(invert, v, -1, vis[r]);
+                }
+            }
+            if (std::abs(bal[r] + (color[r] == color[v] ? bal[v] : -bal[v])) > 1) {
+                invert(invert, v, -1, vis[r]);
+            }
+            if (color[y] != color[r]) {
+                ok = 1;
+            }
+            bal[r] += color[r] == color[v] ? bal[v] : -bal[v];
+        }
+        assert(ok);
+        // std::cerr << r+1 << " " << siz[r] << " " << bal[r] << "\n";
+        return r;
+    };
+    work(work, 0);
+        for (int i = 0; i < n; i++) {
+        int ok = 0;
+        for (auto j : adj[i]) {
+            ok |= color[i] != color[j];
+        }
+        // if (!ok) {
+        // std::cerr << i+1 << " ";
+        // for (auto j : adj[i]) std::cerr << j+1 << " ";
+        //     std::cerr << "\n";
+        // return;
+        // }
+    }
+        int res = 0;
+    for (int i = 0; i < n; i++) {
+        std::cout << "wb"[color[i]];
+        res += color[i];
+    }
+    std::cout << "\n";
+    // std::cerr << res << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

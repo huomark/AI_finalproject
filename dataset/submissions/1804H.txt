@@ -1,0 +1,112 @@
+#pragma GCC optimize("Ofast")
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int inf = 1E9;
+ struct Info {
+    int min = inf;
+    i64 cnt = 0;
+};
+ Info operator+(Info a, Info b) {
+    if (a.min < b.min) {
+        return a;
+    } else if (b.min < a.min) {
+        return b;
+    } else {
+        return {a.min, a.cnt + b.cnt};
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int k, n;
+    std::cin >> k >> n;
+        std::string S;
+    std::cin >> S;
+        std::vector cnt(k, std::vector<int>(k));
+    for (int i = 1; i < n; i++) {
+        cnt[S[i - 1] - 'a'][S[i] - 'a'] += 1;
+        cnt[S[i] - 'a'][S[i - 1] - 'a'] += 1;
+    }
+    for (int i = 0; i < k; i++) {
+        cnt[i][i] = 0;
+    }
+        int half = (k + 1) / 2;
+        std::vector<int> p;
+    for (int i = 0; i < half; i++) {
+        p.push_back(i);
+        if (i + half < k) {
+            p.push_back(i + half);
+        }
+    }
+        std::vector<int> pw(k + 1);
+    pw[0] = 1;
+    for (int i = 1; i <= k; i++) {
+        pw[i] = pw[i - 1] * 3;
+    }
+        std::vector<Info> dp(1 << k);
+    std::vector<int> tm(1 << k, -1);
+    std::vector sum(k, std::vector<int>(1 << k));
+    for (int a = 0; a < k; a++) {
+        for (int s = 1; s < (1 << k); s++) {
+            int b = __builtin_ctz(s);
+            sum[a][s] = sum[a][s ^ (1 << b)] + cnt[a][b];
+        }
+    }
+        // i64 tot = 0;
+    Info ans;
+    std::vector<int> q;
+    for (int s = 0; s < (1 << k); s++) {
+        if (~s >> (S[0] - 'a') & 1) {
+            continue;
+        }
+        if (__builtin_popcount(s) == half) {
+            q.clear();
+            q.push_back(0);
+            tm[0] = s;
+            dp[0] = {0, 1};
+                        for (int _ = 0; _ < q.size(); _++) {
+                int t = q[_];
+                                int c = __builtin_popcount(t);
+                int pos = p[c];
+                if (c % 2 == 0) {
+                    for (int C = ~t & s; C > 0; C &= (C - 1)) {
+                        int i = __builtin_ctz(C);
+                        if (c == 0 && i != S[0] - 'a') {
+                            continue;
+                        }
+                        auto val = dp[t];
+                        val.min += (sum[i][(1 << k) - 1 - (s ^ t)] - sum[i][s ^ t]) * pos;
+                        int nt = t | 1 << i;
+                        if (tm[nt] == s) {
+                            dp[nt] = dp[nt] + val;
+                        } else {
+                            dp[nt] = val;
+                            tm[nt] = s;
+                            q.push_back(nt);
+                        }
+                    }
+                } else {
+                    for (int C = ~t & ~s & ((1 << k) - 1); C > 0; C &= (C - 1)) {
+                        int i = __builtin_ctz(C);
+                        auto val = dp[t];
+                        val.min += (sum[i][s ^ t] - sum[i][(1 << k) - 1 - (s ^ t)]) * pos;
+                        val.min += sum[i][t & s] * k;
+                        int nt = t | 1 << i;
+                        if (tm[nt] == s) {
+                            dp[nt] = dp[nt] + val;
+                        } else {
+                            dp[nt] = val;
+                            tm[nt] = s;
+                            q.push_back(nt);
+                        }
+                    }
+                }
+            }
+                        ans = ans + dp[(1 << k) - 1];
+        }
+    }
+        ans.min += n;
+    std::cout << ans.min << "\n";
+    std::cout << ans.cnt << "\n";
+        return 0;
+}

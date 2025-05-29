@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> odd, even;
+    for (int i = 0; i < n; i++) {
+        int x;
+        std::cin >> x;
+        if (x % 2 == 0) {
+            even.push_back(i + 1);
+        } else {
+            odd.push_back(i + 1);
+        }
+    }
+        if (odd.size() >= 3) {
+        std::cout << "YES\n";
+        std::cout << odd[0] << " " << odd[1] << " " << odd[2] << "\n";
+        return;
+    }
+    if (odd.size() >= 1 && even.size() >= 2) {
+        std::cout << "YES\n";
+        std::cout << odd[0] << " " << even[0] << " " << even[1] << "\n";
+        return;
+    }
+    std::cout << "NO\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

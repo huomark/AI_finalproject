@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+    }
+        std::vector<std::vector<int>> adj(n);
+        for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> dp(n), t(n);
+    std::vector<std::set<int>> s(n);
+    std::function<void(int, int)> dfs = [&](int x, int p) {
+        std::map<int, int> cnt;
+        if (adj[x].size() == 1 && x) {
+            s[x].insert(0);
+            dp[x] = 1;
+        }
+        for (auto y : adj[x]) {
+            if (y == p) {
+                continue;
+            }
+            dfs(y, x);
+            dp[x] += dp[y] + 1;
+            if (s[x].size() < s[y].size()) {
+                std::swap(s[x], s[y]);
+                std::swap(t[x], t[y]);
+            }
+            for (auto z : s[y]) {
+                z ^= t[x] ^ t[y];
+                if (s[x].count(z)) {
+                    cnt[z ^ t[x]]++;
+                } else {
+                    s[x].insert(z);
+                }
+            }
+        }
+        if (!cnt.empty()) {
+            int mx = 0;
+            for (auto [_, v] : cnt) {
+                mx = std::max(mx, v);
+            }
+            dp[x] -= mx + 1;
+            s[x].clear();
+            t[x] = a[x];
+            for (auto [z, v] : cnt) {
+                if (v == mx) {
+                    s[x].insert(z);
+                }
+            }
+        } else {
+            dp[x] -= 1;
+            t[x] ^= a[x];
+        }
+    };
+    dfs(0, -1);
+        int ans = dp[0] + !s[0].count(t[0]);
+    std::cout << ans << "\n";
+        return 0;
+}

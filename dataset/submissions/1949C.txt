@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        std::vector<std::vector<int>> adj(n);
+    std::vector<int> deg(n);
+    for (int i = 1; i < n; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        deg[u]++;
+        deg[v]++;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector<int> a(n, 1);
+    std::vector<std::multiset<int>> s(n);
+        std::vector<int> leaf(n);
+    std::queue<int> q;
+    for (int x = 0; x < n; x++) {
+        if (deg[x] == 1) {
+            leaf[x] = 1;
+            s[adj[x][0]].insert(a[x]);
+            q.push(adj[x][0]);
+        }
+    }
+    int cnt = n;
+    while (cnt > 2) {
+        if (q.empty()) {
+            std::cout << "NO\n";
+            return 0;
+        }
+        int x = q.front();
+        q.pop();
+                if (leaf[x]) {
+            continue;
+        }
+                while (!s[x].empty() && a[x] >= *s[x].begin()) {
+            a[x] += *s[x].begin();
+            s[x].erase(s[x].begin());
+            deg[x]--;
+            cnt--;
+        }
+                if (deg[x] == 1) {
+            leaf[x] = 1;
+            for (auto y : adj[x]) {
+                if (!leaf[y]) {
+                    s[y].insert(a[x]);
+                    q.push(y);
+                }
+            }
+        }
+    }
+    std::cout << "YES\n";
+        return 0;
+}

@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        char tr;
+    std::cin >> tr;
+        std::map<char, std::vector<std::string>> f;
+    for (int i = 0; i < 2 * n; i++) {
+        std::string s;
+        std::cin >> s;
+        f[s[1]].push_back(s);
+    }
+        std::vector<std::array<std::string, 2>> ans;
+    for (auto c : {'C', 'D', 'H', 'S'}) {
+        std::sort(f[c].begin(), f[c].end());
+        if (c == tr) {
+            continue;
+        }
+        for (int i = 0; i + 1 < f[c].size(); i += 2) {
+            ans.push_back({f[c][i], f[c][i + 1]});
+        }
+        if (f[c].size() % 2 == 1) {
+            if (f[tr].empty()) {
+                std::cout << "IMPOSSIBLE\n";
+                return;
+            }
+            auto t = f[tr].back();
+            f[tr].pop_back();
+            ans.push_back({f[c].back(), t});
+        }
+    }
+        for (int i = 0; i + 1 < f[tr].size(); i += 2) {
+        ans.push_back({f[tr][i], f[tr][i + 1]});
+    }
+        for (auto [x, y] : ans) {
+        std::cout << x << " " << y << "\n";
+    }
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

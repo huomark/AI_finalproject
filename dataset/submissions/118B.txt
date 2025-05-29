@@ -1,0 +1,18 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        for (int i = 0; i <= 2 * n; i++) {
+        int v = std::min(i, 2 * n - i);
+        for (int j = 0; j < 2 * (n - v); j++) {
+            std::cout << ' ';
+        }
+        for (int j = 0; j <= 2 * v; j++) {
+            std::cout << std::min(j, 2 * v - j) << " \n"[j == 2 * v];
+        }
+    }
+        return 0;
+}

@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ std::array<int, 2> solve(std::vector<int> a) {
+    int n = a.size();
+    std::array<int, 2> ans{-1, -1};
+    for (int i = 0; i < n; i++) {
+        int res = 0;
+        auto b = a;
+        while (b[0] != 0) {
+            std::swap(b[0], b[b[0]]);
+            res++;
+        }
+        for (int j = 0; j < n; j++) {
+            if (b[j] != j) {
+                std::swap(b[0], b[j]);
+                res++;
+                while (b[0] != 0) {
+                    std::swap(b[0], b[b[0]]);
+                    res++;
+                }
+            }
+        }
+        if (ans[res % 2] == -1 || ans[res % 2] > res) {
+            ans[res % 2] = res;
+        }
+        for (int j = 0; j < n; j++) {
+            a[j] = (a[j] + 1) % n;
+        }
+    }
+    return ans;
+}
+ std::vector<int> get(std::vector<int> a, int k) {
+    int n = a.size();
+    for (int i = 0; i < n; i++) {
+        int res = 0;
+        auto b = a;
+        std::vector<int> ans;
+        while (b[0] != 0) {
+            ans.push_back((b[b[0]] - b[0] + n) % n);
+            std::swap(b[0], b[b[0]]);
+            res++;
+        }
+        for (int j = 0; j < n; j++) {
+            if (b[j] != j) {
+                ans.push_back((b[j] - b[0] + n) % n);
+                std::swap(b[0], b[j]);
+                res++;
+                while (b[0] != 0) {
+                    ans.push_back((b[b[0]] - b[0] + n) % n);
+                    std::swap(b[0], b[b[0]]);
+                    res++;
+                }
+            }
+        }
+        if (res <= k && (k - res) % 2 == 0) {
+            while (res < k) {
+                ans.push_back((b[1] - b[0] + n) % n);
+                std::swap(b[0], b[1]);
+                res++;
+            }
+            return ans;
+        }
+        for (int j = 0; j < n; j++) {
+            a[j] = (a[j] + 1) % n;
+        }
+    }
+    assert(false);
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(n + 1), b(m + 1);
+    for (int i = 1; i <= n; i++) {
+        int x;
+        std::cin >> x;
+        a[x] = i;
+    }
+    for (int i = 1; i <= m; i++) {
+        int x;
+        std::cin >> x;
+        b[x] = i;
+    }
+        auto [ea, oa] = solve(a);
+    auto [eb, ob] = solve(b);
+        int ans = -1;
+    if (ea != -1 && eb != -1) {
+        ans = std::max(ea, eb);
+    }
+    if (oa != -1 && ob != -1 && (ans == -1 || ans > std::max(oa, ob))) {
+        ans = std::max(oa, ob);
+    }
+    if (ans == -1) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+    auto sa = get(a, ans);
+    auto sb = get(b, ans);
+    std::cout << ans << "\n";
+    for (int i = 0; i < ans; i++) {
+        std::cout << sa[i] << " " << sb[i] << "\n";
+    }
+        return 0;
+}

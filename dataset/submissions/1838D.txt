@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, q;
+    std::cin >> n >> q;
+        std::string s;
+    std::cin >> s;
+        s = ')' + s + '(';
+        std::set<int> l, r;
+    for (int i = 1; i < s.size(); i++) {
+        if (s[i - 1] == s[i]) {
+            if (s[i] == '(') {
+                l.insert(i);
+            } else {
+                r.insert(i);
+            }
+        }
+    }
+        while (q--) {
+        int p;
+        std::cin >> p;
+                s[p] ^= '(' ^ ')';
+                l.erase(p);
+        l.erase(p + 1);
+        r.erase(p);
+        r.erase(p + 1);
+                if (p && s[p - 1] == s[p]) {
+            if (s[p] == '(') {
+                l.insert(p);
+            } else {
+                r.insert(p);
+            }
+        }
+        if (p + 1 < s.size() && s[p + 1] == s[p]) {
+            if (s[p] == '(') {
+                l.insert(p + 1);
+            } else {
+                r.insert(p + 1);
+            }
+        }
+                if (n % 2 == 1) {
+            std::cout << "NO\n";
+        } else if (l.empty() && r.empty()) {
+            std::cout << "YES\n";
+        } else if (!l.empty() && !r.empty() && *l.begin() < *r.begin() && *l.rbegin() < *r.rbegin()) {
+            std::cout << "YES\n";
+        } else {
+            std::cout << "NO\n";
+        }
+    }
+        return 0;
+}

@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> a(n);
+    std::map<int, int> cnt;
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        cnt[a[i]]++;
+    }
+        int ans = 0;
+    int last = -1;
+    int c = 0;
+        for (auto [x, y] : cnt) {
+        if (last + 1 != x) c = 0;
+        ans += std::max(0, y - c);
+        last = x, c = y;
+    }
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

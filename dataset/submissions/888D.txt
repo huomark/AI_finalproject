@@ -1,0 +1,20 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+        i64 ans = 1;
+        if (k >= 2) {
+        ans += n * (n - 1) / 2;
+    }
+    if (k >= 3) {
+        ans += n * (n - 1) * (n - 2) / 3;
+    }
+    if (k >= 4) {
+        ans += 1LL * n * (n - 1) * (n - 2) * (n - 3) / 24 * 9;
+    }
+        std::cout << ans << "\n";
+        return 0;
+}

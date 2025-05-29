@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int query(int l, int x) {
+    std::cout << "? " << l << " " << x << std::endl;
+    int res;
+    std::cin >> res;
+    return res;
+}
+ void solve() {
+    int n, k;
+    std::cin >> n >> k;
+        int max = 0;
+    for (int i = 1; i <= n; i++) {
+        if (query(1, i * n) != n + 1) {
+            max = i;
+        }
+    }
+        for (int m = 1; m <= n / k; m++) {
+        int cur = 0;
+        for (int i = 0; i < k; i++) {
+            cur = query(cur + 1, m * max);
+            if (cur == n && i != k - 1) {
+                cur = n + 1;
+            }
+            if (cur == n + 1) {
+                break;
+            }
+        }
+        if (cur == n) {
+            std::cout << "! " << m * max << std::endl;
+            int res;
+            std::cin >> res;
+            return;
+        }
+    }
+    std::cout << "! " << -1 << std::endl;
+    int res;
+    std::cin >> res;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<std::vector<int>> adj(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        std::cin >> u >> v;
+        u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+        std::vector dis(n, std::vector(n, -1));
+    std::vector lst(n, std::vector(n, std::pair{-1, -1}));
+    std::queue<std::pair<int, int>> q;
+    q.emplace(0, n - 1);
+    dis[0][n - 1] = 0;
+    while (!q.empty()) {
+        auto [u, v] = q.front();
+        q.pop();
+                for (auto x : adj[u]) {
+            for (auto y : adj[v]) {
+                if (x != y && dis[x][y] == -1) {
+                    dis[x][y] = dis[u][v] + 1;
+                    lst[x][y] = {u, v};
+                    q.emplace(x, y);
+                }
+            }
+        }
+    }
+        if (dis[n - 1][0] == -1) {
+        std::cout << -1 << "\n";
+        return 0;
+    }
+        std::vector<int> a, b;
+    for (int x = n - 1, y = 0; x != -1; std::tie(x, y) = lst[x][y]) {
+        a.push_back(x);
+        b.push_back(y);
+    }
+        std::cout << a.size() - 1 << "\n";
+    for (int i = 0; i < a.size(); i++) {
+        std::cout << b[i] + 1 << " \n"[i == a.size() - 1];
+    }
+    for (int i = 0; i < a.size(); i++) {
+        std::cout << a[i] + 1 << " \n"[i == a.size() - 1];
+    }
+        return 0;
+}

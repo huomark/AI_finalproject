@@ -1,0 +1,238 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ constexpr int P = 1000000007;
+using i64 = long long;
+// assume -P <= x < 2P
+int norm(int x) {
+    if (x < 0) {
+        x += P;
+    }
+    if (x >= P) {
+        x -= P;
+    }
+    return x;
+}
+template<class T>
+T power(T a, i64 b) {
+    T res = 1;
+    for (; b; b /= 2, a *= a) {
+        if (b % 2) {
+            res *= a;
+        }
+    }
+    return res;
+}
+struct Z {
+    int x;
+    Z(int x = 0) : x(norm(x)) {}
+    Z(i64 x) : x(norm(x % P)) {}
+    int val() const {
+        return x;
+    }
+    Z operator-() const {
+        return Z(norm(P - x));
+    }
+    Z inv() const {
+        assert(x != 0);
+        return power(*this, P - 2);
+    }
+    Z &operator*=(const Z &rhs) {
+        x = i64(x) * rhs.x % P;
+        return *this;
+    }
+    Z &operator+=(const Z &rhs) {
+        x = norm(x + rhs.x);
+        return *this;
+    }
+    Z &operator-=(const Z &rhs) {
+        x = norm(x - rhs.x);
+        return *this;
+    }
+    Z &operator/=(const Z &rhs) {
+        return *this *= rhs.inv();
+    }
+    friend Z operator*(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend Z operator+(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res += rhs;
+        return res;
+    }
+    friend Z operator-(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res -= rhs;
+        return res;
+    }
+    friend Z operator/(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream &operator>>(std::istream &is, Z &a) {
+        i64 v;
+        is >> v;
+        a = Z(v);
+        return is;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Z &a) {
+        return os << a.val();
+    }
+};
+ constexpr int N = 4E6;
+ std::vector<Z> fac(N + 1), invfac(N + 1);
+ Z binom(int n, int m) {
+    if (n < m || m < 0) {
+        return 0;
+    }
+    return fac[n] * invfac[m] * invfac[n - m];
+}
+ Z get(int n, int a, int b, int c, int d) {
+    if ((c - a) % 2 != 0) {
+        return 0;
+    }
+    if (c > a || d < b) {
+        return 0;
+    }
+    if (a + b < 0 || a + b >= 2 * n) {
+        return 0;
+    }
+    if (c + d < 0 || c + d >= 2 * n) {
+        return 0;
+    }
+    Z ans = binom((a - c + d - b) / 2, (a - c) / 2);
+    ans -= binom((a - c + d - b) / 2, (a - (-d - 2)) / 2);
+    ans -= binom((a - c + d - b) / 2, (a - (-d + 2 * n)) / 2);
+    return ans;
+}
+ int init = 0;
+ std::vector<Z> pre;
+ Z get1(int n, int a, int b) {
+    if (a + b < 0 || a + b >= 2 * n) {
+        return 0;
+    }
+    int cur = (2 * n - 4 - (b - a)) / 2;
+    assert(cur >= 0);
+    if (!init) {
+        init = 1;
+        pre.resize(cur + 1);
+        for (int i = 0; i <= cur; i++) {
+            pre[i] = binom(cur, i);
+            if (i) {
+                pre[i] += pre[i - 1];
+            }
+        }
+    }
+    Z ans = 0;
+    int s = cur + (a + b) / 2;
+    if (s >= 0) {
+        ans += pre[std::min(s / 2, cur)];
+    }
+    s = cur - (a + b) / 2 - 2;
+    if (s >= 0) {
+        ans -= pre[s / 2];
+    }
+    s = cur + (a + b) / 2 - n;
+    if (s >= 0) {
+        ans -= pre[s / 2];
+    }
+    s = cur + (a + b) / 2 - n - 1;
+    if (s >= 0) {
+        ans -= pre[s / 2];
+    }
+    return ans;
+}
+ Z work(const std::vector<int> &p) {
+    const int n = p.size();
+    Z ans = 0;
+        for (int t = 0; t < 2; t++) {
+        std::vector<std::pair<std::array<int, 2>, Z>> dp;
+        for (int i = t; i < n; i += 2) {
+            if (p[0] == -1 || p[0] == i) {
+                dp.emplace_back(std::array{i, i}, 1);
+            }
+        }
+        for (int i = 1; i < n - 1; i++) {
+            if (p[i] == -1) {
+                continue;
+            }
+            std::vector<std::pair<std::array<int, 2>, Z>> f;
+            if (p[i] % 2 == t) {
+                int x, y;
+                y = p[i], x = p[i] - 2 * i;
+                Z res = 0;
+                for (auto [q, v] : dp) {
+                    res += get(n, q[0], q[1], x, y - 2) * v;
+                }
+                f.emplace_back(std::array{x, y}, res);
+                                res = 0;
+                x = p[i], y = p[i] + 2 * i;
+                for (auto [q, v] : dp) {
+                    res += get(n, q[0], q[1], x + 2, y) * v;
+                }
+                f.emplace_back(std::array{x, y}, res);
+            } else {
+                int x, y;
+                x = -1 - p[i], y = x + 2 * i;
+                Z res = 0;
+                for (auto [q, v] : dp) {
+                    res += get(n, q[0], q[1], x + 2, y) * v;
+                }
+                f.emplace_back(std::array{x, y}, res);
+                                res = 0;
+                y = 2 * n - 1 - p[i], x = y - 2 * i;
+                for (auto [q, v] : dp) {
+                    res += get(n, q[0], q[1], x, y - 2) * v;
+                }
+                f.emplace_back(std::array{x, y}, res);
+            }
+            dp = f;
+        }
+        if (p[n - 1] == -1) {
+            init = 0;
+            for (auto [q, v] : dp) {
+                ans += get1(n, q[0], q[1]) * v;
+            }
+        } else {
+            for (auto [q, v] : dp) {
+                ans += get(n, q[0], q[1], 1 - p[n - 1], 2 * n - 3 - p[n - 1]) * v;
+            }
+        }
+    }
+        return ans;
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        std::vector<int> p(n, -1);
+    for (int i = 0; i < n; i++) {
+        int x;
+        std::cin >> x;
+        x--;
+        if (x >= 0) {
+            p[x] = i;
+        }
+    }
+        auto ans = work(p);
+        std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        fac[0] = 1;
+    for (int i = 1; i <= N; i++) {
+        fac[i] = fac[i - 1] * i;
+    }
+    invfac[N] = fac[N].inv();
+    for (int i = N; i; i--) {
+        invfac[i - 1] = invfac[i] * i;
+    }
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

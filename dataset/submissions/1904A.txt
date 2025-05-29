@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int a, b;
+    std::cin >> a >> b;
+        int xK, yK;
+    std::cin >> xK >> yK;
+        int xQ, yQ;
+    std::cin >> xQ >> yQ;
+        int ans = 0;
+    for (auto [x, y] : {std::make_pair(a, b), {b, a}, {-a, b}, {-b, a}, {a, -b}, {b, -a}, {-a, -b}, {-b, -a}}) {
+        int u = xK + x - xQ;
+        int v = yK + y - yQ;
+        u = std::abs(u);
+        v = std::abs(v);
+        if ((u == a && v == b) || (u == b && v == a)) {
+            ans++;
+        }
+    }
+    if (a == b) {
+        ans /= 2;
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

@@ -1,0 +1,116 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ struct Info {
+    int in;
+    int out[2];
+    int sum[2];
+    Info() : in(-1), out{-1, -1}, sum{0, 0} {}
+    Info(int x, int eq, int neq, int l) : in(x), out{neq, eq}, sum{neq + l, eq + l} {}
+};
+ Info operator+(const Info &a, const Info &b) {
+    Info c;
+    c.in = a.in;
+    if (a.out[1] == b.in) {
+        c.out[1] = b.out[1];
+        c.sum[1] = a.sum[1] + b.sum[1];
+    } else {
+        c.out[1] = b.out[0];
+        c.sum[1] = a.sum[1] + b.sum[0];
+    }
+    if (a.out[0] == b.in) {
+        c.out[0] = b.out[1];
+        c.sum[0] = a.sum[0] + b.sum[1];
+    } else {
+        c.out[0] = b.out[0];
+        c.sum[0] = a.sum[0] + b.sum[0];
+    }
+    return c;
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n;
+    std::cin >> n;
+        n++;
+    std::vector<int> p(n * 2, -1), parent(n, -1);
+    for (int i = 1; i < n; i++) {
+        std::cin >> parent[i];
+        parent[i]--;
+    }
+        std::vector<int> ch1(2 * n), ch2(2 * n);
+        std::vector<std::array<int, 20>> cnt(n);
+    std::vector<int> ans(2 * n, -1), sum(2 * n), lsum(2 * n);
+    std::vector<Info> info(2 * n);
+    std::function<int(int)> update = [&](int x) {
+        int in = 0;
+        while (cnt[x][in]) {
+            in++;
+        }
+        int out = in + 1;
+        while (cnt[x][out]) {
+            out++;
+        }
+        info[x] = Info(in, out, in, lsum[x]);
+        int t = x;
+        while (p[t] >= n) {
+            t = p[t];
+            info[t] = info[ch1[t]] + info[ch2[t]];
+        }
+        if (p[t] >= 0 && ans[t] != -1) {
+            lsum[p[t]] -= sum[t];
+            cnt[p[t]][ans[t]]--;
+        }
+        ans[t] = info[t].out[0];
+        sum[t] = info[t].sum[0];
+        if (p[t] >= 0) {
+            lsum[p[t]] += sum[t];
+            cnt[p[t]][ans[t]]++;
+            return update(p[t]);
+        }
+        return sum[t];
+    };
+        int cur = n;
+            std::vector<std::vector<int>> adj(n);
+    for (int i = 1; i < n; i++) {
+        adj[parent[i]].push_back(i);
+    }
+        std::vector<int> siz(n);
+    std::function<void(int)> dfs1 = [&](int x) {
+        siz[x] = 1;
+        for (auto &y : adj[x]) {
+            dfs1(y);
+            siz[x] += siz[y];
+            if (siz[y] > siz[adj[x][0]]) {
+                std::swap(y, adj[x][0]);
+            }
+        }
+    };
+    dfs1(0);
+        std::function<int(int, int)> work = [&](int l, int r) {
+        if (r == (adj[l].empty() ? -1 : adj[l][0])) {
+            for (auto x : adj[l]) {
+                if (x != adj[l][0]) {
+                    p[work(x, -1)] = l;
+                }
+            }
+            return l;
+        }
+        int x = l;
+        while (r != (adj[x].empty() ? -1 : adj[x][0]) && siz[x] * 2 >= siz[l] + (r >= 0 ? siz[r] : 0)) {
+            x = adj[x][0];
+        }
+        int a = work(l, x);
+        int b = work(x, r);
+        int c = cur++;
+        ch1[c] = b;
+        ch2[c] = a;
+        p[a] = p[b] = c;
+        return c;
+    };
+        work(0, -1);
+        update(0);
+    for (int i = 1; i < n; i++) {
+        std::cout << update(i) << "\n";
+    }
+        return 0;
+}

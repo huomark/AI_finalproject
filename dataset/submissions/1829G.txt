@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ i64 sum2(i64 n) {
+    return n * (n + 1) * (2 * n + 1) / 6;
+}
+ i64 sum2(i64 l, i64 r) {
+    return sum2(r) - sum2(l - 1);
+}
+ void solve() {
+    int n;
+    std::cin >> n;
+        int x = 1;
+    while (x * (x + 1) / 2 < n) {
+        x++;
+    }
+    int y = n - x * (x - 1) / 2;
+    i64 ans = 0;
+    for (int i = 1; i <= x; i++) {
+        int l = std::max(1, y - (x - i));
+        int r = std::min(i, y);
+        ans += sum2(i * (i - 1) / 2 + l, i * (i - 1) / 2 + r);
+    }
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

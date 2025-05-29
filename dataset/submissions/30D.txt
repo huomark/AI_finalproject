@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, k;
+    std::cin >> n >> k;
+    k--;
+        std::vector<int> x(n);
+    for (int i = 0; i < n; i++) {
+        std::cin >> x[i];
+    }
+    int xn, yn;
+    std::cin >> xn >> yn;
+        int xk = x[k];
+        std::sort(x.begin(), x.end());
+        if (k < n) {
+        k = std::lower_bound(x.begin(), x.end(), xk) - x.begin();
+    }
+        double ans = 1E9;
+    if (k == 0 || k == n) {
+        ans = std::min(ans, x[n - 1] - x[0] + std::sqrt(1. * (x[n - 1] - xn) * (x[n - 1] - xn) + 1. * yn * yn));
+    } else {
+        ans = std::min(ans, x[n - 1] - x[0] + std::sqrt(1. * (x[n - 1] - xn) * (x[n - 1] - xn) + 1. * yn * yn)
+            + std::abs(xk - x[0]));
+    }
+    if (k == n - 1 || k == n) {
+        ans = std::min(ans, x[n - 1] - x[0] + std::sqrt(1. * (x[0] - xn) * (x[0] - xn) + 1. * yn * yn));
+    } else {
+        ans = std::min(ans, x[n - 1] - x[0] + std::sqrt(1. * (x[0] - xn) * (x[0] - xn) + 1. * yn * yn)
+            + std::abs(xk - x[n - 1]));
+    }
+        for (int i = 1; i < n; i++) {
+        for (auto a : {0, i - 1}) {
+            for (auto b : {i, n - 1}) {
+                if (k == i - 1 - a || k == i + n - 1 - b) {
+                    ans = std::min(ans, x[i - 1] - x[0] + x[n - 1] - x[i]
+                        + std::sqrt(1. * (x[a] - xn) * (x[a] - xn) + 1. * yn * yn)
+                        + std::sqrt(1. * (x[b] - xn) * (x[b] - xn) + 1. * yn * yn));
+                } else if (k != n) {
+                    ans = std::min(ans, x[i - 1] - x[0] + x[n - 1] - x[i]
+                        + std::sqrt(1. * (x[a] - xn) * (x[a] - xn) + 1. * yn * yn)
+                        + std::sqrt(1. * (x[b] - xn) * (x[b] - xn) + 1. * yn * yn)
+                        + std::min(std::abs(xk - x[i - 1 - a]), std::abs(xk - x[i + n - 1 - b])));
+                }
+            }
+        }
+    }
+        std::cout << std::fixed << std::setprecision(10);
+    std::cout << ans << "\n";
+        return 0;
+}

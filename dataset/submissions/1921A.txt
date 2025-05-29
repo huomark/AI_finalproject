@@ -1,0 +1,25 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+ void solve() {
+    int x1 = 1000, x2 = -1000, y1 = 1000, y2 = -1000;
+    for (int i = 0; i < 4; i++) {
+        int x, y;
+        std::cin >> x >> y;
+        x1 = std::min(x1, x);
+        x2 = std::max(x2, x);
+        y1 = std::min(y1, y);
+        y2 = std::max(y2, y);
+    }
+    int ans = (x2 - x1) * (y2 - y1);
+    std::cout << ans << "\n";
+}
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int t;
+    std::cin >> t;
+        while (t--) {
+        solve();
+    }
+        return 0;
+}

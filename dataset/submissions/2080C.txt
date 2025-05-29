@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+ using i64 = long long;
+using u64 = unsigned long long;
+using u32 = unsigned;
+ int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+        int n, m;
+    std::cin >> n >> m;
+        std::vector<int> a(n), b(n), c(m);
+    for (int i = 0; i < n; i++) {
+        std::cin >> a[i];
+        a[i]--;
+    }
+    for (int i = 0; i < n; i++) {
+        std::cin >> b[i];
+        b[i]--;
+    }
+    for (int i = 0; i < m; i++) {
+        std::cin >> c[i];
+        c[i]--;
+    }
+        const int N = 2 * n + m;
+    std::vector<int> f(N, -1);
+    for (int i = 0; i < n; i++) {
+        f[a[i]] = b[i];
+        if (a[i] > b[i]) {
+            f[b[i]] = -2;
+        }
+    }
+        int r = N;
+    while (true) {
+        int x = r - 1;
+        while (x >= 0 && (f[x] < 0 || f[x] >= r)) {
+            x--;
+        }
+        if (x == -1) {
+            int c = r - std::count(f.begin(), f.begin() + r, -2);
+            if (c % 2 == 0) {
+                std::cout << "Second\n";
+            } else {
+                std::cout << "First\n";
+            }
+            return 0;
+        } else {
+            f[x] = -1;
+            r = x + 1;
+        }
+    }
+        return 0;
+}
