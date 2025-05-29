@@ -36,6 +36,9 @@ from pygments.token import (
 )
 import ast
 
+from sklearn.preprocessing import MultiLabelBinarizer
+import joblib
+
 logger.add(
     sys.stderr,
     format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
@@ -282,26 +285,122 @@ elif "cleaned_code" not in df.columns:
 # ### Configuration
 
 # %%
-ANONYMIZED_TOKENIZED_FILE = os.path.join(PROCESSED_DATA_DIR, "anonymized_tokenized_data.pkl")
+ANONYMIZED_TOKENIZED_FILE = os.path.join(
+    PROCESSED_DATA_DIR, "anonymized_tokenized_data.pkl"
+)
 
-CPP_KEYWORDS = set([
-    "alignas", "alignof", "and", "and_eq", "asm", "atomic_cancel", "atomic_commit",
-    "atomic_noexcept", "auto", "bitand", "bitor", "bool", "break", "case",
-    "catch", "char", "char8_t", "char16_t", "char32_t", "class", "compl",
-    "concept", "const", "consteval", "constexpr", "constinit", "const_cast",
-    "continue", "co_await", "co_return", "co_yield", "decltype", "default",
-    "delete", "do", "double", "dynamic_cast", "else", "enum", "explicit",
-    "export", "extern", "false", "float", "for", "friend", "goto", "if",
-    "inline", "int", "long", "mutable", "namespace", "new", "noexcept",
-    "not", "not_eq", "nullptr", "operator", "or", "or_eq", "private",
-    "protected", "public", "reflexpr", "register", "reinterpret_cast",
-    "requires", "return", "short", "signed", "sizeof", "static",
-    "static_assert", "static_cast", "struct", "switch", "synchronized",
-    "template", "this", "thread_local", "throw", "true", "try", "typedef",
-    "typeid", "typename", "union", "unsigned", "using", "virtual", "void",
-    "volatile", "wchar_t", "while", "xor", "xor_eq",
-    "std", "cin", "cout", "endl", "vector", "string", "map", "set", "pair", "iostream", "bits/stdc++.h"  # Heuristic
-])
+CPP_KEYWORDS = set(
+    [
+        "alignas",
+        "alignof",
+        "and",
+        "and_eq",
+        "asm",
+        "atomic_cancel",
+        "atomic_commit",
+        "atomic_noexcept",
+        "auto",
+        "bitand",
+        "bitor",
+        "bool",
+        "break",
+        "case",
+        "catch",
+        "char",
+        "char8_t",
+        "char16_t",
+        "char32_t",
+        "class",
+        "compl",
+        "concept",
+        "const",
+        "consteval",
+        "constexpr",
+        "constinit",
+        "const_cast",
+        "continue",
+        "co_await",
+        "co_return",
+        "co_yield",
+        "decltype",
+        "default",
+        "delete",
+        "do",
+        "double",
+        "dynamic_cast",
+        "else",
+        "enum",
+        "explicit",
+        "export",
+        "extern",
+        "false",
+        "float",
+        "for",
+        "friend",
+        "goto",
+        "if",
+        "inline",
+        "int",
+        "long",
+        "mutable",
+        "namespace",
+        "new",
+        "noexcept",
+        "not",
+        "not_eq",
+        "nullptr",
+        "operator",
+        "or",
+        "or_eq",
+        "private",
+        "protected",
+        "public",
+        "reflexpr",
+        "register",
+        "reinterpret_cast",
+        "requires",
+        "return",
+        "short",
+        "signed",
+        "sizeof",
+        "static",
+        "static_assert",
+        "static_cast",
+        "struct",
+        "switch",
+        "synchronized",
+        "template",
+        "this",
+        "thread_local",
+        "throw",
+        "true",
+        "try",
+        "typedef",
+        "typeid",
+        "typename",
+        "union",
+        "unsigned",
+        "using",
+        "virtual",
+        "void",
+        "volatile",
+        "wchar_t",
+        "while",
+        "xor",
+        "xor_eq",
+        "std",
+        "cin",
+        "cout",
+        "endl",
+        "vector",
+        "string",
+        "map",
+        "set",
+        "pair",
+        "iostream",
+        "bits/stdc++.h",  # Heuristic
+    ]
+)
 
 
 # %%
@@ -314,7 +413,9 @@ def anonymize_tokens(tokens):
     Returns a list of processed tokens values.
     """
     if not isinstance(tokens, list):
-        logger.warning("anonymize_and_replace_literals received non-list input.")
+        logger.warning(
+            "anonymize_and_replace_literals received non-list input."
+        )
         return []
 
     processed_tokens = []
@@ -324,16 +425,20 @@ def anonymize_tokens(tokens):
     for i, (ttype, value) in enumerate(tokens):
         nxt_value = tokens[i + 1][1] if i + 1 < len(tokens) else None
 
-        if 'Token.Literal.Number' in ttype:
+        if "Token.Literal.Number" in ttype:
             processed_tokens.append("<NUM>")
-        elif 'Token.Literal.String' in ttype:
+        elif "Token.Literal.String" in ttype:
             processed_tokens.append("<STR>")
-        elif 'Token.Name' in ttype:
+        elif "Token.Name" in ttype:
             if value in CPP_KEYWORDS:
                 processed_tokens.append(value)
             else:
                 if value not in identifier_map:
-                    is_heuristic = (nxt_value == '(') or ('Function' in ttype) or ('Class' in ttype)
+                    is_heuristic = (
+                        (nxt_value == "(")
+                        or ("Function" in ttype)
+                        or ("Class" in ttype)
+                    )
                     if is_heuristic:
                         identifier_map[value] = f"<FUNC_{func_cnt}>"
                         func_cnt += 1
@@ -343,7 +448,7 @@ def anonymize_tokens(tokens):
                 processed_tokens.append(identifier_map[value])
         else:
             processed_tokens.append(value)
-    
+
     return processed_tokens
 
 
@@ -352,23 +457,136 @@ def anonymize_tokens(tokens):
 
 # %%
 assert not df.empty, "DataFrame should not be empty before anonymization."
-assert "lexer_tokens" in df.columns, "'lexer_tokens' column should exist before anonymization."
+assert (
+    "lexer_tokens" in df.columns
+), "'lexer_tokens' column should exist before anonymization."
 
 logger.info("Applying anonymization and literal replacement...")
 
-df['anonymized_tokens'] = df['lexer_tokens'].apply(anonymize_tokens)
+df["anonymized_tokens"] = df["lexer_tokens"].apply(anonymize_tokens)
 
 logger.info("Anonymization and literal replacement completed.")
-logger.info("Sample of data with anonymized token values (first 3 records, first 15 tokens):")
+logger.info(
+    "Sample of data with anonymized token values (first 3 records, first 15 tokens):"
+)
 
 for index, row in df.head(3).iterrows():
     logger.info(f"Problem ID: {row.get('problem_id', 'N/A')}")
-    logger.info(f"Original Tokens (first 15): {row.get('lexer_tokens', [])[:15]}")
-    logger.info(f"Anonymized Tokens (first 15): {row.get('anonymized_tokens', [])[:15]}")
+    logger.info(
+        f"Original Tokens (first 15): {row.get('lexer_tokens', [])[:15]}"
+    )
+    logger.info(
+        f"Anonymized Tokens (first 15): {row.get('anonymized_tokens', [])[:15]}"
+    )
     logger.info("-" * 30)
 
 try:
     df.to_pickle(ANONYMIZED_TOKENIZED_FILE)
-    logger.success(f"Anonymized tokenized data saved to {ANONYMIZED_TOKENIZED_FILE}")
+    logger.success(
+        f"Anonymized tokenized data saved to {ANONYMIZED_TOKENIZED_FILE}"
+    )
 except Exception as e:
-    logger.error(f"Error saving anonymized tokenized data to pickle '{ANONYMIZED_TOKENIZED_FILE}': {e}")
+    logger.error(
+        f"Error saving anonymized tokenized data to pickle '{ANONYMIZED_TOKENIZED_FILE}': {e}"
+    )
+
+# %% [markdown]
+# ### Tag Processing (One-Hot Encoding)
+
+# %% [markdown]
+# #### Configuration
+
+# %%
+FINAL_PROCESSED_FILE = os.path.join(
+    PROCESSED_DATA_DIR, "final_processed_data.pkl"
+)
+MLB_FILE = os.path.join(PROCESSED_DATA_DIR, "mlb_encoder.pkl")
+
+# %%
+if not df.empty and "tags" in df.columns:
+    logger.info(
+        f"DataFrame sample before One-Hot Encoding (first {min(3, len(df))} rows):"
+    )
+
+    for i in range(min(3, len(df))):
+        logger.info(
+            f"Row {i} Problem ID: {df['problem_id'].iloc[i]} - Tags List: {df['tags'].iloc[i]}"
+        )
+
+    if not df["tags"].empty and isinstance(df["tags"].iloc[0], str):
+        logger.warning(
+            "Tags_list appears to be strings, attempting ast.literal_eval. Ensure this column was correctly processed earlier."
+        )
+        try:
+            df["tags"] = df["tags"].apply(ast.literal_eval)
+        except Exception as e:
+            logger.error(f"Error converting 'tags' column to list: {e}")
+            df = pd.DataFrame()
+
+else:
+    logger.warning(
+        "DataFrame is empty or 'tags_list' column is missing. Cannot proceed with One-Hot Encoding."
+    )
+
+# %% [markdown]
+# ### Apply MultiLabelBinarizer
+
+# %%
+if not df.empty and "tags" in df.columns:
+    logger.info("Applying MultiLabelBinarizer to 'tags_list'...")
+
+    mlb = MultiLabelBinarizer()
+
+    try:
+        df["tags_for_mlb"] = df["tags"].apply(
+            lambda x: x if isinstance(x, list) else []
+        )
+
+        one_hot_encoded = mlb.fit_transform(df["tags_for_mlb"])
+        df["one_hot_tags"] = [list(row) for row in one_hot_encoded]
+
+        num_unique_tags = len(mlb.classes_)
+        logger.info(
+            f"One-Hot Encoding completed. Number of unique tags: {num_unique_tags}"
+        )
+        logger.info("Sample of One-Hot Encoded data (first 3 records):")
+
+        for idx, row in df.head(3).iterrows():
+            logger.info(f"Problem ID: {row.get('problem_id', 'N/A')}")
+            logger.info(f"Original Tags: {row.get('tags', [])}")
+            logger.info(f"One-Hot Labels: {row.get('one_hot_tags', [])}")
+            logger.info("-" * 30)
+
+        try:
+            joblib.dump(mlb, MLB_FILE)
+            logger.success(f"MultiLabelBinarizer saved to {MLB_FILE}")
+        except Exception as e:
+            logger.error(
+                f"Error saving MultiLabelBinarizer to file '{MLB_FILE}': {e}"
+            )
+
+        if "tags_for_mlb" in df.columns:
+            df_to_save = df.drop(columns=["tags_for_mlb"])
+        else:
+            df_to_save = df
+
+        try:
+            df_to_save.to_pickle(FINAL_PROCESSED_FILE)
+            logger.success(
+                f"Final processed data saved to {FINAL_PROCESSED_FILE}"
+            )
+        except Exception as e:
+            logger.error(
+                f"Error saving final processed data to pickle '{FINAL_PROCESSED_FILE}': {e}"
+            )
+
+    except Exception as e:
+        logger.error(f"An error occurred during MultiLabelBinarization: {e}")
+        logger.error(
+            "Please check the format of the 'tags' column. It should be a Series of lists of strings."
+        )
+
+else:
+    logger.warning(
+        "DataFrame is empty or 'tags' column is missing. Skipping One-Hot Encoding."
+    )
