@@ -74,4 +74,4 @@ for epoch in range(10):
     logger.info(f"          - Val Accuracy: {correct / total:.4f}")
 
 # Save model
-# torch.save(model.state_dict(), "textcnn_model.pt")
+torch.save(model.state_dict(), "textcnn_model.pt")
