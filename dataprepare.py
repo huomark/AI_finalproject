@@ -101,7 +101,7 @@ class CodeTagDataset(Dataset):
 # %%
 full_dataset = CodeTagDataset(df["input_ids"].tolist(), df["label"].tolist())
 
-train_size = 2500
+train_size = 2600
 valid_size = len(full_dataset) - train_size
 train_dataset, valid_dataset = random_split(full_dataset, [train_size, valid_size], generator=torch.Generator().manual_seed(42))
 
