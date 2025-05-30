@@ -102,7 +102,7 @@ class CodeTagDataset(Dataset):
 full_dataset = CodeTagDataset(df["input_ids"].tolist(), df["label"].tolist())
 
 train_size = 2700
-valid_size = 1
+valid_size = 200
 experiment_size = len(full_dataset) - train_size - valid_size
 train_dataset, valid_dataset, experiment_dataset = random_split(full_dataset, [train_size, valid_size, experiment_size], generator=torch.Generator().manual_seed(42))
 
@@ -117,5 +117,5 @@ print(f"Number of unique tags: {NUM_TAGS}")
 
 # %%
 def get_data():
-    return train_dataset, valid_dataset, vocab, tag_to_idx
+    return train_dataset, valid_dataset, experiment_dataset, vocab, tag_to_idx
 # %%
