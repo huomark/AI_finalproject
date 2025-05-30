@@ -12,8 +12,8 @@ logger.add("train.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}
 train_dataset, valid_dataset, vocab, tag_to_idx = get_data()
 NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
-EMBED_DIM = 128
-FILTER_SIZES = [3, 8, 20]
+EMBED_DIM = 256
+FILTER_SIZES = [3, 8, 15]
 NUM_FILTERS = 120
 MAX_SEQ_LEN = 500
 
