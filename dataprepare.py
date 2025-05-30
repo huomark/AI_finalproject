@@ -48,7 +48,7 @@ vocab.update({token: idx + 2 for idx, (token, _) in enumerate(most_common)})
 # ## Encode Tokens
 
 # %%
-MAX_SEQ_LEN = 300  # truncate/pad to fixed length
+MAX_SEQ_LEN = 500  # truncate/pad to fixed length
 
 def encode_tokens(tokens):
     ids = [vocab.get(token, vocab[UNK_TOKEN]) for token in tokens]
@@ -101,7 +101,7 @@ class CodeTagDataset(Dataset):
 # %%
 full_dataset = CodeTagDataset(df["input_ids"].tolist(), df["label"].tolist())
 
-train_size = 2600
+train_size = 2700
 valid_size = len(full_dataset) - train_size
 train_dataset, valid_dataset = random_split(full_dataset, [train_size, valid_size], generator=torch.Generator().manual_seed(42))
 
