@@ -604,7 +604,9 @@ else:
 # #### Configuration
 
 # %%
-MODEL_INPUT_DATA_FILE_CODEBERT = os.path.join(PROCESSED_DATA_DIR, "model_input_data_codebert.npz")
+MODEL_INPUT_DATA_FILE_CODEBERT = os.path.join(
+    PROCESSED_DATA_DIR, "model_input_data_codebert.npz"
+)
 CODEBERT_MODEL_NAME = "microsoft/codebert-base"
 MAX_SEQUENCE_LENGTH = 512
 
@@ -613,136 +615,387 @@ VALIDATION_SET_SIZE = 0.15
 RANDOM_STATE = 42  # For reproducibility of splits
 
 # %%
-if not df.empty and "anonymized_tokens" in df.columns and "one_hot_tags" in df.columns:
-    logger.info(f"DataFrame sample before CodeBERT tokenization (first {min(3, len(df))} rows):")
+if (
+    not df.empty
+    and "anonymized_tokens" in df.columns
+    and "one_hot_tags" in df.columns
+):
+    logger.info(
+        f"DataFrame sample before CodeBERT tokenization (first {min(3, len(df))} rows):"
+    )
     for i in range(min(3, len(df))):
         logger.info(f"Row {i} Problem ID: {df['problem_id'].iloc[i]}")
-        logger.info(f"Anonymized Tokens (first 10): {df['anonymized_tokens'].iloc[i][:10]}")
-        logger.info(f"One-Hot Labels (first 10 elements): {df['one_hot_tags'].iloc[i][:10]}")
+        logger.info(
+            f"Anonymized Tokens (first 10): {df['anonymized_tokens'].iloc[i][:10]}"
+        )
+        logger.info(
+            f"One-Hot Labels (first 10 elements): {df['one_hot_tags'].iloc[i][:10]}"
+        )
 else:
-    logger.warning("DataFrame is empty or required columns ('anonymized_token_values', 'one_hot_labels') are missing.")
+    logger.warning(
+        "DataFrame is empty or required columns ('anonymized_token_values', 'one_hot_labels') are missing."
+    )
 
 # %% [markdown]
 # ### Convert Token Lists to Strings and Tokenize with CodeBERT Tokenizer
 
 # %%
-if not df.empty and 'anonymized_tokens' in df.columns:
-    logger.info("Converting anonymized token lists to space-separated strings...") 
-    df['anonymized_code_bert'] = df['anonymized_tokens'].apply(lambda x: ' '.join(x))
+if not df.empty and "anonymized_tokens" in df.columns:
+    logger.info(
+        "Converting anonymized token lists to space-separated strings..."
+    )
+    df["anonymized_code_bert"] = df["anonymized_tokens"].apply(
+        lambda x: " ".join(x)
+    )
 
     logger.info("Initializing CodeBERT tokenizer...")
     try:
         codebert_tokenizer = AutoTokenizer.from_pretrained(CODEBERT_MODEL_NAME)
-        logger.info(f"CodeBERT tokenizer '{CODEBERT_MODEL_NAME}' loaded successfully.")
+        logger.info(
+            f"CodeBERT tokenizer '{CODEBERT_MODEL_NAME}' loaded successfully."
+        )
     except Exception as e:
         logger.error(f"Failed to load CodeBERT tokenizer: {e}")
         codebert_tokenizer = None
-    
+
     if codebert_tokenizer:
-        logger.info(f"Tokenizing 'anonymized_code_string_for_bert' with CodeBERT tokenizer (max_length={MAX_SEQUENCE_LENGTH})...")
+        logger.info(
+            f"Tokenizing 'anonymized_code_string_for_bert' with CodeBERT tokenizer (max_length={MAX_SEQUENCE_LENGTH})..."
+        )
 
         all_input_ids = []
         all_attention_masks = []
-        sequences_to_tokenize = df['anonymized_code_bert'].tolist()
+        sequences_to_tokenize = df["anonymized_code_bert"].tolist()
 
         for i, code in enumerate(sequences_to_tokenize):
             if i % 100 == 0 and i > 0:
-                logger.info(f"Tokenizing sample {i} / {len(sequences_to_tokenize)}...")
-            
+                logger.info(
+                    f"Tokenizing sample {i} / {len(sequences_to_tokenize)}..."
+                )
+
             try:
                 encoded_dict = codebert_tokenizer.encode_plus(
                     code,
                     add_special_tokens=True,
                     max_length=MAX_SEQUENCE_LENGTH,
-                    padding='max_length',
+                    padding="max_length",
                     truncation=True,
                     return_attention_mask=True,
-                    return_tensors='np'
+                    return_tensors="np",
                 )
-                all_input_ids.append(encoded_dict['input_ids'][0])
-                all_attention_masks.append(encoded_dict['attention_mask'][0])
+                all_input_ids.append(encoded_dict["input_ids"][0])
+                all_attention_masks.append(encoded_dict["attention_mask"][0])
 
             except Exception as e:
-                logger.error(f"Error tokenizing code for problem_id {df['problem_id'].iloc[i]}: {e}")
+                logger.error(
+                    f"Error tokenizing code for problem_id {df['problem_id'].iloc[i]}: {e}"
+                )
                 # Placeholders for failed tokenization
                 all_input_ids.append(np.zeros(MAX_SEQUENCE_LENGTH, dtype=int))
-                all_attention_masks.append(np.zeros(MAX_SEQUENCE_LENGTH, dtype=int))
-            
+                all_attention_masks.append(
+                    np.zeros(MAX_SEQUENCE_LENGTH, dtype=int)
+                )
+
         X_input_ids = np.array(all_input_ids)
         X_attention_mask = np.array(all_attention_masks)
 
         try:
-            y_labels = np.array(df['one_hot_tags'].tolist(), dtype=np.int32)
+            y_labels = np.array(df["one_hot_tags"].tolist(), dtype=np.int32)
             logger.info(f"Shape of X_input_ids: {X_input_ids.shape}")
             logger.info(f"Shape of X_attention_mask: {X_attention_mask.shape}")
             logger.info(f"Shape of y_labels: {y_labels.shape}")
 
             if X_input_ids.shape[0] != y_labels.shape[0]:
-                logger.error("Mismatch between number of input IDs and labels. Check your data.")
+                logger.error(
+                    "Mismatch between number of input IDs and labels. Check your data."
+                )
             else:
                 logger.info("CodeBERT tokenization complete and shapes match.")
-        
+
         except Exception as e:
-            logger.error(f"Error converting 'one_hot_labels' to NumPy array or shape mismatch: {e}")
+            logger.error(
+                f"Error converting 'one_hot_labels' to NumPy array or shape mismatch: {e}"
+            )
             # Set to None to prevent saving bad data
             X_input_ids, X_attention_mask, y_labels = None, None, None
 
 else:
-    logger.warning("DataFrame is empty or 'anonymized_token' column is missing. Skipping CodeBERT tokenization.")
+    logger.warning(
+        "DataFrame is empty or 'anonymized_token' column is missing. Skipping CodeBERT tokenization."
+    )
     X_input_ids, X_attention_mask, y_labels = None, None, None
 
 # %% [markdown]
 # #### Split Data into Training, Validation, and Test Sets
 
 # %%
-if X_input_ids is not None and X_attention_mask is not None and y_labels is not None:
+if (
+    X_input_ids is not None
+    and X_attention_mask is not None
+    and y_labels is not None
+):
     logger.info("Splitting data into training, validation, and test sets...")
 
     # Separate out the test set
-    train_val_input_ids, X_test_input_ids, \
-    train_val_attention_mask, X_test_attention_mask, \
-    train_val_labels, y_test = train_test_split(
+    (
+        train_val_input_ids,
+        X_test_input_ids,
+        train_val_attention_mask,
+        X_test_attention_mask,
+        train_val_labels,
+        y_test,
+    ) = train_test_split(
         X_input_ids,
         X_attention_mask,
         y_labels,
         test_size=TEST_SET_SIZE,
         random_state=RANDOM_STATE,
-        stratify=None
+        stratify=None,
     )
 
     relative_val_size = VALIDATION_SET_SIZE / (1 - TEST_SET_SIZE)
 
-
-    X_train_input_ids, X_val_input_ids, \
-    X_train_attention_mask, X_val_attention_mask, \
-    y_train, y_val = train_test_split(
+    (
+        X_train_input_ids,
+        X_val_input_ids,
+        X_train_attention_mask,
+        X_val_attention_mask,
+        y_train,
+        y_val,
+    ) = train_test_split(
         train_val_input_ids,
         train_val_attention_mask,
         train_val_labels,
         test_size=relative_val_size,
         random_state=RANDOM_STATE,
-        stratify=None
+        stratify=None,
     )
 
-    logger.info(f"Training set shapes: IDs {X_train_input_ids.shape}, Masks {X_train_attention_mask.shape}, Labels {y_train.shape}")
-    logger.info(f"Validation set shapes: IDs {X_val_input_ids.shape}, Masks {X_val_attention_mask.shape}, Labels {y_val.shape}")
-    logger.info(f"Test set shapes: IDs {X_test_input_ids.shape}, Masks {X_test_attention_mask.shape}, Labels {y_test.shape}")
+    logger.info(
+        f"Training set shapes: IDs {X_train_input_ids.shape}, Masks {X_train_attention_mask.shape}, Labels {y_train.shape}"
+    )
+    logger.info(
+        f"Validation set shapes: IDs {X_val_input_ids.shape}, Masks {X_val_attention_mask.shape}, Labels {y_val.shape}"
+    )
+    logger.info(
+        f"Test set shapes: IDs {X_test_input_ids.shape}, Masks {X_test_attention_mask.shape}, Labels {y_test.shape}"
+    )
 
     try:
-        np.savez_compressed(MODEL_INPUT_DATA_FILE_CODEBERT,
-                            X_train_input_ids=X_train_input_ids,
-                            X_train_attention_mask=X_train_attention_mask,
-                            y_train=y_train,
-                            X_val_input_ids=X_val_input_ids,
-                            X_val_attention_mask=X_val_attention_mask,
-                            y_val=y_val,
-                            X_test_input_ids=X_test_input_ids,
-                            X_test_attention_mask=X_test_attention_mask,
-                            y_test=y_test)
-        logger.success(f"Model input datasets saved to: {MODEL_INPUT_DATA_FILE_CODEBERT}")
-    
+        np.savez_compressed(
+            MODEL_INPUT_DATA_FILE_CODEBERT,
+            X_train_input_ids=X_train_input_ids,
+            X_train_attention_mask=X_train_attention_mask,
+            y_train=y_train,
+            X_val_input_ids=X_val_input_ids,
+            X_val_attention_mask=X_val_attention_mask,
+            y_val=y_val,
+            X_test_input_ids=X_test_input_ids,
+            X_test_attention_mask=X_test_attention_mask,
+            y_test=y_test,
+        )
+        logger.success(
+            f"Model input datasets saved to: {MODEL_INPUT_DATA_FILE_CODEBERT}"
+        )
+
     except Exception as e:
-        logger.error(f"Error saving model input data to '{MODEL_INPUT_DATA_FILE_CODEBERT}': {e}")
+        logger.error(
+            f"Error saving model input data to '{MODEL_INPUT_DATA_FILE_CODEBERT}': {e}"
+        )
 
 else:
-    logger.error("Tokenized inputs (X_input_ids, X_attention_mask) or labels (y_labels) are None. Cannot split or save data.")
+    logger.error(
+        "Tokenized inputs (X_input_ids, X_attention_mask) or labels (y_labels) are None. Cannot split or save data."
+    )
+
+# %% [markdown]
+# ## Model Training
+
+# %% [markdown]
+# ### Setup
+
+# %%
+from transformers import TFAutoModelForSequenceClassification
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.losses import BinaryCrossentropy
+from tensorflow.keras.metrics import BinaryAccuracy, AUC
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+
+# %%
+MODEL_DIR = os.path.join(PROJECT_ROOT, "models")
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+LEARNING_RATE = 5e-5
+EPOCHS = 10
+BATCH_SIZE = 16
+BEST_MODE_PATH = os.path.join(MODEL_DIR, "best_codebert_model.h5")
+
+# %%
+if os.path.exists(MLB_FILE):
+    mlb = joblib.load(MLB_FILE)
+    num_labels = len(mlb.classes_)
+    logger.info(
+        f"Loaded MultiLabelBinarizer. Number of unique labels: {num_labels}"
+    )
+    logger.info(f"Classes: {mlb.classes_}")
+else:
+    logger.error(
+        f"MultiLabelBinarizer file not found at {MLB_FILE}. Cannot determine number of labels."
+    )
+    num_labels = -1
+
+# %% [markdown]
+# ### Load the preprocessed Dataset
+
+# %%
+if num_labels > 0 and os.path.exists(MODEL_INPUT_DATA_FILE_CODEBERT):
+    logger.info(
+        f"Loading model input datasets from {MODEL_INPUT_DATA_FILE_CODEBERT}..."
+    )
+    loaded_data = np.load(MODEL_INPUT_DATA_FILE_CODEBERT)
+
+    X_train_input_ids = loaded_data["X_train_input_ids"]
+    X_train_attention_mask = loaded_data["X_train_attention_mask"]
+    y_train = loaded_data["y_train"]
+
+    X_val_input_ids = loaded_data["X_val_input_ids"]
+    X_val_attention_mask = loaded_data["X_val_attention_mask"]
+    y_val = loaded_data["y_val"]
+
+    logger.info("Datasets loaded successfully.")
+    logger.info(
+        f"Training set shapes: IDs {X_train_input_ids.shape}, Masks {X_train_attention_mask.shape}, Labels {y_train.shape}"
+    )
+    logger.info(
+        f"Validation set shapes: IDs {X_val_input_ids.shape}, Masks {X_val_attention_mask.shape}, Labels {y_val.shape}"
+    )
+
+    train_dataset = (
+        tf.data.Dataset.from_tensor_slices(
+            (
+                {
+                    "input_ids": X_train_input_ids,
+                    "attention_mask": X_train_attention_mask,
+                },
+                y_train,
+            )
+        )
+        .shuffle(len(X_train_input_ids))
+        .batch(BATCH_SIZE)
+    )
+
+    val_dataset = tf.data.Dataset.from_tensor_slices(
+        (
+            {
+                "input_ids": X_val_input_ids,
+                "attention_mask": X_val_attention_mask,
+            },
+            y_val,
+        )
+    ).batch(BATCH_SIZE)
+
+    logger.info("TensorFlow Datasets prepared.")
+
+else:
+    logger.error(
+        "Could not load datasets or num_labels is invalid. Please check previous steps."
+    )
+    train_dataset, val_dataset = None, None
+    X_train_input_ids = np.array([])
+
+# %% [markdown]
+# ### Build/Compile the CodeBERT Model
+
+# %%
+if num_labels > 0 and train_dataset is not None:
+    logger.info(
+        f"Building TFAutoModelForSequenceClassification with CodeBERT: '{CODEBERT_MODEL_NAME}'..."
+    )
+
+    try:
+        model = TFAutoModelForSequenceClassification.from_pretrained(
+            CODEBERT_MODEL_NAME,
+            num_labels=num_labels,
+            problem_type="multi_label_classification",
+        )
+
+        optimizer = Adam(learning_rate=LEARNING_RATE)
+
+        loss_fn = BinaryCrossentropy(from_logits=True)
+
+        metrics_list = [
+            BinaryAccuracy(name="binary_accuracy"),
+            AUC(
+                name="auc_roc",
+                curve="ROC",
+                multi_label=True,
+                num_labels=num_labels,
+            ),  # ROC AUC
+            AUC(
+                name="auc_pr",
+                curve="PR",
+                multi_label=True,
+                num_labels=num_labels,
+            ),  # Precision-Recall AUC
+        ]
+
+        model.compile(optimizer=optimizer, loss=loss_fn, metrics=metrics_list)
+
+        model.summary()
+        logger.info("CodeBERT model built and compiled successfully.")
+
+    except Exception as e:
+        logger.error(
+            f"Error building TFAutoModelForSequenceClassification: {e}"
+        )
+        model = None
+
+else:
+    logger.error(
+        "Cannot build model due to issues in data loading or num_labels."
+    )
+    model = None
+
+# %% [markdown]
+# ### Train the Model
+
+# %%
+if (
+    model is not None
+    and train_dataset is not None
+    and val_dataset is not None
+    and len(X_train_input_ids) > 0
+):
+    logger.info("Starting model training...")
+
+    early_stopping = EarlyStopping(
+        monitor="val_auc_roc", mode="max", patience=3, restore_best_weights=True
+    )
+
+    model_checkpoint = ModelCheckpoint(
+        BEST_MODE_PATH,
+        monitor="val_auc_roc",
+        mode="max",
+        save_best_only=True,
+        save_weights_only=False,
+    )
+
+    callbacks_list = [early_stopping, model_checkpoint]
+
+    try:
+        history = model.fit(
+            train_dataset,
+            validation_data=val_dataset,
+            epochs=EPOCHS,
+            callbacks=callbacks_list,
+        )
+
+        logger.success(
+            f"Model training finished. Best model saved to {BEST_MODEL_PATH} (if validation improved)."
+        )
+
+    except Exception as e:
+        logger.error(f"An error occurred during model training: {e}")
+
+else:
+    logger.error("Model or datasets are not available. Skipping training.")
