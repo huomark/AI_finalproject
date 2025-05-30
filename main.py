@@ -597,6 +597,79 @@ else:
         "DataFrame is empty or 'tags' column is missing. Skipping One-Hot Encoding."
     )
 
+# %%
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+if "df" not in locals() or df.empty or "anonymized_tokens" not in df.columns:
+    if os.path.exists(FINAL_PROCESSED_FILE):
+        logger.info(
+            f"Loading DataFrame with anonymized tokens from {FINAL_PROCESSED_FILE}..."
+        )
+        df = pd.read_pickle(FINAL_PROCESSED_FILE)
+        logger.info(f"Successfully loaded data with {len(df)} records.")
+    else:
+        logger.error(
+            f"File {FINAL_PROCESSED_FILE} not found. Cannot analyze sequence lengths."
+        )
+        df = pd.DataFrame()
+else:
+    logger.info(
+        "DataFrame 'df' with 'anonymized_tokens' already exists. Proceeding with length analysis."
+    )
+
+if not df.empty and "anonymized_tokens" in df.columns:
+    # Calculate the length of each token sequence
+    df["token_sequence_length"] = df["anonymized_tokens"].apply(len)
+
+    logger.info("\n--- Sequence Length Statistics ---")
+    logger.info(f"Min length: {df['token_sequence_length'].min()}")
+    logger.info(f"Max length: {df['token_sequence_length'].max()}")
+    logger.info(f"Mean length: {df['token_sequence_length'].mean():.2f}")
+    logger.info(f"Median length: {df['token_sequence_length'].median()}")
+
+    # --- Percentile Analysis ---
+    percentiles_to_check = [
+        0.50,
+        0.75,
+        0.80,
+        0.85,
+        0.90,
+        0.95,
+        0.98,
+        0.99,
+        1.00,
+    ]
+    logger.info("\n--- Percentile Distribution of Sequence Lengths ---")
+    for p in percentiles_to_check:
+        logger.info(
+            f"{p*100:.0f}th percentile: {df['token_sequence_length'].quantile(p):.0f} tokens"
+        )
+
+    # --- Plotting the distribution (optional but highly recommended) ---
+    plt.figure(figsize=(12, 6))
+    sns.histplot(df["token_sequence_length"], bins=50, kde=False)
+    plt.title("Distribution of Token Sequence Lengths")
+    plt.xlabel("Sequence Length (Number of Tokens)")
+    plt.ylabel("Frequency")
+    plt.grid(True)
+    # You might want to set x-axis limits if there are extreme outliers making the plot hard to read
+    # For example, limit to the 99th percentile to see the main distribution better
+    # plt.xlim(0, df['token_sequence_length'].quantile(0.99) * 1.1) # Add 10% margin
+    plt.show()
+
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(x=df["token_sequence_length"])
+    plt.title("Box Plot of Token Sequence Lengths")
+    plt.xlabel("Sequence Length (Number of Tokens)")
+    plt.grid(True)
+    plt.show()
+
+else:
+    logger.warning(
+        "DataFrame is empty or 'anonymized_token' column is missing. Cannot analyze sequence lengths."
+    )
+
 # %% [markdown]
 # ## Final Dataset Preparation (for CodeBERT ...)
 
@@ -828,7 +901,9 @@ os.makedirs(MODEL_DIR, exist_ok=True)
 LEARNING_RATE = 5e-5
 EPOCHS = 10
 BATCH_SIZE = 16
-BEST_MODE_PATH = os.path.join(MODEL_DIR, "best_codebert_model.h5")
+BEST_MODEL_PATH = os.path.join(
+    MODEL_DIR, "codebert_multi_label_classifier_best_tf_format"
+)
 
 # %%
 if os.path.exists(MLB_FILE):
@@ -973,11 +1048,12 @@ if (
     )
 
     model_checkpoint = ModelCheckpoint(
-        BEST_MODE_PATH,
+        BEST_MODEL_PATH,
         monitor="val_auc_roc",
         mode="max",
         save_best_only=True,
         save_weights_only=False,
+        save_format="tf",
     )
 
     callbacks_list = [early_stopping, model_checkpoint]
@@ -999,3 +1075,467 @@ if (
 
 else:
     logger.error("Model or datasets are not available. Skipping training.")
+
+
+# %% [markdown]
+# ## Model Evaluation
+
+# %%
+from sklearn.metrics import (
+    jaccard_score,
+    f1_score,
+    multilabel_confusion_matrix,
+    classification_report,
+    roc_auc_score,
+)
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import precision_recall_curve, average_precision_score
+import tensorflow as tf
+
+# %% [markdown]
+# ### Load Best Model and Test Data
+
+# %%
+if os.path.exists(BEST_MODEL_PATH):
+    logger.info(f"Loading best model from {BEST_MODEL_PATH}...")
+    try:
+        best_model = tf.keras.models.load_model(BEST_MODEL_PATH)
+        logger.success("Best model loaded successfully.")
+    except Exception as e:
+        logger.error(f"Error loading best model: {e}")
+        best_model = None
+else:
+    logger.warning(
+        f"Best model file not found at {BEST_MODEL_PATH}. Using current model for evaluation."
+    )
+    best_model = model if "model" in locals() else None
+
+# Load test data
+if os.path.exists(MODEL_INPUT_DATA_FILE_CODEBERT):
+    logger.info("Loading test dataset...")
+    loaded_data = np.load(MODEL_INPUT_DATA_FILE_CODEBERT)
+
+    X_test_input_ids = loaded_data["X_test_input_ids"]
+    X_test_attention_mask = loaded_data["X_test_attention_mask"]
+    y_test = loaded_data["y_test"]
+
+    test_dataset = tf.data.Dataset.from_tensor_slices(
+        (
+            {
+                "input_ids": X_test_input_ids,
+                "attention_mask": X_test_attention_mask,
+            },
+            y_test,
+        )
+    ).batch(BATCH_SIZE)
+
+    logger.info(f"Test dataset loaded. Shape: {X_test_input_ids.shape}")
+else:
+    logger.error("Test dataset file not found. Cannot perform evaluation.")
+    test_dataset = None
+
+# %% [markdown]
+# ### Make Predictions on Test Set
+
+# %%
+if best_model is not None and test_dataset is not None:
+    logger.info("Making predictions on test set...")
+
+    # Get predictions
+    try:
+        y_pred_logits = best_model.predict(test_dataset)
+
+        # Convert logits to probabilities using sigmoid
+        y_pred_proba = tf.nn.sigmoid(y_pred_logits).numpy()
+
+        # Convert probabilities to binary predictions (threshold = 0.5)
+        y_pred_binary = (y_pred_proba > 0.5).astype(int)
+
+        logger.info(f"Predictions completed. Shape: {y_pred_proba.shape}")
+        logger.info(f"Binary predictions shape: {y_pred_binary.shape}")
+
+    except Exception as e:
+        logger.error(f"Error during prediction: {e}")
+        y_pred_proba = None
+        y_pred_binary = None
+else:
+    logger.error("Model or test dataset not available. Skipping prediction.")
+    y_pred_proba = None
+    y_pred_binary = None
+
+# %% [markdown]
+# ### Calculate Evaluation Metrics
+
+# %%
+if y_pred_binary is not None and y_test is not None:
+    logger.info("Calculating evaluation metrics...")
+
+    # Calculate various metrics
+    try:
+        # Jaccard Score (IoU)
+        jaccard_micro = jaccard_score(y_test, y_pred_binary, average="micro")
+        jaccard_macro = jaccard_score(y_test, y_pred_binary, average="macro")
+        jaccard_weighted = jaccard_score(
+            y_test, y_pred_binary, average="weighted"
+        )
+
+        # F1 Scores
+        f1_micro = f1_score(y_test, y_pred_binary, average="micro")
+        f1_macro = f1_score(y_test, y_pred_binary, average="macro")
+        f1_weighted = f1_score(y_test, y_pred_binary, average="weighted")
+
+        # ROC AUC Score
+        try:
+            roc_auc_micro = roc_auc_score(y_test, y_pred_proba, average="micro")
+            roc_auc_macro = roc_auc_score(y_test, y_pred_proba, average="macro")
+            roc_auc_weighted = roc_auc_score(
+                y_test, y_pred_proba, average="weighted"
+            )
+        except Exception as e:
+            logger.warning(f"Could not calculate ROC AUC: {e}")
+            roc_auc_micro = roc_auc_macro = roc_auc_weighted = None
+
+        # Average Precision Score
+        try:
+            avg_precision_micro = average_precision_score(
+                y_test, y_pred_proba, average="micro"
+            )
+            avg_precision_macro = average_precision_score(
+                y_test, y_pred_proba, average="macro"
+            )
+            avg_precision_weighted = average_precision_score(
+                y_test, y_pred_proba, average="weighted"
+            )
+        except Exception as e:
+            logger.warning(f"Could not calculate Average Precision: {e}")
+            avg_precision_micro = avg_precision_macro = (
+                avg_precision_weighted
+            ) = None
+
+        # Print evaluation results
+        logger.info("\n" + "=" * 60)
+        logger.info("MODEL EVALUATION RESULTS")
+        logger.info("=" * 60)
+
+        logger.info(f"\nJaccard Score (IoU):")
+        logger.info(f"  - Micro Average: {jaccard_micro:.4f}")
+        logger.info(f"  - Macro Average: {jaccard_macro:.4f}")
+        logger.info(f"  - Weighted Average: {jaccard_weighted:.4f}")
+
+        logger.info(f"\nF1 Score:")
+        logger.info(f"  - Micro Average: {f1_micro:.4f}")
+        logger.info(f"  - Macro Average: {f1_macro:.4f}")
+        logger.info(f"  - Weighted Average: {f1_weighted:.4f}")
+
+        if roc_auc_micro is not None:
+            logger.info(f"\nROC AUC Score:")
+            logger.info(f"  - Micro Average: {roc_auc_micro:.4f}")
+            logger.info(f"  - Macro Average: {roc_auc_macro:.4f}")
+            logger.info(f"  - Weighted Average: {roc_auc_weighted:.4f}")
+
+        if avg_precision_micro is not None:
+            logger.info(f"\nAverage Precision Score:")
+            logger.info(f"  - Micro Average: {avg_precision_micro:.4f}")
+            logger.info(f"  - Macro Average: {avg_precision_macro:.4f}")
+            logger.info(f"  - Weighted Average: {avg_precision_weighted:.4f}")
+
+    except Exception as e:
+        logger.error(f"Error calculating evaluation metrics: {e}")
+
+# %% [markdown]
+# ### Per-Label Analysis
+
+# %%
+if y_pred_binary is not None and y_test is not None and "mlb" in locals():
+    logger.info("\nCalculating per-label metrics...")
+
+    try:
+        # Calculate per-label F1 scores
+        f1_per_label = f1_score(y_test, y_pred_binary, average=None)
+
+        # Calculate per-label precision and recall
+        from sklearn.metrics import precision_score, recall_score
+
+        precision_per_label = precision_score(
+            y_test, y_pred_binary, average=None, zero_division=0
+        )
+        recall_per_label = recall_score(
+            y_test, y_pred_binary, average=None, zero_division=0
+        )
+
+        # Create a DataFrame for better visualization
+        per_label_metrics = pd.DataFrame(
+            {
+                "Tag": mlb.classes_,
+                "F1_Score": f1_per_label,
+                "Precision": precision_per_label,
+                "Recall": recall_per_label,
+                "Support": y_test.sum(
+                    axis=0
+                ),  # Number of true positives for each label
+            }
+        )
+
+        # Sort by F1 score for better readability
+        per_label_metrics = per_label_metrics.sort_values(
+            "F1_Score", ascending=False
+        )
+
+        logger.info("\nTop 10 Tags by F1 Score:")
+        logger.info(per_label_metrics.head(10).to_string(index=False))
+
+        logger.info("\nBottom 10 Tags by F1 Score:")
+        logger.info(per_label_metrics.tail(10).to_string(index=False))
+
+        # Save detailed results
+        results_file = os.path.join(
+            PROCESSED_DATA_DIR, "evaluation_results.csv"
+        )
+        per_label_metrics.to_csv(results_file, index=False)
+        logger.info(f"Detailed per-label results saved to {results_file}")
+
+    except Exception as e:
+        logger.error(f"Error in per-label analysis: {e}")
+
+# %% [markdown]
+# ### Visualization of Results
+
+# %%
+if y_pred_binary is not None and y_test is not None:
+    # 1. Confusion Matrix Heatmap for top tags
+    try:
+        # Select top 10 most frequent tags for confusion matrix visualization
+        if "per_label_metrics" in locals():
+            top_tags_indices = per_label_metrics.nlargest(10, "Support").index[
+                :10
+            ]
+            top_tag_names = [mlb.classes_[i] for i in top_tags_indices]
+
+            fig, axes = plt.subplots(2, 5, figsize=(20, 8))
+            axes = axes.flatten()
+
+            for idx, tag_idx in enumerate(top_tags_indices):
+                cm = multilabel_confusion_matrix(y_test, y_pred_binary)[tag_idx]
+                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=axes[idx])
+                axes[idx].set_title(f"Tag: {mlb.classes_[tag_idx]}")
+                axes[idx].set_xlabel("Predicted")
+                axes[idx].set_ylabel("Actual")
+
+            plt.tight_layout()
+            plt.suptitle(
+                "Confusion Matrices for Top 10 Most Frequent Tags", y=1.02
+            )
+            plt.show()
+
+    except Exception as e:
+        logger.warning(f"Could not create confusion matrix visualization: {e}")
+
+    # 2. F1 Score Distribution
+    try:
+        if "f1_per_label" in locals():
+            plt.figure(figsize=(12, 6))
+            plt.hist(
+                f1_per_label,
+                bins=30,
+                alpha=0.7,
+                color="skyblue",
+                edgecolor="black",
+            )
+            plt.axvline(
+                f1_per_label.mean(),
+                color="red",
+                linestyle="--",
+                label=f"Mean F1: {f1_per_label.mean():.3f}",
+            )
+            plt.xlabel("F1 Score")
+            plt.ylabel("Number of Tags")
+            plt.title("Distribution of F1 Scores Across All Tags")
+            plt.legend()
+            plt.grid(True, alpha=0.3)
+            plt.show()
+
+    except Exception as e:
+        logger.warning(f"Could not create F1 score distribution plot: {e}")
+
+    # 3. Prediction Probability Distribution
+    try:
+        plt.figure(figsize=(12, 6))
+        plt.hist(
+            y_pred_proba.flatten(),
+            bins=50,
+            alpha=0.7,
+            color="lightgreen",
+            edgecolor="black",
+        )
+        plt.axvline(
+            0.5, color="red", linestyle="--", label="Decision Threshold (0.5)"
+        )
+        plt.xlabel("Prediction Probability")
+        plt.ylabel("Frequency")
+        plt.title("Distribution of Prediction Probabilities")
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.show()
+
+    except Exception as e:
+        logger.warning(f"Could not create probability distribution plot: {e}")
+
+    # 4. Support vs Performance Analysis
+    try:
+        if "per_label_metrics" in locals():
+            plt.figure(figsize=(12, 8))
+
+            # Create scatter plot
+            scatter = plt.scatter(
+                per_label_metrics["Support"],
+                per_label_metrics["F1_Score"],
+                alpha=0.6,
+                s=60,
+                c=per_label_metrics["F1_Score"],
+                cmap="viridis",
+            )
+
+            plt.xlabel("Support (Number of True Instances)")
+            plt.ylabel("F1 Score")
+            plt.title("F1 Score vs Support for Each Tag")
+            plt.colorbar(scatter, label="F1 Score")
+            plt.grid(True, alpha=0.3)
+
+            # Add trend line
+            z = np.polyfit(
+                per_label_metrics["Support"], per_label_metrics["F1_Score"], 1
+            )
+            p = np.poly1d(z)
+            plt.plot(
+                per_label_metrics["Support"],
+                p(per_label_metrics["Support"]),
+                "r--",
+                alpha=0.8,
+                label="Trend Line",
+            )
+            plt.legend()
+            plt.show()
+
+    except Exception as e:
+        logger.warning(f"Could not create support vs performance plot: {e}")
+
+# %% [markdown]
+# ### Sample Predictions Analysis
+
+# %%
+if y_pred_binary is not None and y_test is not None and "mlb" in locals():
+    logger.info("\nAnalyzing sample predictions...")
+
+    try:
+        # Select a few samples for detailed analysis
+        sample_indices = np.random.choice(
+            len(y_test), size=min(5, len(y_test)), replace=False
+        )
+
+        for i, idx in enumerate(sample_indices):
+            logger.info(f"\n--- Sample {i+1} (Index: {idx}) ---")
+
+            # True labels
+            true_labels = [
+                mlb.classes_[j]
+                for j in range(len(mlb.classes_))
+                if y_test[idx][j] == 1
+            ]
+
+            # Predicted labels
+            pred_labels = [
+                mlb.classes_[j]
+                for j in range(len(mlb.classes_))
+                if y_pred_binary[idx][j] == 1
+            ]
+
+            # Top predicted probabilities
+            top_prob_indices = np.argsort(y_pred_proba[idx])[::-1][:10]
+            top_probs = [
+                (mlb.classes_[j], y_pred_proba[idx][j])
+                for j in top_prob_indices
+            ]
+
+            logger.info(f"True Labels: {true_labels}")
+            logger.info(f"Predicted Labels: {pred_labels}")
+            logger.info(f"Top 10 Prediction Probabilities:")
+            for label, prob in top_probs:
+                logger.info(f"  {label}: {prob:.4f}")
+
+            # Calculate sample-level metrics
+            sample_intersection = set(true_labels) & set(pred_labels)
+            sample_union = set(true_labels) | set(pred_labels)
+            sample_jaccard = (
+                len(sample_intersection) / len(sample_union)
+                if sample_union
+                else 0
+            )
+
+            logger.info(f"Sample Jaccard Score: {sample_jaccard:.4f}")
+            logger.info(f"Correct Predictions: {len(sample_intersection)}")
+            logger.info(f"Total True Labels: {len(true_labels)}")
+            logger.info(f"Total Predicted Labels: {len(pred_labels)}")
+
+    except Exception as e:
+        logger.error(f"Error in sample predictions analysis: {e}")
+
+# %% [markdown]
+# ### Model Performance Summary
+
+# %%
+logger.info("\n" + "=" * 60)
+logger.info("MODEL PERFORMANCE SUMMARY")
+logger.info("=" * 60)
+
+summary_metrics = {
+    "Dataset Size": len(y_test) if y_test is not None else "N/A",
+    "Number of Labels": len(mlb.classes_) if "mlb" in locals() else "N/A",
+    "Average Labels per Sample": (
+        np.mean(y_test.sum(axis=1)) if y_test is not None else "N/A"
+    ),
+}
+
+if "jaccard_micro" in locals():
+    summary_metrics.update(
+        {
+            "Jaccard Score (Micro)": f"{jaccard_micro:.4f}",
+            "F1 Score (Micro)": f"{f1_micro:.4f}",
+            "F1 Score (Macro)": f"{f1_macro:.4f}",
+        }
+    )
+
+if "roc_auc_micro" in locals() and roc_auc_micro is not None:
+    summary_metrics.update(
+        {
+            "ROC AUC (Micro)": f"{roc_auc_micro:.4f}",
+            "ROC AUC (Macro)": f"{roc_auc_macro:.4f}",
+        }
+    )
+
+for key, value in summary_metrics.items():
+    logger.info(f"{key}: {value}")
+
+logger.info("=" * 60)
+
+# Save evaluation summary
+if "summary_metrics" in locals():
+    summary_file = os.path.join(PROCESSED_DATA_DIR, "evaluation_summary.json")
+    import json
+
+    # Convert numpy types to native Python types for JSON serialization
+    json_summary = {}
+    for key, value in summary_metrics.items():
+        if isinstance(value, (np.integer, np.floating)):
+            json_summary[key] = value.item()
+        else:
+            json_summary[key] = value
+
+    try:
+        with open(summary_file, "w") as f:
+            json.dump(json_summary, f, indent=2)
+        logger.info(f"Evaluation summary saved to {summary_file}")
+    except Exception as e:
+        logger.warning(f"Could not save evaluation summary: {e}")
+
+logger.info("Model evaluation completed!")
