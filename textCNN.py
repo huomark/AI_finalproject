@@ -51,8 +51,8 @@ optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 # ==== Training loop ====
 for epoch in range(20):
-    print("debug")
     model.train()
+    print("debug")
     total_loss = 0
     for inputs, labels in train_loader:
         inputs, labels = inputs.to(device), labels.to(device)
