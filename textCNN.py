@@ -16,7 +16,7 @@ VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
 FILTER_SIZES = [3, 8, 15]
 NUM_FILTERS = 120
-MAX_SEQ_LEN = 500
+MAX_SEQ_LEN = 300
 
 # ==== Define TextCNN ====
 class TextCNN(nn.Module):
@@ -52,7 +52,6 @@ optimizer = optim.Adam(model.parameters(), lr=1e-3)
 # ==== Training loop ====
 for epoch in range(20):
     model.train()
-    print("debug")
     total_loss = 0
     for inputs, labels in train_loader:
         inputs, labels = inputs.to(device), labels.to(device)
