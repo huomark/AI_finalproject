@@ -9,7 +9,7 @@ from loguru import logger
 logger.add("train.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
 
 # ==== Load data ====
-train_dataset, valid_dataset, experiment_dataset, vocab, tag_to_idx = get_data()
+train_dataset, valid_dataset, vocab, tag_to_idx = get_data()
 NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
@@ -43,7 +43,6 @@ model = TextCNN(VOCAB_SIZE, EMBED_DIM, NUM_CLASSES, FILTER_SIZES, NUM_FILTERS).t
 
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=128)
-experiment_loader = DataLoader(experiment_dataset, batch_size=128)
 
 criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
@@ -67,7 +66,7 @@ for epoch in range(20):
     model.eval()
     correct, total = 0, 0
     with torch.no_grad():
-        for inputs, labels in valid_loader:
+        for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             preds = torch.sigmoid(outputs) > 0.5
@@ -81,7 +80,7 @@ all_preds = []
 all_labels = []
 
 with torch.no_grad():
-    for inputs, labels in experiment_loader:
+    for inputs, labels in valid_loader:
         inputs = inputs.to(device)
         labels = labels.to(device)
         outputs = model(inputs)
