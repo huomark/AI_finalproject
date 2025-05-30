@@ -1,0 +1,14 @@
+2025-05-30 13:25:54 | INFO | Epoch 1 - Train Loss: 0.4429
+2025-05-30 13:25:55 | INFO |           - Val Accuracy: 0.8301
+2025-05-30 13:26:06 | INFO | Epoch 2 - Train Loss: 0.3943
+2025-05-30 13:26:06 | INFO |           - Val Accuracy: 0.8308
+2025-05-30 13:26:17 | INFO | Epoch 3 - Train Loss: 0.3801
+2025-05-30 13:26:18 | INFO |           - Val Accuracy: 0.8324
+2025-05-30 13:26:29 | INFO | Epoch 4 - Train Loss: 0.3728
+2025-05-30 13:26:30 | INFO |           - Val Accuracy: 0.8339
+2025-05-30 13:26:49 | INFO | Epoch 5 - Train Loss: 0.3618
+2025-05-30 13:26:49 | INFO |           - Val Accuracy: 0.8353
+2025-05-30 13:27:12 | INFO | Epoch 6 - Train Loss: 0.3551
+2025-05-30 13:27:13 | INFO |           - Val Accuracy: 0.8382
+2025-05-30 13:27:34 | INFO | Epoch 7 - Train Loss: 0.3487
+2025-05-30 13:27:35 | INFO |           - Val Accuracy: 0.8359

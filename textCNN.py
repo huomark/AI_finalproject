@@ -3,6 +3,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from dataprepare import get_data
+from loguru import logger
+
+logger.add("train.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
 
 # ==== Load data ====
 train_dataset, valid_dataset, vocab, tag_to_idx = get_data()
@@ -56,7 +59,7 @@ for epoch in range(10):
         optimizer.step()
         total_loss += loss.item()
 
-    print(f"Epoch {epoch+1} - Train Loss: {total_loss / len(train_loader):.4f}")
+    logger.info(f"Epoch {epoch+1} - Train Loss: {total_loss / len(train_loader):.4f}")
 
     # Validation
     model.eval()
@@ -68,7 +71,7 @@ for epoch in range(10):
             preds = torch.sigmoid(outputs) > 0.5
             correct += (preds == labels.bool()).sum().item()
             total += labels.numel()
-    print(f"          - Val Accuracy: {correct / total:.4f}")
+    logger.info(f"          - Val Accuracy: {correct / total:.4f}")
 
 # Save model
-torch.save(model.state_dict(), "textcnn_model.pt")
+# torch.save(model.state_dict(), "textcnn_model.pt")
