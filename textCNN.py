@@ -14,8 +14,8 @@ NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 128
 FILTER_SIZES = [3, 8, 20]
-NUM_FILTERS = 150
-MAX_SEQ_LEN = 300
+NUM_FILTERS = 120
+MAX_SEQ_LEN = 500
 
 # ==== Define TextCNN ====
 class TextCNN(nn.Module):
@@ -41,8 +41,8 @@ class TextCNN(nn.Module):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = TextCNN(VOCAB_SIZE, EMBED_DIM, NUM_CLASSES, FILTER_SIZES, NUM_FILTERS).to(device)
 
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-valid_loader = DataLoader(valid_dataset, batch_size=32)
+train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=64)
 
 criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
