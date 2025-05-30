@@ -39,6 +39,12 @@ import ast
 from sklearn.preprocessing import MultiLabelBinarizer
 import joblib
 
+from transformers import AutoTokenizer
+import numpy as np
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+
+logger.remove()
 logger.add(
     sys.stderr,
     format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}",
@@ -590,3 +596,153 @@ else:
     logger.warning(
         "DataFrame is empty or 'tags' column is missing. Skipping One-Hot Encoding."
     )
+
+# %% [markdown]
+# ## Final Dataset Preparation (for CodeBERT ...)
+
+# %% [markdown]
+# #### Configuration
+
+# %%
+MODEL_INPUT_DATA_FILE_CODEBERT = os.path.join(PROCESSED_DATA_DIR, "model_input_data_codebert.npz")
+CODEBERT_MODEL_NAME = "microsoft/codebert-base"
+MAX_SEQUENCE_LENGTH = 512
+
+TEST_SET_SIZE = 0.15
+VALIDATION_SET_SIZE = 0.15
+RANDOM_STATE = 42  # For reproducibility of splits
+
+# %%
+if not df.empty and "anonymized_tokens" in df.columns and "one_hot_tags" in df.columns:
+    logger.info(f"DataFrame sample before CodeBERT tokenization (first {min(3, len(df))} rows):")
+    for i in range(min(3, len(df))):
+        logger.info(f"Row {i} Problem ID: {df['problem_id'].iloc[i]}")
+        logger.info(f"Anonymized Tokens (first 10): {df['anonymized_tokens'].iloc[i][:10]}")
+        logger.info(f"One-Hot Labels (first 10 elements): {df['one_hot_tags'].iloc[i][:10]}")
+else:
+    logger.warning("DataFrame is empty or required columns ('anonymized_token_values', 'one_hot_labels') are missing.")
+
+# %% [markdown]
+# ### Convert Token Lists to Strings and Tokenize with CodeBERT Tokenizer
+
+# %%
+if not df.empty and 'anonymized_tokens' in df.columns:
+    logger.info("Converting anonymized token lists to space-separated strings...") 
+    df['anonymized_code_bert'] = df['anonymized_tokens'].apply(lambda x: ' '.join(x))
+
+    logger.info("Initializing CodeBERT tokenizer...")
+    try:
+        codebert_tokenizer = AutoTokenizer.from_pretrained(CODEBERT_MODEL_NAME)
+        logger.info(f"CodeBERT tokenizer '{CODEBERT_MODEL_NAME}' loaded successfully.")
+    except Exception as e:
+        logger.error(f"Failed to load CodeBERT tokenizer: {e}")
+        codebert_tokenizer = None
+    
+    if codebert_tokenizer:
+        logger.info(f"Tokenizing 'anonymized_code_string_for_bert' with CodeBERT tokenizer (max_length={MAX_SEQUENCE_LENGTH})...")
+
+        all_input_ids = []
+        all_attention_masks = []
+        sequences_to_tokenize = df['anonymized_code_bert'].tolist()
+
+        for i, code in enumerate(sequences_to_tokenize):
+            if i % 100 == 0 and i > 0:
+                logger.info(f"Tokenizing sample {i} / {len(sequences_to_tokenize)}...")
+            
+            try:
+                encoded_dict = codebert_tokenizer.encode_plus(
+                    code,
+                    add_special_tokens=True,
+                    max_length=MAX_SEQUENCE_LENGTH,
+                    padding='max_length',
+                    truncation=True,
+                    return_attention_mask=True,
+                    return_tensors='np'
+                )
+                all_input_ids.append(encoded_dict['input_ids'][0])
+                all_attention_masks.append(encoded_dict['attention_mask'][0])
+
+            except Exception as e:
+                logger.error(f"Error tokenizing code for problem_id {df['problem_id'].iloc[i]}: {e}")
+                # Placeholders for failed tokenization
+                all_input_ids.append(np.zeros(MAX_SEQUENCE_LENGTH, dtype=int))
+                all_attention_masks.append(np.zeros(MAX_SEQUENCE_LENGTH, dtype=int))
+            
+        X_input_ids = np.array(all_input_ids)
+        X_attention_mask = np.array(all_attention_masks)
+
+        try:
+            y_labels = np.array(df['one_hot_tags'].tolist(), dtype=np.int32)
+            logger.info(f"Shape of X_input_ids: {X_input_ids.shape}")
+            logger.info(f"Shape of X_attention_mask: {X_attention_mask.shape}")
+            logger.info(f"Shape of y_labels: {y_labels.shape}")
+
+            if X_input_ids.shape[0] != y_labels.shape[0]:
+                logger.error("Mismatch between number of input IDs and labels. Check your data.")
+            else:
+                logger.info("CodeBERT tokenization complete and shapes match.")
+        
+        except Exception as e:
+            logger.error(f"Error converting 'one_hot_labels' to NumPy array or shape mismatch: {e}")
+            # Set to None to prevent saving bad data
+            X_input_ids, X_attention_mask, y_labels = None, None, None
+
+else:
+    logger.warning("DataFrame is empty or 'anonymized_token' column is missing. Skipping CodeBERT tokenization.")
+    X_input_ids, X_attention_mask, y_labels = None, None, None
+
+# %% [markdown]
+# #### Split Data into Training, Validation, and Test Sets
+
+# %%
+if X_input_ids is not None and X_attention_mask is not None and y_labels is not None:
+    logger.info("Splitting data into training, validation, and test sets...")
+
+    # Separate out the test set
+    train_val_input_ids, X_test_input_ids, \
+    train_val_attention_mask, X_test_attention_mask, \
+    train_val_labels, y_test = train_test_split(
+        X_input_ids,
+        X_attention_mask,
+        y_labels,
+        test_size=TEST_SET_SIZE,
+        random_state=RANDOM_STATE,
+        stratify=None
+    )
+
+    relative_val_size = VALIDATION_SET_SIZE / (1 - TEST_SET_SIZE)
+
+
+    X_train_input_ids, X_val_input_ids, \
+    X_train_attention_mask, X_val_attention_mask, \
+    y_train, y_val = train_test_split(
+        train_val_input_ids,
+        train_val_attention_mask,
+        train_val_labels,
+        test_size=relative_val_size,
+        random_state=RANDOM_STATE,
+        stratify=None
+    )
+
+    logger.info(f"Training set shapes: IDs {X_train_input_ids.shape}, Masks {X_train_attention_mask.shape}, Labels {y_train.shape}")
+    logger.info(f"Validation set shapes: IDs {X_val_input_ids.shape}, Masks {X_val_attention_mask.shape}, Labels {y_val.shape}")
+    logger.info(f"Test set shapes: IDs {X_test_input_ids.shape}, Masks {X_test_attention_mask.shape}, Labels {y_test.shape}")
+
+    try:
+        np.savez_compressed(MODEL_INPUT_DATA_FILE_CODEBERT,
+                            X_train_input_ids=X_train_input_ids,
+                            X_train_attention_mask=X_train_attention_mask,
+                            y_train=y_train,
+                            X_val_input_ids=X_val_input_ids,
+                            X_val_attention_mask=X_val_attention_mask,
+                            y_val=y_val,
+                            X_test_input_ids=X_test_input_ids,
+                            X_test_attention_mask=X_test_attention_mask,
+                            y_test=y_test)
+        logger.success(f"Model input datasets saved to: {MODEL_INPUT_DATA_FILE_CODEBERT}")
+    
+    except Exception as e:
+        logger.error(f"Error saving model input data to '{MODEL_INPUT_DATA_FILE_CODEBERT}': {e}")
+
+else:
+    logger.error("Tokenized inputs (X_input_ids, X_attention_mask) or labels (y_labels) are None. Cannot split or save data.")
