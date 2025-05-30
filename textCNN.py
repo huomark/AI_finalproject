@@ -14,7 +14,7 @@ NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
 FILTER_SIZES = [3, 8, 15]
-NUM_FILTERS = 300
+NUM_FILTERS = 120
 MAX_SEQ_LEN = 500
 
 # ==== Define TextCNN ====
@@ -48,7 +48,7 @@ criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 # ==== Training loop ====
-for epoch in range(10):
+for epoch in range(40):
     model.train()
     total_loss = 0
     for inputs, labels in train_loader:
