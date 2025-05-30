@@ -41,14 +41,14 @@ class TextCNN(nn.Module):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = TextCNN(VOCAB_SIZE, EMBED_DIM, NUM_CLASSES, FILTER_SIZES, NUM_FILTERS).to(device)
 
-train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-valid_loader = DataLoader(valid_dataset, batch_size=64)
+train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=128)
 
 criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 # ==== Training loop ====
-for epoch in range(40):
+for epoch in range(20):
     model.train()
     total_loss = 0
     for inputs, labels in train_loader:
