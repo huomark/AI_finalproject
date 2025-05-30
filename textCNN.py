@@ -6,7 +6,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from dataprepare import get_data
 from loguru import logger
 
-# logger.add("train.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
+logger.add(format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
 
 # ==== Load data ====
 train_dataset, valid_dataset, experiment_dataset, vocab, tag_to_idx = get_data()
