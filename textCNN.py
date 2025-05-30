@@ -14,7 +14,7 @@ NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
 FILTER_SIZES = [3, 8, 15]
-NUM_FILTERS = 120
+NUM_FILTERS = 300
 MAX_SEQ_LEN = 500
 
 # ==== Define TextCNN ====
