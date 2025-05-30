@@ -46,7 +46,18 @@ macro_f1 = f1_score(all_labels, all_preds, average='macro')
 precision = precision_score(all_labels, all_preds, average='micro')
 recall = recall_score(all_labels, all_preds, average='micro')
 
-logger.info(f"Micro F1: {micro_f1:.4f}")
-logger.info(f"Macro F1: {macro_f1:.4f}")
+# === Hamming Score ===
+hamming_numer = 0
+hamming_denom = 0
+for pred, label in zip(all_preds, all_labels):
+    tp = ((pred == 1) & (label == 1)).sum()
+    fp = ((pred == 1) & (label == 0)).sum()
+    fn = ((pred == 0) & (label == 1)).sum()
+    denom = tp + fp + fn
+    if denom > 0:
+        hamming_numer += tp / denom
+hamming_score = hamming_numer / len(all_preds)
+
 logger.info(f"Precision: {precision:.4f}")
 logger.info(f"Recall: {recall:.4f}")
+logger.info(f"Hamming Score: {hamming_score:.4f}")
