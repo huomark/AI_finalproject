@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from sklearn.metrics import f1_score, precision_score, recall_score
 from dataprepare import get_data
 from loguru import logger
 
@@ -12,8 +13,8 @@ train_dataset, valid_dataset, vocab, tag_to_idx = get_data()
 NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 128
-FILTER_SIZES = [3, 10, 30]
-NUM_FILTERS = 200
+FILTER_SIZES = [3, 8, 20]
+NUM_FILTERS = 150
 MAX_SEQ_LEN = 300
 
 # ==== Define TextCNN ====
@@ -73,5 +74,36 @@ for epoch in range(10):
             total += labels.numel()
     logger.info(f"          - Val Accuracy: {correct / total:.4f}")
 
-# Save model
-torch.save(model.state_dict(), "textcnn_model.pt")
+# evaluete
+logger.info("Start evaluation on validation set...")
+all_preds = []
+all_labels = []
+
+with torch.no_grad():
+    for inputs, labels in valid_loader:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+        outputs = model(inputs)
+        probs = torch.sigmoid(outputs).cpu().numpy()
+        preds = (probs > 0.5).astype(int)
+        all_preds.extend(preds)
+        all_labels.extend(labels.cpu().numpy())
+
+precision = precision_score(all_labels, all_preds, average='micro')
+recall = recall_score(all_labels, all_preds, average='micro')
+
+# === Hamming Score ===
+hamming_numer = 0
+hamming_denom = 0
+for pred, label in zip(all_preds, all_labels):
+    tp = ((pred == 1) & (label == 1)).sum()
+    fp = ((pred == 1) & (label == 0)).sum()
+    fn = ((pred == 0) & (label == 1)).sum()
+    denom = tp + fp + fn
+    if denom > 0:
+        hamming_numer += tp / denom
+hamming_score = hamming_numer / len(all_preds)
+
+logger.info(f"Precision: {precision:.4f}")
+logger.info(f"Recall: {recall:.4f}")
+logger.info(f"Hamming Score: {hamming_score:.4f}")
