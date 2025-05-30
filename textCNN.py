@@ -66,7 +66,7 @@ for epoch in range(20):
     model.eval()
     correct, total = 0, 0
     with torch.no_grad():
-        for inputs, labels in valid_loader:
+        for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             preds = torch.sigmoid(outputs) > 0.5
