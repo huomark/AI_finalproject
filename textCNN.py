@@ -12,8 +12,8 @@ train_dataset, valid_dataset, vocab, tag_to_idx = get_data()
 NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 128
-FILTER_SIZES = [3, 4, 5]
-NUM_FILTERS = 100
+FILTER_SIZES = [3, 10, 30]
+NUM_FILTERS = 200
 MAX_SEQ_LEN = 300
 
 # ==== Define TextCNN ====
