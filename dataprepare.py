@@ -33,7 +33,11 @@ MAX_VOCAB_SIZE = 2000
 PAD_TOKEN = "<PAD>"
 UNK_TOKEN = "<UNK>"
 
-all_tokens = [token for tokens in df["tokens"] for token in tokens]
+def is_valid_token(token):
+    # 只允許長度 2~20 且為英數或簡單符號
+    return 2 <= len(token) <= 20 and re.match(r'^[\w\+\-\*/=<>!\[\]{}().,;:]+$', token)
+
+all_tokens = [token for tokens in df["tokens"] for token in tokens if is_valid_token(token)]
 token_freq = Counter(all_tokens)
 most_common = token_freq.most_common(MAX_VOCAB_SIZE - 2)
 vocab = {PAD_TOKEN: 0, UNK_TOKEN: 1}
