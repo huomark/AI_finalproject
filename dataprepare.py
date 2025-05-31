@@ -29,7 +29,7 @@ df["tokens"] = df["cleaned_code"].apply(tokenize)
 # 數每個token的數量，取前 MAX_VOCAB_SIZE 多個的，其他都當作 <UNK> 
 
 # %%
-MAX_VOCAB_SIZE = 5000
+MAX_VOCAB_SIZE = 2000
 PAD_TOKEN = "<PAD>"
 UNK_TOKEN = "<UNK>"
 
@@ -38,8 +38,8 @@ token_freq = Counter(all_tokens)
 most_common = token_freq.most_common(MAX_VOCAB_SIZE - 2)
 vocab = {PAD_TOKEN: 0, UNK_TOKEN: 1}
 vocab.update({token: idx + 2 for idx, (token, _) in enumerate(most_common)})
-# for idx, (token, _) in enumerate(most_common):
-#     print(f'{token}: {_}')
+for idx, (token, _) in enumerate(most_common):
+    print(f'{token}: {_}')
 
 # %% [markdown]
 # 對每筆程式碼轉成固定長度是 MAX_SEQ_LEN 的數字陣列，不足就補 <PAD>
