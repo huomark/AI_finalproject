@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import f1_score, precision_score, recall_score
 from dataprepare import get_data
 from loguru import logger
+import matplotlib.pyplot as plt
 
 logger.add("train.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
 
@@ -13,9 +14,8 @@ train_dataset, valid_dataset, experiment_dataset, vocab, tag_to_idx = get_data()
 NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
-FILTER_SIZES = [3, 8, 15]
+FILTER_SIZES = [10, 30, 70]
 NUM_FILTERS = 120
-# MAX_SEQ_LEN = 500
 
 # ==== Define TextCNN ====
 class TextCNN(nn.Module):
