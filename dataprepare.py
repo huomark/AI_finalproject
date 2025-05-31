@@ -45,7 +45,7 @@ vocab.update({token: idx + 2 for idx, (token, _) in enumerate(most_common)})
 # 對每筆程式碼轉成固定長度是 MAX_SEQ_LEN 的數字陣列，不足就補 <PAD>
 
 # %%
-MAX_SEQ_LEN = 1500  # truncate/pad to fixed length
+MAX_SEQ_LEN = 750  # truncate/pad to fixed length
 
 def encode_tokens(tokens):
     ids = [vocab.get(token, vocab[UNK_TOKEN]) for token in tokens]
