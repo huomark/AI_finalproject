@@ -91,6 +91,9 @@ class CodeTagDataset(Dataset):
 
     def __len__(self):
         return len(self.inputs)
+    
+    def __getitem__(self, idx):
+        return self.inputs[idx], self.labels[idx]
 
 # %% [markdown]
 # 切資料: 分成 training / validate / experiment
