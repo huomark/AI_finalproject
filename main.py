@@ -891,7 +891,7 @@ else:
 from transformers import TFAutoModelForSequenceClassification
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import BinaryCrossentropy
-from tensorflow.keras.metrics import BinaryAccuracy, AUC
+from tensorflow.keras.metrics import BinaryAccuracy, AUC, Precision
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # %%
@@ -988,30 +988,54 @@ if num_labels > 0 and train_dataset is not None:
     )
 
     try:
+
         model = TFAutoModelForSequenceClassification.from_pretrained(
             CODEBERT_MODEL_NAME,
             num_labels=num_labels,
             problem_type="multi_label_classification",
         )
+        for i, layer in enumerate(model.roberta.encoder.layer):
+            if i < 10:
+                layer.trainable = False
 
-        optimizer = Adam(learning_rate=LEARNING_RATE)
+        if "y_train" in locals():
+            class_weights = []
+            total_samples = len(y_train)
+            for i in range(num_labels):
+                pos_samples = np.sum(y_train[:, i])
+                if pos_samples > 0:
+                    weight = total_samples / (2 * pos_samples)
+                else:
+                    weight = 1.0
+                class_weights.append(weight)
 
-        loss_fn = BinaryCrossentropy(from_logits=True)
+            def weighted_binary_crossentropy(y_true, y_pred):
+                weights = tf.constant(class_weights, dtype=tf.float32)
+                y_true = tf.cast(y_true, tf.float32)
+                y_pred = tf.cast(y_pred, tf.float32)
+
+                bce = tf.nn.sigmoid_cross_entropy_with_logits(
+                    labels=y_true, logits=y_pred
+                )
+                weighted_bce = bce * weights
+                return tf.reduce_mean(weighted_bce)
+
+            loss_fn = weighted_binary_crossentropy
+        else:
+            assert False
+            loss_fn = BinaryCrossentropy(from_logits=True)
+
+        optimizer = Adam(learning_rate=LEARNING_RATE, clipnorm=1.0)
 
         metrics_list = [
-            BinaryAccuracy(name="binary_accuracy"),
-            AUC(
-                name="auc_roc",
-                curve="ROC",
-                multi_label=True,
-                num_labels=num_labels,
-            ),  # ROC AUC
             AUC(
                 name="auc_pr",
                 curve="PR",
                 multi_label=True,
                 num_labels=num_labels,
             ),  # Precision-Recall AUC
+            Precision(name="precision", thresholds=0.5),
+            BinaryAccuracy(name="binary_accuracy"),
         ]
 
         model.compile(optimizer=optimizer, loss=loss_fn, metrics=metrics_list)
@@ -1044,12 +1068,15 @@ if (
     logger.info("Starting model training...")
 
     early_stopping = EarlyStopping(
-        monitor="val_auc_roc", mode="max", patience=3, restore_best_weights=True
+        monitor="val_precision",
+        mode="max",
+        patience=3,
+        restore_best_weights=True,
     )
 
     model_checkpoint = ModelCheckpoint(
         BEST_MODEL_PATH,
-        monitor="val_auc_roc",
+        monitor="val_precision",
         mode="max",
         save_best_only=True,
         save_weights_only=False,
@@ -1171,7 +1198,6 @@ else:
 if y_pred_binary is not None and y_test is not None:
     logger.info("Calculating evaluation metrics...")
 
-    # Calculate various metrics
     try:
         # Jaccard Score (IoU)
         jaccard_micro = jaccard_score(y_test, y_pred_binary, average="micro")
