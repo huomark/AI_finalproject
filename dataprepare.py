@@ -1,6 +1,3 @@
-# %% [markdown]
-# # TextCNN Multi-label Data Preparation (for Codeforces Tags)
-
 # %%
 import pandas as pd
 import numpy as np
@@ -16,10 +13,10 @@ import os
 # %%
 CSV_PATH = "dataset/metadata.csv"
 df = pd.read_csv(CSV_PATH)
-df.dropna(subset=["cleaned_code", "tags"], inplace=True)
+df.dropna(subset=["cleaned_code", "tags"], inplace=True)  # 清垃圾
 
 # %% [markdown]
-# ## Tokenizer (simple whitespace split)
+# 把每個單字或符號切出來
 
 # %%
 def tokenize(code):
@@ -29,7 +26,7 @@ def tokenize(code):
 df["tokens"] = df["cleaned_code"].apply(tokenize)
 
 # %% [markdown]
-# ## Build Vocabulary
+# 數每個token的數量，取前 MAX_VOCAB_SIZE 多個的，其他都當作 <UNK> 
 
 # %%
 MAX_VOCAB_SIZE = 5000
@@ -45,10 +42,10 @@ vocab.update({token: idx + 2 for idx, (token, _) in enumerate(most_common)})
 #     print(f'{token}: {_}')
 
 # %% [markdown]
-# ## Encode Tokens
+# 對每筆程式碼轉成固定長度是 MAX_SEQ_LEN 的數字陣列，不足就補 <PAD>
 
 # %%
-MAX_SEQ_LEN = 500  # truncate/pad to fixed length
+MAX_SEQ_LEN = 1000  # truncate/pad to fixed length
 
 def encode_tokens(tokens):
     ids = [vocab.get(token, vocab[UNK_TOKEN]) for token in tokens]
@@ -61,13 +58,16 @@ def encode_tokens(tokens):
 df["input_ids"] = df["tokens"].apply(encode_tokens)
 
 # %% [markdown]
-# ## Build Tag-to-Index Map
+# 建 tag 跟 idx 的 map
 
 # %%
 all_tags = sorted(set(tag for tags in df["tags"] for tag in tags))
 tag_to_idx = {tag: i for i, tag in enumerate(all_tags)}
 idx_to_tag = {i: tag for tag, i in tag_to_idx.items()}
 
+
+# %% [markdown]
+# 建 每一題的 tag 向量
 # %%
 NUM_TAGS = len(tag_to_idx)
 
@@ -92,11 +92,8 @@ class CodeTagDataset(Dataset):
     def __len__(self):
         return len(self.inputs)
 
-    def __getitem__(self, idx):
-        return self.inputs[idx], self.labels[idx]
-
 # %% [markdown]
-# ## Create Train/Valid Split
+# 切資料: 分成 training / validate / experiment
 
 # %%
 full_dataset = CodeTagDataset(df["input_ids"].tolist(), df["label"].tolist())
@@ -113,7 +110,7 @@ print(f"Experiment dataset size: {len(experiment_dataset)}")
 print(f"Number of unique tags: {NUM_TAGS}")
 
 # %% [markdown]
-# You can now pass `train_dataset` and `valid_dataset` into PyTorch DataLoader to begin training.
+# 送 data 到 textCNN
 
 # %%
 def get_data():
