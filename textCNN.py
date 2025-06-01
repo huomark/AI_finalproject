@@ -48,6 +48,11 @@ experiment_loader = DataLoader(experiment_dataset, batch_size=128)
 criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
+train_losses = []
+val_precisions = []
+val_recalls = []
+val_hamming_scores = []
+
 # ==== Training loop ====
 for epoch in range(20):
     model.train()
@@ -61,6 +66,9 @@ for epoch in range(20):
         optimizer.step()
         total_loss += loss.item()
 
+    avg_loss = total_loss / len(train_loader)
+    train_losses.append(avg_loss)
+
     logger.info(f"Epoch {epoch+1} - Train Loss: {total_loss / len(train_loader):.4f}")
 
     # Validation
@@ -73,6 +81,9 @@ for epoch in range(20):
             preds = torch.sigmoid(outputs) > 0.5
             correct += (preds == labels.bool()).sum().item()
             total += labels.numel()
+
+
+
     logger.info(f"          - Val Accuracy: {correct / total:.4f}")
 
 # evaluete
@@ -89,13 +100,17 @@ with torch.no_grad():
         preds = (probs > 0.5).astype(int)
         all_preds.extend(preds)
         all_labels.extend(labels.cpu().numpy())
+        val_precisions.append(precision_score(all_labels, all_preds, average='micro'))
+        val_recalls.append(recall_score(all_labels, all_preds, average='micro'))
 
 precision = precision_score(all_labels, all_preds, average='micro')
 recall = recall_score(all_labels, all_preds, average='micro')
 
+
 # === Hamming Score ===
 hamming_numer = 0
 hamming_denom = 0
+iu = 0
 for pred, label in zip(all_preds, all_labels):
     tp = ((pred == 1) & (label == 1)).sum()
     fp = ((pred == 1) & (label == 0)).sum()
@@ -103,8 +118,26 @@ for pred, label in zip(all_preds, all_labels):
     denom = tp + fp + fn
     if denom > 0:
         hamming_numer += tp / denom
+    iu += 1
+    val_hamming_scores.append(hamming_numer / iu)
+
 hamming_score = hamming_numer / len(all_preds)
 
 logger.info(f"Precision: {precision:.4f}")
 logger.info(f"Recall: {recall:.4f}")
 logger.info(f"Hamming Score: {hamming_score:.4f}")
+
+
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, len(train_losses)+1), train_losses, label="Train Loss", marker='o')
+plt.plot(range(1, len(val_precisions)+1), val_precisions, label="Val Precision", marker='o')
+plt.plot(range(1, len(val_recalls)+1), val_recalls, label="Val Recall", marker='o')
+plt.plot(range(1, len(val_hamming_scores)+1), val_hamming_scores, label="Val Hamming Score", marker='o')
+
+plt.title("Training & Validation Metrics over Epochs")
+plt.xlabel("Epoch")
+plt.ylabel("Value")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
