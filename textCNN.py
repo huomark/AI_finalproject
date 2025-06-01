@@ -69,7 +69,7 @@ train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=128)
 experiment_loader = DataLoader(experiment_dataset, batch_size=128)
 
-criterion = FocalLoss(gamma=2.0, alpha=0.25)
+criterion = FocalLoss(gamma=2.0, alpha=0.75)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 train_losses = []
