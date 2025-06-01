@@ -72,7 +72,7 @@ all_label_lists = df["tags_list"].tolist()
 tag_counter = Counter([tag for sublist in all_label_lists for tag in sublist])
 
 # 取出前 10 名最常出現的標籤
-top_tags = [tag for tag, _ in tag_counter.most_common(10)]
+top_tags = [tag for tag, _ in tag_counter.most_common(5)]
 print("Top 10 tags:", top_tags)
 
 # 建立只針對這 10 個標籤的映射
@@ -133,8 +133,8 @@ class CodeTagDataset(Dataset):
 full_dataset = CodeTagDataset(inputs, labels)
 
 # train/val/experiment 的大小
-train_size = 2700
-valid_size = 200
+train_size = 1000
+valid_size = 1000
 experiment_size = len(full_dataset) - train_size - valid_size
 
 train_dataset, valid_dataset, experiment_dataset = random_split(

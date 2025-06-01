@@ -15,7 +15,7 @@ NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
 FILTER_SIZES = [10, 20, 50]
-NUM_FILTERS = 120
+NUM_FILTERS = 32
 
 # for input, label in valid_dataset:
 #     print(len(label))
@@ -41,26 +41,23 @@ class TextCNN(nn.Module):
         return self.fc(x)
     
 class FocalLoss(nn.Module):
-    """Focal Loss for handling class imbalance."""
-    
-    def __init__(self, alpha=0.25, gamma=2.0, pos_weight=None):
+    def __init__(self, alpha=0.25, gamma=2.0): # Removed pos_weight from init
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma
-        if pos_weight is not None:
-            self.register_buffer('pos_weight', torch.tensor(pos_weight, dtype=torch.float))
-        else:
-            self.pos_weight = None
-    
+        # No self.pos_weight needed here if not used
+
     def forward(self, inputs, targets):
         if inputs.device != targets.device:
             targets = targets.to(inputs.device)
-            
+
         bce_loss = nn.functional.binary_cross_entropy_with_logits(
-            inputs, targets, pos_weight=self.pos_weight, reduction='none'
+            inputs, targets, reduction='none' # pos_weight is removed
         )
         pt = torch.exp(-bce_loss)
-        focal_loss = self.alpha * (1 - pt) ** self.gamma * bce_loss
+        # alpha_t for per-sample alpha based on target
+        alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
+        focal_loss = alpha_t * (1 - pt) ** self.gamma * bce_loss
         return focal_loss.mean()
 
 # ==== Prepare for training ====
@@ -79,7 +76,7 @@ train_losses = []
 all_f1 = []
 
 # ==== Training loop ====
-for epoch in range(20):
+for epoch in range(5):
     model.train()
     total_loss = 0
     for inputs, labels in train_loader:
