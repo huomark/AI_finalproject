@@ -135,8 +135,8 @@ class CodeTagDataset(Dataset):
 full_dataset = CodeTagDataset(inputs, labels)
 
 # train/val/experiment 的大小
-train_size = len(full_dataset) * 0.7
-valid_size = len(full_dataset) * 0.15
+train_size = int(len(full_dataset) * 0.7)
+valid_size = int(len(full_dataset) * 0.15)
 experiment_size = len(full_dataset) - train_size - valid_size
 
 train_dataset, valid_dataset, experiment_dataset = random_split(
