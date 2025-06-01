@@ -69,7 +69,7 @@ train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=128)
 experiment_loader = DataLoader(experiment_dataset, batch_size=128)
 
-criterion = FocalLoss(gamma=2.0, alpha=0.75)
+criterion = FocalLoss(gamma=2.0, alpha=0.25)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 train_losses = []
@@ -106,7 +106,7 @@ for epoch in range(5):
             correct += (preds == labels.bool()).sum().item()
             probs = torch.sigmoid(outputs).cpu().numpy()
             
-            preds = (probs > 0.5).astype(int)
+            preds = (probs > 0.05).astype(int)
             alp.extend(preds)
             all.extend(labels.cpu().numpy())
             total += labels.numel()
