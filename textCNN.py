@@ -14,8 +14,11 @@ train_dataset, valid_dataset, experiment_dataset, vocab, tag_to_idx = get_data()
 NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
-FILTER_SIZES = [10, 30, 70]
+FILTER_SIZES = [10, 20, 50]
 NUM_FILTERS = 120
+
+# for input, label in valid_dataset:
+#     print(len(label))
 
 # ==== Define TextCNN ====
 class TextCNN(nn.Module):
@@ -36,22 +39,44 @@ class TextCNN(nn.Module):
         x = torch.cat(x, dim=1)  # (batch, num_filters * len(filter_sizes))
         x = self.dropout(x)
         return self.fc(x)
+    
+class FocalLoss(nn.Module):
+    """Focal Loss for handling class imbalance."""
+    
+    def __init__(self, alpha=0.25, gamma=2.0, pos_weight=None):
+        super().__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        if pos_weight is not None:
+            self.register_buffer('pos_weight', torch.tensor(pos_weight, dtype=torch.float))
+        else:
+            self.pos_weight = None
+    
+    def forward(self, inputs, targets):
+        if inputs.device != targets.device:
+            targets = targets.to(inputs.device)
+            
+        bce_loss = nn.functional.binary_cross_entropy_with_logits(
+            inputs, targets, pos_weight=self.pos_weight, reduction='none'
+        )
+        pt = torch.exp(-bce_loss)
+        focal_loss = self.alpha * (1 - pt) ** self.gamma * bce_loss
+        return focal_loss.mean()
 
 # ==== Prepare for training ====
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = TextCNN(VOCAB_SIZE, EMBED_DIM, NUM_CLASSES, FILTER_SIZES, NUM_FILTERS).to(device)
 
+
 train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=128)
 experiment_loader = DataLoader(experiment_dataset, batch_size=128)
 
-criterion = nn.BCEWithLogitsLoss()
+criterion = FocalLoss(gamma=2.0, alpha=0.25)
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 train_losses = []
-val_precisions = []
-val_recalls = []
-val_hamming_scores = []
+all_f1 = []
 
 # ==== Training loop ====
 for epoch in range(20):
@@ -74,16 +99,24 @@ for epoch in range(20):
     # Validation
     model.eval()
     correct, total = 0, 0
+    alp = []
+    all = []
     with torch.no_grad():
         for inputs, labels in valid_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             preds = torch.sigmoid(outputs) > 0.5
             correct += (preds == labels.bool()).sum().item()
+            probs = torch.sigmoid(outputs).cpu().numpy()
+            
+            preds = (probs > 0.5).astype(int)
+            alp.extend(preds)
+            all.extend(labels.cpu().numpy())
             total += labels.numel()
-
-
-
+            print(correct, total)
+            
+    f1 = f1_score(alp, all, average='micro')
+    all_f1.append(f1)
     logger.info(f"          - Val Accuracy: {correct / total:.4f}")
 
 # evaluete
@@ -100,11 +133,11 @@ with torch.no_grad():
         preds = (probs > 0.5).astype(int)
         all_preds.extend(preds)
         all_labels.extend(labels.cpu().numpy())
-        val_precisions.append(precision_score(all_labels, all_preds, average='micro'))
-        val_recalls.append(recall_score(all_labels, all_preds, average='micro'))
 
 precision = precision_score(all_labels, all_preds, average='micro')
 recall = recall_score(all_labels, all_preds, average='micro')
+f1_micro = f1_score(all_labels, all_preds, average='micro')
+# recall = recall_score(all_labels, all_preds, average='micro')
 
 
 # === Hamming Score ===
@@ -119,20 +152,20 @@ for pred, label in zip(all_preds, all_labels):
     if denom > 0:
         hamming_numer += tp / denom
     iu += 1
-    val_hamming_scores.append(hamming_numer / iu)
 
 hamming_score = hamming_numer / len(all_preds)
 
 logger.info(f"Precision: {precision:.4f}")
 logger.info(f"Recall: {recall:.4f}")
 logger.info(f"Hamming Score: {hamming_score:.4f}")
+logger.info(f"f1_micro Score: {f1_micro:.4f}")
 
 
 plt.figure(figsize=(10, 6))
 plt.plot(range(1, len(train_losses)+1), train_losses, label="Train Loss", marker='o')
-plt.plot(range(1, len(val_precisions)+1), val_precisions, label="Val Precision", marker='o')
-plt.plot(range(1, len(val_recalls)+1), val_recalls, label="Val Recall", marker='o')
-plt.plot(range(1, len(val_hamming_scores)+1), val_hamming_scores, label="Val Hamming Score", marker='o')
+plt.plot(range(1, len(all_f1)+1), all_f1, label="F1 score", marker='o')
+# plt.plot(range(1, len(val_recalls)+1), val_recalls, label="Val Recall", marker='o')
+# plt.plot(range(1, len(val_hamming_scores)+1), val_hamming_scores, label="Val Hamming Score", marker='o')
 
 plt.title("Training & Validation Metrics over Epochs")
 plt.xlabel("Epoch")
