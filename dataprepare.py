@@ -48,7 +48,7 @@ vocab.update({token: idx + 2 for idx, (token, _) in enumerate(most_common)})
 # 把每筆程式碼轉成固定長度是 MAX_SEQ_LEN 的數字陣列，不夠就補 <PAD>
 
 # %%
-MAX_SEQ_LEN = 750  # truncate/pad to fixed length
+MAX_SEQ_LEN = 512  # truncate/pad to fixed length
 
 def encode_tokens(tokens):
     ids = [vocab.get(token, vocab[UNK_TOKEN]) for token in tokens]
@@ -69,10 +69,16 @@ df["tags_list"] = df["tags"].apply(lambda s: ast.literal_eval(s))
 all_label_lists = df["tags_list"].tolist()
 
 
-tag_counter = Counter([tag for sublist in all_label_lists for tag in sublist])
+top_tags = []
+
+for sublist in all_label_lists:
+    for tag in sublist:
+        if top_tags.count(tag):
+            continue
+        top_tags.append(tag)
 
 # 取出前 10 名最常出現的標籤
-top_tags = [tag for tag, _ in tag_counter.most_common(5)]
+# top_tags = [tag for tag, _ in tag_counter]
 print("Top 10 tags:", top_tags)
 
 # 建立只針對這 10 個標籤的映射
@@ -85,10 +91,6 @@ NUM_TAGS = len(tag_to_idx)  # 10
 
 # %%
 def encode_top10_tags(tag_list):
-    """
-    只對 top_tags 裡的標籤標為 1，其他標籤忽略。
-    如果這筆資料沒有任何屬於 top_tags 的元素，將回傳全 0 的向量。
-    """
     label = [0] * NUM_TAGS  # 全 10 維都設為 0
     for tag in tag_list:
         # print(f'tag: {tag}')
@@ -133,8 +135,8 @@ class CodeTagDataset(Dataset):
 full_dataset = CodeTagDataset(inputs, labels)
 
 # train/val/experiment 的大小
-train_size = 1000
-valid_size = 1000
+train_size = len(full_dataset) * 0.7
+valid_size = len(full_dataset) * 0.15
 experiment_size = len(full_dataset) - train_size - valid_size
 
 train_dataset, valid_dataset, experiment_dataset = random_split(

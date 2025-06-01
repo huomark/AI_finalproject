@@ -6,6 +6,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 from dataprepare import get_data
 from loguru import logger
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
 
 logger.add("train.log", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", level="INFO")
 
@@ -40,25 +41,6 @@ class TextCNN(nn.Module):
         x = self.dropout(x)
         return self.fc(x)
     
-class FocalLoss(nn.Module):
-    def __init__(self, alpha=0.25, gamma=2.0): # Removed pos_weight from init
-        super().__init__()
-        self.alpha = alpha
-        self.gamma = gamma
-        # No self.pos_weight needed here if not used
-
-    def forward(self, inputs, targets):
-        if inputs.device != targets.device:
-            targets = targets.to(inputs.device)
-
-        bce_loss = nn.functional.binary_cross_entropy_with_logits(
-            inputs, targets, reduction='none' # pos_weight is removed
-        )
-        pt = torch.exp(-bce_loss)
-        # alpha_t for per-sample alpha based on target
-        alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
-        focal_loss = alpha_t * (1 - pt) ** self.gamma * bce_loss
-        return focal_loss.mean()
 
 # ==== Prepare for training ====
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -69,14 +51,15 @@ train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=128)
 experiment_loader = DataLoader(experiment_dataset, batch_size=128)
 
-criterion = FocalLoss(gamma=2.0, alpha=0.25)
+criterion = nn.BCEWithLogitsLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 train_losses = []
 all_f1 = []
+right_pr = 0.5
 
 # ==== Training loop ====
-for epoch in range(5):
+for epoch in range(10):
     model.train()
     total_loss = 0
     for inputs, labels in train_loader:
@@ -102,11 +85,11 @@ for epoch in range(5):
         for inputs, labels in valid_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
-            preds = torch.sigmoid(outputs) > 0.5
+            preds = torch.sigmoid(outputs) > right_pr
             correct += (preds == labels.bool()).sum().item()
             probs = torch.sigmoid(outputs).cpu().numpy()
             
-            preds = (probs > 0.05).astype(int)
+            preds = (probs > right_pr).astype(int)
             alp.extend(preds)
             all.extend(labels.cpu().numpy())
             total += labels.numel()
@@ -127,7 +110,7 @@ with torch.no_grad():
         labels = labels.to(device)
         outputs = model(inputs)
         probs = torch.sigmoid(outputs).cpu().numpy()
-        preds = (probs > 0.5).astype(int)
+        preds = (probs > right_pr).astype(int)
         all_preds.extend(preds)
         all_labels.extend(labels.cpu().numpy())
 
@@ -138,19 +121,8 @@ f1_micro = f1_score(all_labels, all_preds, average='micro')
 
 
 # === Hamming Score ===
-hamming_numer = 0
-hamming_denom = 0
-iu = 0
-for pred, label in zip(all_preds, all_labels):
-    tp = ((pred == 1) & (label == 1)).sum()
-    fp = ((pred == 1) & (label == 0)).sum()
-    fn = ((pred == 0) & (label == 1)).sum()
-    denom = tp + fp + fn
-    if denom > 0:
-        hamming_numer += tp / denom
-    iu += 1
+hamming_score = accuracy_score(all_labels, all_preds)
 
-hamming_score = hamming_numer / len(all_preds)
 
 logger.info(f"Precision: {precision:.4f}")
 logger.info(f"Recall: {recall:.4f}")
