@@ -15,7 +15,7 @@ train_dataset, valid_dataset, experiment_dataset, vocab, tag_to_idx = get_data()
 NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
-FILTER_SIZES = [3, 6, 10, 20, 50, 70, 90]
+FILTER_SIZES = [10, 20, 50]
 NUM_FILTERS = 32
 
 # for input, label in valid_dataset:
