@@ -16,7 +16,7 @@ NUM_CLASSES = len(tag_to_idx)
 VOCAB_SIZE = len(vocab)
 EMBED_DIM = 256
 FILTER_SIZES = [10, 20, 50]
-NUM_FILTERS = 32
+NUM_FILTERS = 38
 
 # for input, label in valid_dataset:
 #     print(len(label))
